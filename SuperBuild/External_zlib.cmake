@@ -7,6 +7,11 @@ set(${proj}_DEPENDENCIES "")
 # Include dependent projects if any
 ExternalProject_Include_Dependencies(${proj} PROJECT_VAR proj DEPENDS_VAR ${proj}_DEPENDENCIES)
 
+# Fix for CMP0074
+if (POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
+
 if(${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
   unset(zlib_DIR CACHE)
   find_package(ZLIB REQUIRED)
