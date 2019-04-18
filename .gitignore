@@ -23,3 +23,10 @@
 
 # macOS cruft
 .DS_Store
+
+# My build folder in VS code
+/build
+
+# Various VS code settings json files
+settings.json
+
