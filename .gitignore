@@ -30,3 +30,5 @@
 # Various VS code settings json files
 settings.json
 
+# VS code settings
+/.vscode
