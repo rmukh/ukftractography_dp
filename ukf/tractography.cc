@@ -46,6 +46,7 @@
 #include "filter_Simple2T.h"
 #include "filter_Simple2T_FW.h"
 #include "filter_Simple3T.h"
+#include "filter_ridg.h"
 
 // TODO implement this switch
 //#include "config.h"
