@@ -205,7 +205,10 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X,
             const vec3_t &u = gradients[j];
 
             Y(j, i) =
-                w * (weights_on_tensors_[0] * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D1 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D1t * u))) + weights_on_tensors_[1] * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D2 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D2t * u))) + weights_on_tensors_[2] * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D3 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D3t * u)))) + (1 - w) * std::exp(-b[j] * u.dot(m_D_iso * u));
+                (1 - w) * (weights_on_tensors_[0] * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D1 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D1t * u))) +
+                 weights_on_tensors_[1] * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D2 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D2t * u))) + 
+                 weights_on_tensors_[2] * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D3 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D3t * u)))) + 
+                 w * std::exp(-b[j] * u.dot(m_D_iso * u));
         }
     }
 }
