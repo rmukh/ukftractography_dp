@@ -225,30 +225,18 @@ void Ridg_BiExp_FW::State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &
     l1[0] = std::max(x(3), _lambda_min_fast_diffusion);
     l1[1] = std::max(x(4), _lambda_min_fast_diffusion);
     l1[2] = l1[1];
-    // Lamda slow diffusion
-    /*l12[0] = std::max(x(5), _lambda_min_slow_diffusion);
-  l12[1] = std::max(x(6), _lambda_min_slow_diffusion);
-  l12[2] = l12[1];*/
 
     // Tensor 2
     // Lambda fast diffusion
     l2[0] = std::max(x(10), _lambda_min_fast_diffusion);
     l2[1] = std::max(x(11), _lambda_min_fast_diffusion);
     l2[2] = l2[1];
-    // Lamda slow diffusion
-    /*l22[0] = std::max(x(12), _lambda_min_slow_diffusion);
-  l22[1] = std::max(x(13), _lambda_min_slow_diffusion);
-  l22[2] = l22[1];*/
 
     // Tensor 3
     // Lambda fast diffusion
     l3[0] = std::max(x(17), _lambda_min_fast_diffusion);
     l3[1] = std::max(x(18), _lambda_min_fast_diffusion);
     l3[2] = l3[1];
-    // Lamda slow diffusion
-    /*l22[0] = std::max(x(12), _lambda_min_slow_diffusion);
-  l22[1] = std::max(x(13), _lambda_min_slow_diffusion);
-  l22[2] = l22[1];*/
 
     // Flip orientations if necessary. (For m1 it should not happen, maybe for
     // m2.)
