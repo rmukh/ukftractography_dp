@@ -211,14 +211,14 @@ fiberbundle
                 << curFiber.Points[i][2] << " "
                 << "]" << std::endl;
       }
-    for(Fiber::FieldMapType::const_iterator it_fib = curFiber.Fields.begin();
-        it_fib != curFiber.Fields.end(); ++it_fib)
+    for(Fiber::FieldMapType::const_iterator curFiberIt = curFiber.Fields.begin();
+        curFiberIt != curFiber.Fields.end(); ++curFiberIt)
       {
-      std::cerr << "  " << it_fib->first << ":" << std::endl << "    ";
-      for(unsigned int i = 0; i < it_fib->second.size(); ++i)
+      std::cerr << "  " << curFiberIt->first << ":" << std::endl << "    ";
+      for(unsigned int i = 0; i < curFiberIt->second.size(); ++i)
         {
-        std::cerr << it_fib->second[i];
-        if(i == it_fib->second.size() - 1)
+        std::cerr << curFiberIt->second[i];
+        if(i == curFiberIt->second.size() - 1)
           {
           std::cerr << endl;
           }
