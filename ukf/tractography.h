@@ -62,6 +62,7 @@ struct UKFSettings
   ukfPrecisionType Ql;
   ukfPrecisionType Qw;
   ukfPrecisionType Qt;
+  ukfPrecisionType Qwiso;
   ukfPrecisionType Qkappa;
   ukfPrecisionType Qvic;
   ukfPrecisionType Rs;
@@ -112,7 +113,7 @@ public:
     _2T_FW_FULL,
     _3T,
     _3T_FULL,
-    _3T_BiExp_Ridg
+    _3T_BIEXP_RIDG
   };
 
   /** Constructor, is called from main.cc where all parameters are defined. */
@@ -326,6 +327,7 @@ private:
   ukfPrecisionType Ql;
   ukfPrecisionType Qw;
   ukfPrecisionType Qt;
+  ukfPrecisionType Qwiso;
   ukfPrecisionType Qkappa;
   ukfPrecisionType Qvic;
   ukfPrecisionType Rs;

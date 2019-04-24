@@ -12,7 +12,7 @@
 class Ridg_BiExp_FW : public FilterModel
 {
 public:
-    Ridg_BiExp_FW(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType qw, ukfPrecisionType qwiso, ukfPrecisionType qt,
+    Ridg_BiExp_FW(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType qt, ukfPrecisionType qw, ukfPrecisionType qwiso,
                   ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, const ukfPrecisionType diff_fw)
         : FilterModel(24, rs, weights_on_tensors, constrained),
           _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000),
@@ -29,7 +29,7 @@ public:
         _Q(0, 0) = _Q(1, 1) = _Q(2, 2) = _Q(7, 7) = _Q(8, 8) = _Q(9, 9) = _Q(14, 14) = _Q(15, 15) = _Q(16, 16) = qs; // noise for the main direction
         _Q(3, 3) = _Q(4, 4) = _Q(10, 10) = _Q(11, 11) = _Q(17, 17) = _Q(18, 18) = ql;                                // noise for the lambdas (fast diffusion)
         _Q(5, 5) = _Q(6, 6) = _Q(12, 12) = _Q(13, 13) = _Q(19, 19) = _Q(20, 20) = qt;                                // noise for the lambdas (slow diffusion)
-        _Q(21, 21) = _Q(22, 22) = qw;                                                                                // nose for the omega's
+        _Q(21, 21) = _Q(22, 22) = qw;                                                                                // noise for the omega's
         _Q(23, 23) = qwiso;                                                                                          // noise for the free water weight
 
         // D is the constraint matrix.

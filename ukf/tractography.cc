@@ -58,7 +58,7 @@ Tractography::Tractography(UKFSettings s) :
                                             _ukf(0, NULL),
                                             _output_file(s.output_file),
                                             _output_file_with_second_tensor(s.output_file_with_second_tensor),
-                                            
+
                                             _record_fa(s.record_fa),
                                             _record_nmse(s.record_nmse),
                                             _record_trace(s.record_trace),
@@ -101,6 +101,7 @@ Tractography::Tractography(UKFSettings s) :
                                             Ql(s.Ql),
                                             Qw(s.Qw),
                                             Qt(s.Qt),
+                                            Qwiso(s.Qwiso),
                                             Qkappa(s.Qkappa),
                                             Qvic(s.Qvic),
                                             Rs(s.Rs),
@@ -114,7 +115,7 @@ Tractography::Tractography(UKFSettings s) :
                                             _filter_model_type(Tractography::_1T),
                                             _model(NULL),
                                             debug(false)
-                                            // end initializer list
+// end initializer list
 
 {
 }
@@ -340,6 +341,11 @@ void Tractography::UpdateFilterModelType()
       _nPosFreeWater = 10;
     }
   }
+  else if (_num_tensors == 3)
+  {
+    if (_diffusion_propagator)
+      _nPosFreeWater = 23;
+  }
 
   // set up tensor weights
   this->weights_on_tensors.resize(_num_tensors);
@@ -412,6 +418,10 @@ void Tractography::UpdateFilterModelType()
   else if (this->_filter_model_type == _3T_FULL)
   {
     _model = new Full3T(Qm, Ql, Rs, this->weights_on_tensors, this->_free_water);
+  }
+  else if (this->_filter_model_type == _3T_BIEXP_RIDG) {
+    // Qwiso = 0.002 ?
+    _model = new Ridg_BiExp_FW(Qm, Ql, Qt, Qw, Qwiso, Rs, this->weights_on_tensors, this->_free_water, D_ISO);
   }
   else
   {
