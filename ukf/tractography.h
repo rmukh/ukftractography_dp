@@ -18,13 +18,14 @@ class vtkPolyData;
 class Tractography;
 
 // Internal constants
-const ukfPrecisionType SIGMA_MASK                 = 0.5;
-const ukfPrecisionType P0                         = 0.01;
-const ukfPrecisionType MIN_RADIUS                 = 0.87;
+const ukfPrecisionType SIGMA_MASK = 0.5;
+const ukfPrecisionType P0 = 0.01;
+const ukfPrecisionType MIN_RADIUS = 0.87;
 const ukfPrecisionType FULL_BRAIN_MEAN_SIGNAL_MIN = 0.18;
-const ukfPrecisionType D_ISO                      = 0.003; // Diffusion coefficient of free water
+const ukfPrecisionType D_ISO = 0.003; // Diffusion coefficient of free water
 
-struct UKFSettings {
+struct UKFSettings
+{
   bool record_fa;
   bool record_nmse;
   bool record_trace;
@@ -84,7 +85,7 @@ struct UKFSettings {
   std::string dwiFile;
   std::string seedsFile;
   std::string maskFile;
-  };
+};
 
 /**
  * \class Tractography
@@ -93,23 +94,26 @@ struct UKFSettings {
 class UKFBASELIB_EXPORTS Tractography
 {
 
-friend class vtkSlicerInteractiveUKFLogic;
+  friend class vtkSlicerInteractiveUKFLogic;
 
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   /** Defines a type to specify the model */
-  enum model_type { _1T,
-                    _1T_FW,
-                    _1T_FULL,
-                    _1T_FW_FULL,
-                    _2T,
-                    _2T_FW,
-                    _2T_FULL,
-                    _2T_FW_FULL,
-                    _3T,
-                    _3T_FULL,
-                    _3T_BiExp_Ridg };
+  enum model_type
+  {
+    _1T,
+    _1T_FW,
+    _1T_FULL,
+    _1T_FW_FULL,
+    _2T,
+    _2T_FW,
+    _2T_FULL,
+    _2T_FW_FULL,
+    _3T,
+    _3T_FULL,
+    _3T_BiExp_Ridg
+  };
 
   /** Constructor, is called from main.cc where all parameters are defined. */
   Tractography(UKFSettings settings);
@@ -121,30 +125,30 @@ public:
    * Load the files that contain the DWI signal, the seeds and a mask
    * defining the volume of the brain.
   */
-  bool LoadFiles(const std::string& data_file, const std::string& seed_file, const std::string& mask_file,
+  bool LoadFiles(const std::string &data_file, const std::string &seed_file, const std::string &mask_file,
                  const bool normalized_DWI_data, const bool output_normalized_DWI_data);
 
   /**
    * Directly set the data volume pointers
   */
 
-  bool SetData(void* data, void* mask, void* seed, bool normalizedDWIData);
+  bool SetData(void *data, void *mask, void *seed, bool normalizedDWIData);
 
   /**
    * Directly set the seed locations
   */
 
   void SetSeeds(stdVec_t seeds)
-    {
+  {
     _ext_seeds = seeds;
-    }
+  }
 
   /**
    * Creates the seeds and initilizes them by finding the tensor directions,
    * eigenvalues and Euler Angles. This also sets the initial state and
    * covariance.
   */
-  void Init(std::vector<SeedPointInfo>& seed_infos);
+  void Init(std::vector<SeedPointInfo> &seed_infos);
 
   /** \breif Performs the tractography
       \return true if files written successfully, else false
@@ -154,34 +158,33 @@ public:
   /**
    * Follows one seed point for the 3 Tensor case
   */
-  void Follow3T(const int thread_id, const size_t seed_index, const SeedPointInfo& seed, UKFFiber& fiber,
-                bool is_branching, std::vector<SeedPointInfo>& branching_seeds,
-                std::vector<BranchingSeedAffiliation>& branching_seed_affiliation);
+  void Follow3T(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber,
+                bool is_branching, std::vector<SeedPointInfo> &branching_seeds,
+                std::vector<BranchingSeedAffiliation> &branching_seed_affiliation);
 
   /**
    * Follows one seed point for the 2 Tensor case
   */
-  void Follow2T(const int thread_id, const size_t seed_index, const SeedPointInfo& seed, UKFFiber& fiber,
-                bool is_branching, std::vector<SeedPointInfo>& branching_seeds,
-                std::vector<BranchingSeedAffiliation>& branching_seed_affiliation);
+  void Follow2T(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber,
+                bool is_branching, std::vector<SeedPointInfo> &branching_seeds,
+                std::vector<BranchingSeedAffiliation> &branching_seed_affiliation);
 
   /**
    * Follows one seed point for the 1 Tensor case
   */
-  void Follow1T(const int thread_id, const SeedPointInfo& seed, UKFFiber& fiber);
+  void Follow1T(const int thread_id, const SeedPointInfo &seed, UKFFiber &fiber);
 
   /*
   * Update filter model type
   */
   void UpdateFilterModelType();
 
-
   /**
   * Helper functions for library use to set internal data
   */
   void SetWriteBinary(bool wb) { this->_writeBinary = wb; }
   void SetWriteCompressed(bool wb) { this->_writeCompressed = wb; }
-  void SetOutputPolyData(vtkPolyData* pd) { this->_outputPolyData = pd; }
+  void SetOutputPolyData(vtkPolyData *pd) { this->_outputPolyData = pd; }
 
   void SetDebug(bool v) { this->debug = v; }
 
@@ -190,50 +193,50 @@ private:
    * Calculate six tensor coefficients by solving B * d = log(s), where d are
    * tensor coefficients, B is gradient weighting, s is signal.
   */
-  void UnpackTensor(const ukfVectorType& b, const stdVec_t& u, stdEigVec_t& s,
-                    stdEigVec_t& ret);
+  void UnpackTensor(const ukfVectorType &b, const stdVec_t &u, stdEigVec_t &s,
+                    stdEigVec_t &ret);
 
   /**
   * Creates necessary variable for noddi
   */
-  void createProtocol(const ukfVectorType& b, ukfVectorType& gradientStrength,
-                                  ukfVectorType& pulseSeparation);
+  void createProtocol(const ukfVectorType &b, ukfVectorType &gradientStrength,
+                      ukfVectorType &pulseSeparation);
 
   /** One step along the fiber for the 3-tensor case. */
-  void Step3T(const int thread_id, vec3_t& x, vec3_t& m1, vec3_t& l1, vec3_t& m2, vec3_t& l2, vec3_t& m3, vec3_t& l3,
-              ukfPrecisionType& fa, ukfPrecisionType& fa2, State& state, ukfMatrixType& covariance, ukfPrecisionType& dNormMSE, ukfPrecisionType& trace,
-              ukfPrecisionType& trace2);
+  void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3,
+              ukfPrecisionType &fa, ukfPrecisionType &fa2, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE, ukfPrecisionType &trace,
+              ukfPrecisionType &trace2);
 
   /** One step along the fiber for the 2-tensor case. */
-  void Step2T(const int thread_id, vec3_t& x, vec3_t& m1, vec3_t& l1, vec3_t& m2, vec3_t& l2, ukfPrecisionType& fa, ukfPrecisionType& fa2,
-              State& state, ukfMatrixType& covariance, ukfPrecisionType& dNormMSE, ukfPrecisionType& trace, ukfPrecisionType& trace2);
+  void Step2T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, ukfPrecisionType &fa, ukfPrecisionType &fa2,
+              State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE, ukfPrecisionType &trace, ukfPrecisionType &trace2);
 
   /** One step along the fiber for the 1-tensor case. */
-  void Step1T(const int thread_id, vec3_t& x, ukfPrecisionType& fa, State& state, ukfMatrixType& covariance, ukfPrecisionType& dNormMSE,
-              ukfPrecisionType& trace);
+  void Step1T(const int thread_id, vec3_t &x, ukfPrecisionType &fa, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE,
+              ukfPrecisionType &trace);
 
   /**
    * Swaps the first tensor with the i-th tensor in state and covariance matrix for the 3 Tensor case.
    * This is used when the main direction of the tractography 'switches' tensor.
   */
-  void SwapState3T(State& state, ukfMatrixType& covariance, int i);
+  void SwapState3T(State &state, ukfMatrixType &covariance, int i);
 
   /**
    * Swap the tensors in the state and covariance matrix for the 2-tensor case. This is used when the
    * principal direction of the minor tensor has more weight than the one of the current tensor.
   */
-  void SwapState2T(State& state, ukfMatrixType& covariance);
+  void SwapState2T(State &state, ukfMatrixType &covariance);
 
   /**
    * Saves one point along the fiber so that everything can be written to a
    * file at the end.
   */
-  void Record(const vec3_t& x, const ukfPrecisionType fa, const ukfPrecisionType fa2,
-              const State& state, const ukfMatrixType p, UKFFiber& fiber,
+  void Record(const vec3_t &x, const ukfPrecisionType fa, const ukfPrecisionType fa2,
+              const State &state, const ukfMatrixType p, UKFFiber &fiber,
               const ukfPrecisionType dNormMSE, const ukfPrecisionType trace, const ukfPrecisionType trace2);
 
   /**  Reserving fiber array memory so as to avoid resizing at every step*/
-  void FiberReserve(UKFFiber& fiber, int fiber_size);
+  void FiberReserve(UKFFiber &fiber, int fiber_size);
 
   /** Vector of Pointers to Unscented Kalaman Filters. One for each thread. */
   std::vector<UnscentedKalmanFilter *> _ukf;
@@ -283,7 +286,7 @@ private:
   bool _branches_only;
 
   // Internal parameters
-  bool         _is_branching;
+  bool _is_branching;
   const ukfPrecisionType _p0;
   const ukfPrecisionType _sigma_signal;
   const ukfPrecisionType _sigma_mask;
@@ -293,7 +296,7 @@ private:
 
   /** Maximal number of points in the tract */
   const int _max_length;
-  bool      _full_brain;
+  bool _full_brain;
   bool _noddi;
   ukfVectorType _gradientStrength, _pulseSeparation;
   /** Diffustion propagator parameters **/
@@ -305,18 +308,18 @@ private:
   int _nPosFreeWater;
 
   // Parameters for the tractography
-  ukfPrecisionType  _fa_min;
-  ukfPrecisionType  _mean_signal_min;
-  ukfPrecisionType  _seeding_threshold;
-  int               _num_tensors;
-  int               _seeds_per_voxel;
-  ukfPrecisionType  _cos_theta_min;
-  ukfPrecisionType  _cos_theta_max;
-  bool              _is_full_model;
-  bool              _free_water;
-  ukfPrecisionType  _stepLength;
-  int               _steps_per_record;
-  std::vector<int>  _labels;
+  ukfPrecisionType _fa_min;
+  ukfPrecisionType _mean_signal_min;
+  ukfPrecisionType _seeding_threshold;
+  int _num_tensors;
+  int _seeds_per_voxel;
+  ukfPrecisionType _cos_theta_min;
+  ukfPrecisionType _cos_theta_max;
+  bool _is_full_model;
+  bool _free_water;
+  ukfPrecisionType _stepLength;
+  int _steps_per_record;
+  std::vector<int> _labels;
   stdVec_t _ext_seeds;
 
   ukfPrecisionType Qm;
@@ -332,7 +335,7 @@ private:
   // Threading control
   const int _num_threads;
 
-  vtkPolyData* _outputPolyData;
+  vtkPolyData *_outputPolyData;
 
   // TODO smartpointer
   model_type _filter_model_type;
@@ -341,4 +344,4 @@ private:
   bool debug;
 };
 
-#endif  // TRACTOGRAPHY_H_
+#endif // TRACTOGRAPHY_H_
