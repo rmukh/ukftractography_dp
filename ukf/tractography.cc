@@ -219,6 +219,11 @@ void Tractography::UpdateFilterModelType()
       this->_filter_model_type = Tractography::_3T_FULL;
     }
   }
+  else if (_diffusion_propagator)
+  {
+    std::cout << "Using Diffusion Propagator model (3 tensors, free water, bi-exponential)" << std::endl;
+    this->_filter_model_type = Tractography::_3T_BIEXP_RIDG;
+  }
 
   if ((_cos_theta_max != ukfOne) && (_cos_theta_max <= _cos_theta_min))
   {
