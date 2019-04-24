@@ -62,7 +62,7 @@
   </parameters>
 
   <parameters>
-  <label>Tractography Options</label>
+    <label>Tractography Options</label>
     <description>Basic Parameters</description>
 
     <integer>
@@ -74,9 +74,9 @@
       <default>1</default>
       <constraints>
         <minimum>0</minimum>
-      <maximum>50</maximum>
-      <step>1</step>
-    </constraints>
+        <maximum>50</maximum>
+        <step>1</step>
+      </constraints>
     </integer>
 
     <double>
@@ -104,9 +104,9 @@
       <default>0.15</default>
       <constraints>
         <minimum>0</minimum>
-      <maximum>1</maximum>
-      <step>0.01</step>
-    </constraints>
+        <maximum>1</maximum>
+        <step>0.01</step>
+      </constraints>
     </double>
 
     <double>
@@ -147,7 +147,7 @@
       <label>Tracking: Step length of tractography (in mm)</label>
       <description>Tractography parameter used in all models. Step size when conducting tractography. Default: 0.3. Range: 0.1-1. </description>
       <default>0.3</default>
-      <constraints> 
+      <constraints>
         <minimum> 0.1 </minimum>
         <maximum> 1 </maximum>
         <step> 0.1 </step>
@@ -204,7 +204,7 @@
   </parameters>
 
   <parameters>
-  <label>Tensor Model (default)</label>
+    <label>Tensor Model (default)</label>
     <description>Tensor model parameters</description>
 
     <boolean>
@@ -263,6 +263,27 @@
     <double>
       <name>Qw</name>
       <longflag>Qw</longflag>
+      <label>UKF Parameter (Advanced): Rate of change of volume fraction (?)</label>
+      <description>UKF data fitting parameter for tensor plus free water model: Process noise for volume fraction weights. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
+      <default>0.0</default>
+      <constraints>
+        <minimum> 0.0 </minimum>
+        <maximum> 0.25 </maximum>
+        <step> 0.00001 </step>
+      </constraints>
+    </double>
+
+    <double>
+      <name>Qt</name>
+      <longflag>Qt</longflag>
+      <label>UKF Parameter (Advanced): Rate of change of eigenvalues for the slow diffusion (diffusion propagator model)</label>
+      <description>UKF data fitting parameter for tensor model: Process noise for slow diffusion eigenvalues.</description>
+      <default>0.0</default>
+    </double>
+
+    <double>
+      <name>Qwiso</name>
+      <longflag>Qwiso</longflag>
       <label>UKF Parameter (Advanced): Rate of change of freewater weight</label>
       <description>UKF data fitting parameter for tensor plus free water model: Process noise for free water weights, ignored if no free water estimation. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
       <default>0.0</default>
@@ -275,7 +296,7 @@
 
   </parameters>
 
-<parameters advanced="true">
+  <parameters advanced="true">
     <label>NODDI Model</label>
     <description>Use NODDI model</description>
 
@@ -350,11 +371,49 @@
     </double>
 
 
-</parameters>
+  </parameters>
 
-<parameters advanced="true">
-  <label>Not Used: Debug/Develop Only </label>
-  <description> </description>
+  <parameters advanced="true">
+    <label>Diffusion Propagator model </label>
+    <description> Use the Bi-exponential diffusion propagator model, with 3 tensors and free water </description>
+
+    <boolean>
+      <name>diffusionPropagator</name>
+      <longflag>diffusionPropagator</longflag>
+      <label>Diffusion Propagator model </label>
+      <description>Use the Bi-exponential diffusion propagator model, with 3 tensors and free water </description>
+      <default>false</default>
+    </boolean>
+
+    <boolean>
+      <name>recordRTOP</name>
+      <longflag>recordRTOP</longflag>
+      <label>Record the return to origin probability </label>
+      <description>Record the return to origin probability when using the diffusion propagator model </description>
+      <default>false</default>
+    </boolean>
+
+    <double>
+      <name>minRTOP</name>
+      <longflag>minRTOP</longflag>
+      <label>Stopping criteria: RTOP values computed from the signal below this minimum imply the termination of the fiber</label>
+      <description>Stopping criteria: RTOP values computed from the signal below this minimum implied the termination of the fiber. Default: 60.0</description>
+      <default>0.0</default>
+    </double>
+
+    <double>
+      <name>maxNMSE</name>
+      <longflag>maxNMSE</longflag>
+      <label>Stopping criteria: maximum NMSE allowed when seeding and tracing fibers, in the case of the diffusion propagator model</label>
+      <description>Stopping criteria: maximum NMSE allowed when seeding and tracing fibers, in the case of the diffusion propagator model (default 0.2)</description>
+      <default>0.0</default>
+    </double>
+
+  </parameters>
+
+  <parameters advanced="true">
+    <label>Not Used: Debug/Develop Only </label>
+    <description></description>
 
     <double>
       <name>sigmaSignal</name>
@@ -438,7 +497,7 @@
       <description>Develop/Debug Only: Write tract file as ASCII text format. Default is not ASCII. Default tracts are written on VTK binary data file.</description>
       <default>false</default>
     </boolean>
-    
+
     <boolean>
       <name>writeUncompressedTracts</name>
       <flag>u</flag>
@@ -448,7 +507,7 @@
       <default>false</default>
     </boolean>
 
-<!-- DEPRECATED-REMOVED: we will print an error and deprecation notice because this GA threshold is no
+    <!-- DEPRECATED-REMOVED: we will print an error and deprecation notice because this GA threshold is no
                          longer available.
                          for changes see: https://github.com/pnlbwh/ukftractography/pull/64  -->
 
@@ -461,7 +520,7 @@
       <constraints>
         <minimum>0</minimum>
         <maximum>1</maximum>
-          <step>0.01</step>
+        <step>0.01</step>
         <default>10000</default>
       </constraints>
     </double>
@@ -474,6 +533,6 @@
       <default>false</default>
     </boolean>
 
-</parameters>
+  </parameters>
 
 </executable>

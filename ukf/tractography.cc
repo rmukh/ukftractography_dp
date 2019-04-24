@@ -419,7 +419,8 @@ void Tractography::UpdateFilterModelType()
   {
     _model = new Full3T(Qm, Ql, Rs, this->weights_on_tensors, this->_free_water);
   }
-  else if (this->_filter_model_type == _3T_BIEXP_RIDG) {
+  else if (this->_filter_model_type == _3T_BIEXP_RIDG)
+  {
     // Qwiso = 0.002 ?
     _model = new Ridg_BiExp_FW(Qm, Ql, Qt, Qw, Qwiso, Rs, this->weights_on_tensors, this->_free_water, D_ISO);
   }

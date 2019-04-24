@@ -13,30 +13,33 @@
 // TODO make configurable?
 static const bool verbose = true;
 
-namespace {
-void ukf_setAndTell(ukfPrecisionType & x, const ukfPrecisionType y, const std::string & name)
+namespace
 {
-  if (verbose) {
+void ukf_setAndTell(ukfPrecisionType &x, const ukfPrecisionType y, const std::string &name)
+{
+  if (verbose)
+  {
     x = y;
     std::cout << "- " << name << ": " << y << std::endl;
   }
 }
 
-void ukf_tell(const ukfPrecisionType & x, const std::string &name)
+void ukf_tell(const ukfPrecisionType &x, const std::string &name)
 {
-  if (verbose) {
+  if (verbose)
+  {
     std::cout << "* " << name << ": " << x << std::endl;
   }
 }
 }; // anonymous namespace
 
-UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char** argv, UKFSettings& s)
+UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
 {
-  PARSE_ARGS ;
+  PARSE_ARGS;
 
   /* Begin deprecation section */
   {
-  /*
+    /*
   *  Check for and print warning about invalid parameter `minGA`
   *
   *  GA is no longer used as a tracking threshold.
@@ -52,10 +55,10 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char** argv, UKFSettings& s)
     // parameters, and the CLP doesn't indicate no-arg
 
     if (minGAArg.isSet() && minGA != 10000)
-      {
+    {
       std::cerr << "Error: the `minGA` parameter is no longer valid because GA is not used! Please use 'stoppingThreshold' instead! Please see `--help` for more information." << std::endl;
       return EXIT_FAILURE;
-      }
+    }
   }
   /* End deprecation section */
 
@@ -68,6 +71,8 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char** argv, UKFSettings& s)
   ukfPrecisionType l_Qm = Qm;
   ukfPrecisionType l_Ql = Ql;
   ukfPrecisionType l_Qw = Qw;
+  ukfPrecisionType l_Qt = Qt;
+  ukfPrecisionType l_Qwiso = Qwiso;
   ukfPrecisionType l_Qkappa = Qkappa;
   ukfPrecisionType l_Qvic = Qvic;
   ukfPrecisionType l_Rs = Rs;
@@ -78,39 +83,47 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char** argv, UKFSettings& s)
   ukfPrecisionType SIGMA_SIGNAL = sigmaSignal;
 
   // HANDLE ERRORNOUS INPUT
-  if (dwiFile.empty() || maskFile.empty() || tracts.empty()) {
-    std::cout << "Error! Must indicate DWI data, mask and tracts output files!" << std::endl << std::endl ;
-    return 1 ;	//This is to indicate that the module returns with error
+  if (dwiFile.empty() || maskFile.empty() || tracts.empty())
+  {
+    std::cout << "Error! Must indicate DWI data, mask and tracts output files!" << std::endl
+              << std::endl;
+    return 1; //This is to indicate that the module returns with error
   }
 
-  if (numTensor == 1) {
-    tractsWithSecondTensor.clear() ;	//Reassure the string is empty
+  if (numTensor == 1)
+  {
+    tractsWithSecondTensor.clear(); //Reassure the string is empty
   }
 
-  if (l_maxHalfFiberLength <= 0) {
-    std::cout << "Invalid maximum half fiber length!" << std::endl ;
-    return 1 ;
+  if (l_maxHalfFiberLength <= 0)
+  {
+    std::cout << "Invalid maximum half fiber length!" << std::endl;
+    return 1;
   }
 
-  if (std::ceil(l_maxHalfFiberLength / l_stepLength) <= 1) {
-    std::cout << "Too large step length or too small fiber cutoff limit!" << std::endl ;
-    return 1 ;
+  if (std::ceil(l_maxHalfFiberLength / l_stepLength) <= 1)
+  {
+    std::cout << "Too large step length or too small fiber cutoff limit!" << std::endl;
+    return 1;
   }
 
-  if (!freeWater && recordFreeWater) {
+  if (!freeWater && recordFreeWater)
+  {
     std::cout << "In Order to use the \"--recordFreeWater\" flag, also the \"--freeWater\" flag must be used!" << std::endl;
-    return 1 ;
+    return 1;
   }
 
-  if (freeWater && numTensor == 3) {
+  if (freeWater && numTensor == 3)
+  {
     std::cout << "In Order to use the free water estimation the number of Tensors (\"--numTensor\") must be set to 1 or 2.";
     std::cout << "(3-Tensor case not implemented yet.)" << std::endl;
-    return 1 ;
+    return 1;
   }
 
-  if (l_recordLength < l_stepLength) {
+  if (l_recordLength < l_stepLength)
+  {
     std::cout << "recordLength should be greater than stepLength" << std::endl;
-    return 1 ;
+    return 1;
   }
 
   // SETTING THE DEFAULT PARAMETERS
@@ -121,114 +134,225 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char** argv, UKFSettings& s)
   std::cout << "\"*\": set by user\n";
   std::cout << "\"-\": default setting\n";
 
-  if (seedsFile.empty()) {
+  if (seedsFile.empty())
+  {
     l_maxBranchingAngle = 0.0;
   }
 
-  if (labels.size() == 0) {
-    labels.push_back(1) ;	//Default to use label 1
+  if (labels.size() == 0)
+  {
+    labels.push_back(1); //Default to use label 1
   }
 
-  if (l_stoppingFA == 0.15) {
+  if (l_stoppingFA == 0.15)
+  {
     ukf_setAndTell(l_stoppingFA, l_stoppingFA, "stoppingFA");
-  } else {
+  }
+  else
+  {
     ukf_tell(l_stoppingFA, "stoppingFA");
   }
 
-  if (l_seedingThreshold == 0.0) {
+  if (l_seedingThreshold == 0.0)
+  {
     ukf_setAndTell(l_seedingThreshold, FULL_BRAIN_MEAN_SIGNAL_MIN,
-               "seedingThreshold");  // Used to default to 2 times the FA threshold.
-  } else {
+                   "seedingThreshold"); // Used to default to 2 times the FA threshold.
+  }
+  else
+  {
     ukf_tell(l_seedingThreshold, "seedingThreshold");
   }
 
-  if(!noddi){
-    if(recordVic || recordKappa || recordViso){
+  if (!noddi)
+  {
+    if (recordVic || recordKappa || recordViso)
+    {
       std::cout << "Can use recordVic or recordKappa or recordViso parameters only with noddi model";
       return EXIT_FAILURE;
     }
   }
 
-  if (l_Qm == 0.0) {
-    if (noddi){
+  if (l_Qm == 0.0)
+  {
+    if (noddi)
+    {
       if (numTensor == 1)
         ukf_setAndTell(l_Qm, 0.0025, "Qm");
       else
         ukf_setAndTell(l_Qm, 0.001, "Qm");
-    } else if (numTensor == 1) {
-        ukf_setAndTell(l_Qm, 0.005, "Qm");//l_Qm = 0.0015;
-    } else {
-      if (fullTensorModel) {
-        ukf_setAndTell(l_Qm, 0.002, "Qm");//l_Qm = 0.002;
-      } else {
-        ukf_setAndTell(l_Qm, 0.001, "Qm");//l_Qm = 0.001; was 0.003, changed to 0.001 for new Interp3Signal
+    }
+    else if (numTensor == 1)
+    {
+      ukf_setAndTell(l_Qm, 0.005, "Qm"); //l_Qm = 0.0015;
+    }
+    else if (diffusionPropagator)
+    {
+      ukf_setAndTell(l_Qm, 0.0001, "Qm");
+    }
+    else
+    {
+      if (fullTensorModel)
+      {
+        ukf_setAndTell(l_Qm, 0.002, "Qm"); //l_Qm = 0.002;
+      }
+      else
+      {
+        ukf_setAndTell(l_Qm, 0.001, "Qm"); //l_Qm = 0.001; was 0.003, changed to 0.001 for new Interp3Signal
       }
     }
-  } else {
+  }
+  else
+  {
     ukf_tell(l_Qm, "Qm");
   }
 
-
-  if (noddi){
-    if ( l_Qkappa == 0.0)
-      ukf_setAndTell (l_Qkappa, 0.01, "Qkappa");
+  if (noddi)
+  {
+    if (l_Qkappa == 0.0)
+      ukf_setAndTell(l_Qkappa, 0.01, "Qkappa");
     else
       ukf_tell(l_Qkappa, "Qkappa");
   }
-  else {
-    if (l_Ql == 0.0) {
-      if (numTensor == 1) {
-        ukf_setAndTell(l_Ql, 300.0, "Ql");//l_Ql = 25.0;
-      } else if (numTensor == 2) {
-        ukf_setAndTell(l_Ql, 50.0, "Ql");//was l_Ql = 100.0; for old Interp3Signal
-      } else if (numTensor == 3) {
-        ukf_setAndTell(l_Ql, 100.0, "Ql");//l_Ql = 150.0;
+  else
+  {
+    if (l_Ql == 0.0)
+    {
+      if (diffusionPropagator)
+      {
+        ukf_setAndTell(l_Ql, 150, "Ql");
       }
-    } else {
-        ukf_tell(l_Ql, "Ql");
+      else if (numTensor == 1)
+      {
+        ukf_setAndTell(l_Ql, 300.0, "Ql"); //l_Ql = 25.0;
+      }
+      else if (numTensor == 2)
+      {
+        ukf_setAndTell(l_Ql, 50.0, "Ql"); //was l_Ql = 100.0; for old Interp3Signal
+      }
+      else if (numTensor == 3)
+      {
+        ukf_setAndTell(l_Ql, 100.0, "Ql"); //l_Ql = 150.0;
+      }
+    }
+    else
+    {
+      ukf_tell(l_Ql, "Ql");
     }
   }
 
+  if (diffusionPropagator)
+  {
+    if (l_Qt == 0.0)
+    {
+      ukf_setAndTell(l_Qt, 50, "Qt");
+    }
+    else
+    {
+      ukf_tell(l_Qt, "Qt");
+    }
+  }
 
-  if (l_Rs == 0.0) {
-    if (numTensor == 1) {
-      ukf_setAndTell(l_Rs, 0.01, "Rs");//l_Rs = 0.02;
-    } else {
-      if (fullTensorModel) {
-        ukf_setAndTell(l_Rs, 0.01, "Rs");// = 0.01;
-      } else {
-        ukf_setAndTell(l_Rs, 0.02, "Rs");//was l_Rs = 0.015;for old Interp3Signal
+  if (diffusionPropagator)
+  {
+    if (minRTOP == 0.0)
+    {
+      ukf_setAndTell(minRTOP, 60.0, "minRTOP");
+    }
+    else
+    {
+      ukf_tell(minRTOP, "minRTOP");
+    }
+  }
+
+  if (diffusionPropagator)
+  {
+    if (maxNMSE == 0.0)
+    {
+      ukf_setAndTell(maxNMSE, 0.15, "maxNMSE");
+    }
+    else
+    {
+      ukf_tell(maxNMSE, "maxNMSE");
+    }
+  }
+
+  if (l_Rs == 0.0)
+  {
+    if (diffusionPropagator)
+    {
+      ukf_setAndTell(l_Rs, 0.015, "Rs");
+    }
+    if (numTensor == 1)
+    {
+      ukf_setAndTell(l_Rs, 0.01, "Rs"); //l_Rs = 0.02;
+    }
+    else
+    {
+      if (fullTensorModel)
+      {
+        ukf_setAndTell(l_Rs, 0.01, "Rs"); // = 0.01;
+      }
+      else
+      {
+        ukf_setAndTell(l_Rs, 0.02, "Rs"); //was l_Rs = 0.015;for old Interp3Signal
       }
     }
-  } else {
+  }
+  else
+  {
     ukf_tell(l_Rs, "Rs");
   }
 
-  if (l_stepLength == 0.0) {
-    if (numTensor == 1) {
+  if (l_stepLength == 0.3 && diffusionPropagator)
+  {
+    ukf_setAndTell(l_stepLength, 0.5, "stepLength");
+  }
+  else if (l_stepLength == 0.0)
+  {
+    if (diffusionPropagator)
+    {
+      ukf_setAndTell(l_stepLength, 0.5, "stepLength");
+    }
+    else if (numTensor == 1)
+    {
       ukf_setAndTell(l_stepLength, 0.3, "stepLength");
-    } else if (numTensor == 2) {
+    }
+    else if (numTensor == 2)
+    {
       ukf_setAndTell(l_stepLength, 0.3, "stepLength"); //was 0.2 for old Interp3Signal
-    } else { // 3T
+    }
+    else
+    { // 3T
       ukf_setAndTell(l_stepLength, 0.15, "stepLength");
     }
-  } else {
+  }
+  else
+  {
     ukf_tell(l_stepLength, "stepLength");
   }
 
-  if (l_recordLength == 0.0) {
-    if (numTensor == 1) {
+  if (l_recordLength == 0.0)
+  {
+    if (numTensor == 1)
+    {
       ukf_setAndTell(l_recordLength, 0.9, "recordLength");
-    } else if (numTensor == 2) {
+    }
+    else if (numTensor == 2)
+    {
       ukf_setAndTell(l_recordLength, 0.9, "recordLength"); //was 0.2 for old Interp3Signal
-    } else { // 3T
+    }
+    else
+    { // 3T
       ukf_setAndTell(l_recordLength, 0.45, "recordLength");
     }
-  } else {
+  }
+  else
+  {
     ukf_tell(l_recordLength, "recordLength");
   }
 
-  if (noddi){
+  if (noddi)
+  {
     if (l_Qvic == 0.0)
       if (numTensor == 1)
         ukf_setAndTell(l_Qvic, 0.0005, "Qvic = Qviso");
@@ -237,30 +361,48 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char** argv, UKFSettings& s)
     else
       ukf_tell(l_Qvic, "Qvic = Qviso");
   }
-  else
-    if (freeWater) {
-      if (l_Qw == 0.0) {
-        if (numTensor == 1) {
-          ukf_setAndTell(l_Qw, 0.0025, "Qw"); // estimated in a paramsearch // 0.0025
-        } else if (numTensor == 2) {
-          ukf_setAndTell(l_Qw, 0.0015, "Qw"); // 0.0015
-        }
-      } else {
-          ukf_tell(l_Qw, "Qw");
+  else if (freeWater)
+  {
+    if (l_Qw == 0.0)
+    {
+      if (diffusionPropagator)
+      {
+        ukf_setAndTell(l_Qw, 0.002, "Qw");
+      }
+      else if (numTensor == 1)
+      {
+        ukf_setAndTell(l_Qw, 0.0025, "Qw"); // estimated in a paramsearch // 0.0025
+      }
+      else if (numTensor == 2)
+      {
+        ukf_setAndTell(l_Qw, 0.0015, "Qw"); // 0.0015
       }
     }
+    else
+    {
+      ukf_tell(l_Qw, "Qw");
+    }
+  }
+
+  if (diffusionPropagator)
+  {
+    ukf_setAndTell(l_Qwiso, 0.002, "Qwiso");
+  }
 
   ukf_tell(l_stoppingThreshold, "stoppingThreshold");
 
-  if (seedsPerVoxel == 1) {
+  if (seedsPerVoxel == 1)
+  {
     std::cout << "- seedsPerVoxel: " << seedsPerVoxel << std::endl;
-  } else {
+  }
+  else
+  {
     std::cout << "* seedsPerVoxel: " << seedsPerVoxel << std::endl;
   }
 
   // initializing settings
   //UKFSettings& s -- from function argument
-    {
+  {
     s.record_fa = recordFA;
     s.record_nmse = recordNMSE;
     s.record_trace = recordTrace;
@@ -277,13 +419,14 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char** argv, UKFSettings& s)
     s.fa_min = l_stoppingFA;
     s.mean_signal_min = l_stoppingThreshold;
     s.seeding_threshold = l_seedingThreshold;
-    s.num_tensors = numTensor;;
+    s.num_tensors = numTensor;
     s.seeds_per_voxel = seedsPerVoxel;
     s.min_branching_angle = l_minBranchingAngle;
     s.max_branching_angle = l_maxBranchingAngle;
     s.is_full_model = fullTensorModel;
     s.free_water = freeWater;
     s.noddi = noddi;
+    s.diffusion_propagator = diffusionPropagator;
     s.stepLength = l_stepLength;
     s.recordLength = l_recordLength;
     s.maxHalfFiberLength = maxHalfFiberLength;
@@ -293,9 +436,14 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char** argv, UKFSettings& s)
     s.Qm = l_Qm;
     s.Ql = l_Ql;
     s.Qw = l_Qw;
+    s.Qt = l_Qt;
+    s.Qwiso = l_Qwiso;
     s.Qkappa = l_Qkappa;
     s.Qvic = l_Qvic;
     s.Rs = l_Rs;
+
+    s.rtop_min = minRTOP;
+    s.max_nmse = maxNMSE;
 
     // TODO these should be header-initialized once we use C++11
     s.p0 = P0;
@@ -310,7 +458,7 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char** argv, UKFSettings& s)
     s.maskFile = maskFile;
     s.writeAsciiTracts = writeAsciiTracts;
     s.writeUncompressedTracts = writeUncompressedTracts;
-    }
+  }
 
   return EXIT_SUCCESS;
 }
