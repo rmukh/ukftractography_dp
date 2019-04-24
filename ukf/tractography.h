@@ -48,6 +48,10 @@ struct UKFSettings {
   bool is_full_model;
   bool free_water;
   bool noddi;
+  bool diffusion_propagator;
+  ukfPrecisionType rtop_min;
+  bool record_rtop;
+  ukfPrecisionType max_nmse;
   ukfPrecisionType stepLength;
   ukfPrecisionType recordLength;
   ukfPrecisionType maxHalfFiberLength;
@@ -56,6 +60,7 @@ struct UKFSettings {
   ukfPrecisionType Qm;
   ukfPrecisionType Ql;
   ukfPrecisionType Qw;
+  ukfPrecisionType Qt;
   ukfPrecisionType Qkappa;
   ukfPrecisionType Qvic;
   ukfPrecisionType Rs;
@@ -103,7 +108,8 @@ public:
                     _2T_FULL,
                     _2T_FW_FULL,
                     _3T,
-                    _3T_FULL };
+                    _3T_FULL,
+                    _3T_BiExp_Ridg };
 
   /** Constructor, is called from main.cc where all parameters are defined. */
   Tractography(UKFSettings settings);
@@ -290,6 +296,11 @@ private:
   bool      _full_brain;
   bool _noddi;
   ukfVectorType _gradientStrength, _pulseSeparation;
+  /** Diffustion propagator parameters **/
+  bool _diffusion_propagator;
+  const ukfPrecisionType _rtop_min;
+  bool _record_rtop;
+  const ukfPrecisionType _max_nmse;
   /** Index of the weight in the state for the free water cases */
   int _nPosFreeWater;
 
@@ -311,6 +322,7 @@ private:
   ukfPrecisionType Qm;
   ukfPrecisionType Ql;
   ukfPrecisionType Qw;
+  ukfPrecisionType Qt;
   ukfPrecisionType Qkappa;
   ukfPrecisionType Qvic;
   ukfPrecisionType Rs;

@@ -40,7 +40,7 @@ public:
         const unsigned int N_constr = 25;
 
         // N_constr constraints for the 24 dimensions of the state
-        _D.resize(23, N_constr);
+        _D.resize(24, N_constr);
         _D.setConstant(ukfZero);
 
         _d.resize(N_constr);

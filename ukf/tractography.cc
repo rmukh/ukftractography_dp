@@ -57,8 +57,6 @@ Tractography::Tractography(UKFSettings s) :
 
     _ukf(0, NULL),
 
-
-
     _output_file(s.output_file),
     _output_file_with_second_tensor(s.output_file_with_second_tensor),
 
@@ -83,6 +81,10 @@ Tractography::Tractography(UKFSettings s) :
     _max_length(static_cast<int>(std::ceil(s.maxHalfFiberLength / s.stepLength) ) ),
     _full_brain(false),
     _noddi(s.noddi),
+    _diffusion_propagator(s.diffusion_propagator),
+    _rtop_min(s.rtop_min),
+    _record_rtop(s.record_rtop),
+    _max_nmse(s.max_nmse),
     _fa_min(s.fa_min), _mean_signal_min(s.mean_signal_min),
     _seeding_threshold(s.seeding_threshold),
     _num_tensors(s.num_tensors),
@@ -98,6 +100,7 @@ Tractography::Tractography(UKFSettings s) :
     Qm(s.Qm),
     Ql(s.Ql),
     Qw(s.Qw),
+    Qt(s.Qt),
     Qkappa(s.Qkappa),
     Qvic(s.Qvic),
     Rs(s.Rs),
@@ -111,6 +114,7 @@ Tractography::Tractography(UKFSettings s) :
     _filter_model_type(Tractography::_1T),
     _model(NULL),
     debug(false)
+
     // end initializer list
 {
 }
@@ -204,6 +208,54 @@ void Tractography::UpdateFilterModelType()
         std::cout << "recordFA, recordTrace, record_free_water, recordTensors parameters can only be used with tensor models\n";
         throw;
     }
+  }
+
+  // Diffusion propagator part
+  if (_diffusion_propagator) { 
+    if (_noddi) {
+      std::cout<<"Noddi and Diffusion Propagator parameters are mutually exclusive. Use either one of the two"<<std::endl;
+      throw;
+    }
+
+        if (_record_fa || _record_trace) {
+      std::cout << "recordFA and recordTrace cannot be used with the diffusion propagator model\n";
+      throw;
+    }
+
+    if (!_free_water) {
+      std::cout<<"Since the Diffusion Propagator model is used, the free water parameter will be estimated"<<std::endl;
+      _free_water = true;
+    }
+
+    if (!simpleTensorModel) {
+      std::cout<<"Since the Diffusion Propagator model is used, the simple tensor model will be used"<<std::endl;
+      simpleTensorModel = true;
+    }
+
+    if (_num_tensors != 3) {
+      std::cout<<"Since the Diffusion Propagator model is used, the number of tensors is set to three (3)"<<std::endl;
+      _num_tensors = 3;
+    }
+  }
+
+  if (_record_rtop && !_diffusion_propagator) {
+    std::cout<<"recordRTOP cannot be used with any other models than the diffusionPropagator"<<std::endl;
+    throw;
+  }
+
+   if (Qt != 0.0 && !_diffusion_propagator) {
+    std::cout<<"Qt parameter cannot be set with any other models than the diffusionPropagator model"<<std::endl;
+    throw;
+  }
+
+   if (_rtop_min != 0.0 && !_diffusion_propagator) {
+    std::cout<<"minRTOP parameter cannot be set with any other models than the diffusionPropagator model"<<std::endl;
+    throw;
+  }
+
+   if (_max_nmse != 0.0 && !_diffusion_propagator) {
+    std::cout<<"maxNMSE parameter cannot be set with any other models than the diffusionPropagator model"<<std::endl;
+    throw;
   }
 
   // Double check branching.
