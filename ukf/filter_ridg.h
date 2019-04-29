@@ -75,7 +75,7 @@ public:
         _D(13, 9) = 1;
         _d(9) = _lambda_min_slow_diffusion; // l24 >= min
 
-         // Tensor 3 (minimal values)
+        // Tensor 3 (minimal values)
         _D(17, 10) = 1;
         _d(10) = _lambda_min_fast_diffusion; // l31 >= min
         _D(18, 11) = 1;
@@ -105,7 +105,7 @@ public:
         _D(13, 21) = -1; // l24 <= max
         _d(21) = _lambda_max_diffusion;
 
-         // Tensor 3 (maximal values)
+        // Tensor 3 (maximal values)
         _D(17, 22) = -1;
         _d(22) = _lambda_max_diffusion; // l31 <= max
         _D(18, 23) = -1;

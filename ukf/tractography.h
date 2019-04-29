@@ -221,7 +221,7 @@ private:
    * This is used when the main direction of the tractography 'switches' tensor.
   */
   void SwapState3T(State &state, ukfMatrixType &covariance, int i);
-
+  void SwapState3T(stdVecState &state, ukfMatrixType &covariance, int i);
   /**
    * Swap the tensors in the state and covariance matrix for the 2-tensor case. This is used when the
    * principal direction of the minor tensor has more weight than the one of the current tensor.
@@ -238,6 +238,12 @@ private:
 
   /**  Reserving fiber array memory so as to avoid resizing at every step*/
   void FiberReserve(UKFFiber &fiber, int fiber_size);
+
+  /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the state parameters */
+  void computeRTOPfromState(stdVecState& state, ukfPrecisionType& rtop, ukfPrecisionType& rtop1, ukfPrecisionType& rtop2, ukfPrecisionType& rtop3);
+
+   /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the interpolated signal */
+  void computeRTOPfromSignal(ukfPrecisionType& rtopSignal, ukfVectorType& signal);
 
   /** Vector of Pointers to Unscented Kalaman Filters. One for each thread. */
   std::vector<UnscentedKalmanFilter *> _ukf;

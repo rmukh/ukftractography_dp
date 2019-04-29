@@ -623,6 +623,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       }
     }
   }
+
   stdEigVec_t starting_params(starting_points.size());
 
   UnpackTensor(_signal_data->GetBValues(), _signal_data->gradients(),
@@ -1036,6 +1037,71 @@ bool Tractography::Run()
   }
   _ukf.clear();
   return writeStatus;
+}
+
+void Tractography::computeRTOPfromSignal(ukfPrecisionType &rtopSignal, ukfVectorType &signal)
+{
+  assert(signal.size() > 0);
+
+  rtopSignal = 0.0;
+
+  // The RTOP is the sum of the signal
+  // We use signal.size()/2 because the first half of the signal is identical
+  // to the second half.
+
+  for (int i = 0; i < signal.size() / 2; ++i)
+  {
+    rtopSignal += signal[i];
+
+    if (signal[i] < 0)
+    {
+      std::cout << "Negative signal found when computing the RTOP from the signal, value : " << signal[i] << std::endl;
+    }
+  }
+}
+
+void Tractography::computeRTOPfromState(stdVecState &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3)
+{
+  // Control input: state should have 15 rows
+  assert(state.size() == 24);
+
+  ukfPrecisionType l11 = state[3] * 1e-6;
+  ukfPrecisionType l12 = state[4] * 1e-6;
+  ukfPrecisionType l13 = state[5] * 1e-6;
+  ukfPrecisionType l14 = state[6] * 1e-6;
+
+  ukfPrecisionType l21 = state[10] * 1e-6;
+  ukfPrecisionType l22 = state[11] * 1e-6;
+  ukfPrecisionType l23 = state[12] * 1e-6;
+  ukfPrecisionType l24 = state[13] * 1e-6;
+
+  ukfPrecisionType l31 = state[17] * 1e-6;
+  ukfPrecisionType l32 = state[18] * 1e-6;
+  ukfPrecisionType l33 = state[19] * 1e-6;
+  ukfPrecisionType l34 = state[20] * 1e-6;
+
+  ukfPrecisionType w1 = state[21];
+  ukfPrecisionType w2 = state[22];
+  ukfPrecisionType w3 = 1 - w1 - w2;
+  ukfPrecisionType wiso = state[23];
+
+  ukfPrecisionType det_l1 = l11 * l12;
+  ukfPrecisionType det_t1 = l13 * l14;
+  ukfPrecisionType det_l2 = l21 * l22;
+  ukfPrecisionType det_t2 = l23 * l24;
+  ukfPrecisionType det_l3 = l31 * l32;
+  ukfPrecisionType det_t3 = l33 * l34;
+
+  // !!! D_ISO value hardcoded...
+  ukfPrecisionType det_fw = 0.003 * 0.003 * 0.003;
+
+  ukfPrecisionType PI_COEFF = std::pow(UKF_PI, 1.5);
+
+  // !!! 0.7 and 0.3 tensor weights are hardcoded...
+  rtop1 = PI_COEFF * w1 * (0.7 / std::sqrt(det_l1) + 0.3 / std::sqrt(det_t1));
+  rtop2 = PI_COEFF * w2 * (0.7 / std::sqrt(det_l2) + 0.3 / std::sqrt(det_t2));
+  rtop3 = PI_COEFF * w2 * (0.7 / std::sqrt(det_l3) + 0.3 / std::sqrt(det_t3));
+  rtop = rtop1 + rtop2 + rtop3 + PI_COEFF * (wiso / std::sqrt(det_fw));
 }
 
 // FIXME: not clear why gradientStrength and pulseSeparation are passed as arguments when
@@ -1910,6 +1976,15 @@ void Tractography::Step1T(const int thread_id,
       dir[1] / voxel[1],
       dir[0] / voxel[2];
   x = x + dx * _stepLength;
+}
+
+void Tractography::SwapState3T(stdVecState &state,
+                               ukfMatrixType &covariance,
+                               int i)
+{
+  State tmp_state = ConvertVector<stdVecState, State>(state);
+  SwapState3T(tmp_state, covariance, i);
+  state = ConvertVector<State, stdVecState>(tmp_state);
 }
 
 void Tractography::SwapState3T(State &state,
