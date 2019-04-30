@@ -1100,8 +1100,228 @@ void Tractography::computeRTOPfromState(stdVecState &state, ukfPrecisionType &rt
   // !!! 0.7 and 0.3 tensor weights are hardcoded...
   rtop1 = PI_COEFF * w1 * (0.7 / std::sqrt(det_l1) + 0.3 / std::sqrt(det_t1));
   rtop2 = PI_COEFF * w2 * (0.7 / std::sqrt(det_l2) + 0.3 / std::sqrt(det_t2));
-  rtop3 = PI_COEFF * w2 * (0.7 / std::sqrt(det_l3) + 0.3 / std::sqrt(det_t3));
+  rtop3 = PI_COEFF * w3 * (0.7 / std::sqrt(det_l3) + 0.3 / std::sqrt(det_t3));
   rtop = rtop1 + rtop2 + rtop3 + PI_COEFF * (wiso / std::sqrt(det_fw));
+}
+
+void Tractography::PrintState(State &state)
+{
+  std::cout << "State \n";
+  std::cout << "\t m1: " << state[0] << " " << state[1] << " " << state[2] << std::endl;
+  std::cout << "\t l11 .. l14: " << state[3] << " " << state[4] << " " << state[5] << " " << state[6] << std::endl;
+  std::cout << "\t m2: " << state[7] << " " << state[8] << " " << state[9] << std::endl;
+  std::cout << "\t l21 .. l24: " << state[10] << " " << state[11] << " " << state[12] << " " << state[13] << std::endl;
+  std::cout << "\t m3: " << state[14] << " " << state[15] << " " << state[16] << std::endl;
+  std::cout << "\t l31 .. l34: " << state[17] << " " << state[18] << " " << state[19] << " " << state[20] << std::endl;
+  std::cout << "\t w1, w2: " << state[21] << " " << state[22] << std::endl;
+  std::cout << "\t wiso: " << state[23] << std::endl;
+  std::cout << " --- " << std::endl;
+}
+
+itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction::GetValue(const ParametersType &parameters) const
+{
+  MeasureType residual = 0.0;
+
+  assert(this->GetNumberOfParameters() == 24);
+
+  // Convert the parameter to the ukfMtarixType
+  ukfMatrixType localState(this->GetNumberOfParameters(), 1);
+  for (unsigned int it = 0; it < this->GetNumberOfParameters(); ++it)
+  {
+    localState(it, 0) = parameters[it];
+  }
+
+  // w for freeWater
+  if (localState(23, 0) < 0.0)
+  {
+    localState(23, 0) = 0.0;
+  }
+
+  // Estimate the signal
+  ukfMatrixType estimatedSignal(this->GetNumberOfValues(), 1);
+
+  //_model->F(localState);
+  _model->H(localState, estimatedSignal);
+
+  // Compute the error between the estimated signal and the acquired one
+  ukfPrecisionType err = 0.0;
+  this->computeError(estimatedSignal, _signal, err);
+
+  // Return the result
+  residual = err;
+  return residual;
+}
+
+void itk::DiffusionPropagatorCostFunction::GetDerivative(const ParametersType &parameters, DerivativeType &derivative) const
+{
+  // We use numerical derivative
+  // slope = [f(x+h) - f(x-h)] / (2h)
+
+  ParametersType p_h(this->GetNumberOfParameters());  // for f(x+h)
+  ParametersType p_hh(this->GetNumberOfParameters()); // for f(x-h)
+
+  // The size of the derivative is not set by default,
+  // so we have to do it manually
+  derivative.SetSize(this->GetNumberOfParameters());
+
+  // Set parameters
+  for (unsigned int it = 0; it < this->GetNumberOfParameters(); ++it)
+  {
+    p_h[it] = parameters[it];
+    p_hh[it] = parameters[it];
+  }
+
+  // Calculate derivative for each parameter
+  for (unsigned int it = 0; it < this->GetNumberOfParameters(); ++it)
+  {
+    // Optimal h is sqrt(epsilon machine) * x
+    double h = std::sqrt(2.3e-16) * std::max(std::abs(parameters[it]), 1.0);
+
+    // Volatile, otherwise compiler will optimize the value for dx
+    volatile double xph = parameters[it] + h;
+
+    // For taking into account the rounding error
+    double dx = xph - parameters[it];
+
+    // Compute the slope
+    p_h[it] = xph;
+
+    //p_hh[it] = parameters[it] - h;
+    derivative[it] = (this->GetValue(p_h) - this->GetValue(p_hh)) / (dx);
+
+    // Set parameters back for next iteration
+    p_h[it] = parameters[it];
+    p_hh[it] = parameters[it];
+  }
+}
+
+void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType &signal, FilterModel *model)
+{
+  typedef itk::LBFGSBOptimizer OptimizerType;
+  typedef itk::DiffusionPropagatorCostFunction CostType;
+
+  CostType::Pointer cost = CostType::New();
+  OptimizerType::Pointer optimizer = OptimizerType::New();
+
+  cost->SetNumberOfParameters(state.size());
+  cost->SetNumberOfValues(signal.size());
+  cost->SetSignalValues(signal);
+  cost->SetModel(model);
+
+  optimizer->SetCostFunction(cost);
+
+  CostType::ParametersType p(cost->GetNumberOfParameters());
+
+  // Fill p
+  for (int it = 0; it < state.size(); ++it)
+  {
+    p[it] = state[it];
+  }
+
+  optimizer->SetInitialPosition(p);
+  optimizer->SetProjectedGradientTolerance(1e-10);
+  optimizer->SetMaximumNumberOfIterations(500);
+  optimizer->SetMaximumNumberOfEvaluations(500);
+  optimizer->SetMaximumNumberOfCorrections(5);      // The number of corrections to approximate the inverse hessian matrix
+  optimizer->SetCostFunctionConvergenceFactor(1e2); // Precision of the solution 1e1 = very precise, 1e12 = coarse estimate
+  optimizer->SetTrace(false);                       // Print debug info
+
+  // Set bounds
+
+  OptimizerType::BoundSelectionType boundSelect(cost->GetNumberOfParameters());
+  OptimizerType::BoundValueType upperBound(cost->GetNumberOfParameters());
+  OptimizerType::BoundValueType lowerBound(cost->GetNumberOfParameters());
+
+  boundSelect.Fill(2); // BOTHBOUNDED = 2
+  lowerBound.Fill(0.0);
+  upperBound.Fill(3000.0);
+
+  // Lower bound
+  // First bi-exponential parameters
+  lowerBound[0] = lowerBound[1] = lowerBound[2] = -1.0;
+  lowerBound[3] = lowerBound[4] = 1.0;
+  lowerBound[5] = lowerBound[6] = 0.1;
+
+  // Second bi-exponential
+  lowerBound[7] = lowerBound[8] = lowerBound[9] = -1.0;
+  lowerBound[10] = lowerBound[11] = 1.0;
+  lowerBound[12] = lowerBound[13] = 0.1;
+
+  // Third bi-exponential
+  lowerBound[14] = lowerBound[15] = lowerBound[16] = -1.0;
+  lowerBound[17] = lowerBound[18] = 1.0;
+  lowerBound[19] = lowerBound[20] = 0.1;
+
+  // w1 & w2 in [0,1]
+  lowerBound[21] = lowerBound[22] = 0.0;
+  // free water between 0 and 1
+  lowerBound[23] = 0.0;
+
+  // Upper bound
+  // First bi-exponential
+  upperBound[0] = upperBound[1] = upperBound[2] = 1.0;
+  upperBound[3] = upperBound[4] = upperBound[5] = upperBound[6] = 3000.0;
+
+  // Second bi-exponential
+  upperBound[7] = upperBound[8] = upperBound[9] = 1.0;
+  upperBound[10] = upperBound[11] = upperBound[12] = upperBound[13] = 3000.0;
+
+  // Third bi-exponential
+  upperBound[14] = upperBound[15] = upperBound[16] = 1.0;
+  upperBound[17] = upperBound[18] = upperBound[19] = upperBound[20] = 3000.0;
+
+  upperBound[21] = upperBound[22] = 1.0;
+  upperBound[23] = 1.0;
+
+  optimizer->SetBoundSelection(boundSelect);
+  optimizer->SetUpperBound(upperBound);
+  optimizer->SetLowerBound(lowerBound);
+
+  optimizer->StartOptimization();
+
+  // std::cout<<"Current Iteration: "<<optimizer->GetCurrentIteration()<<std::endl;
+  // std::cout<<"Value: "<<optimizer->GetValue()<<std::endl;
+  p = optimizer->GetCurrentPosition();
+  // Write back the state
+  for (int it = 0; it < state.size(); ++it)
+  {
+    state[it] = p[it];
+  }
+}
+
+void Tractography::InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted)
+{
+  assert(reference.size() == 24);
+  assert(inverted.size() == 24);
+
+  for (unsigned int it = 0; it < reference.size(); ++it)
+  {
+    if (it <= 2)
+      inverted[it] = -reference[it];
+    else
+      inverted[it] = reference[it];
+  }
+}
+
+void Tractography::StateToMatrix(State &state, ukfMatrixType &matrix)
+{
+  assert(state.size() > 0);
+
+  matrix.resize(state.size(), 1);
+
+  for (int it = 0; it < state.size(); ++it)
+    matrix(it, 0) = state[it];
+}
+
+void Tractography::MatrixToState(ukfMatrixType &matrix, State &state)
+{
+  assert(matrix.cols() == 1);
+  assert(matrix.rows() > 0);
+
+  state.resize(matrix.rows());
+
+  for (int it = 0; it < matrix.rows(); ++it)
+    state[it] = matrix(it, 0);
 }
 
 // FIXME: not clear why gradientStrength and pulseSeparation are passed as arguments when
@@ -2078,7 +2298,7 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
     fiber.normMSE.push_back(dNormMSE);
   }
 
-  if (_record_trace || _record_kappa)
+  if ((_record_trace || _record_kappa) && !_record_rtop)
   {
     fiber.trace.push_back(2 * (atan(1 / trace) / 3.14));
     if (_num_tensors >= 2)
@@ -2087,7 +2307,7 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
     }
   }
 
-  if (_record_fa || _record_Vic)
+  if (_record_fa || _record_Vic || _record_rtop)
   {
     fiber.fa.push_back(fa);
     if (_num_tensors >= 2)
@@ -2136,8 +2356,8 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
   }
 
   // Record the state
-  if (state.size() == 5 || state.size() == 10 || state.size() == 15) // i.e. simple model
-  {                                                                  // Normalize direction before storing it;
+  if ((state.size() == 5 || state.size() == 10 || state.size() == 15) && !_diffusion_propagator) // i.e. simple model
+  {                                                                                              // Normalize direction before storing it;
     State store_state(state);
     vec3_t dir;
     initNormalized(dir, store_state[0], store_state[1], store_state[2]);
@@ -2159,6 +2379,31 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
       store_state[11] = dir[1];
       store_state[12] = dir[2];
     }
+    fiber.state.push_back(store_state);
+  }
+  else if (_diffusion_propagator)
+  {
+    State store_state(state);
+    vec3_t dir;
+
+    // normalize m1
+    initNormalized(dir, store_state[0], store_state[1], store_state[2]);
+    store_state[0] = dir[0];
+    store_state[1] = dir[1];
+    store_state[2] = dir[2];
+
+    // normalize m2
+    initNormalized(dir, store_state[7], store_state[8], store_state[9]);
+    store_state[7] = dir[0];
+    store_state[8] = dir[1];
+    store_state[9] = dir[2];
+
+    // normalize m2
+    initNormalized(dir, store_state[14], store_state[15], store_state[16]);
+    store_state[14] = dir[0];
+    store_state[15] = dir[1];
+    store_state[16] = dir[2];
+
     fiber.state.push_back(store_state);
   }
   else
@@ -2184,7 +2429,7 @@ void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
     fiber.normMSE.reserve(fiber_size);
   }
 
-  if (_record_trace || _record_kappa)
+  if (_record_trace || _record_kappa || _record_rtop)
   {
     fiber.trace.reserve(fiber_size);
     if (_num_tensors >= 2)
@@ -2193,7 +2438,7 @@ void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
     }
   }
 
-  if (_record_fa || _record_Vic)
+  if (_record_fa || _record_Vic || _record_rtop)
   {
     fiber.fa.reserve(fiber_size);
     if (_num_tensors >= 2)

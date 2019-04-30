@@ -13,6 +13,10 @@
 #include "ukf_types.h"
 #include "ukf_exports.h"
 
+// ITK includes
+#include "itkSingleValuedCostFunction.h"
+#include "itkLBFGSBOptimizer.h"
+
 class NrrdData;
 class vtkPolyData;
 class Tractography;
@@ -240,10 +244,25 @@ private:
   void FiberReserve(UKFFiber &fiber, int fiber_size);
 
   /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the state parameters */
-  void computeRTOPfromState(stdVecState& state, ukfPrecisionType& rtop, ukfPrecisionType& rtop1, ukfPrecisionType& rtop2, ukfPrecisionType& rtop3);
+  void computeRTOPfromState(stdVecState &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3);
 
-   /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the interpolated signal */
-  void computeRTOPfromSignal(ukfPrecisionType& rtopSignal, ukfVectorType& signal);
+  /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the interpolated signal */
+  void computeRTOPfromSignal(ukfPrecisionType &rtopSignal, ukfVectorType &signal);
+
+  /** Print the State on the standard output in the case of the diffusion propagator model */
+  void PrintState(State &state);
+
+  /** Non Linear Least Square Optimization of input parameters */
+  void NonLinearLeastSquareOptimization(State &state, ukfVectorType &signal, FilterModel *model);
+
+  /** Make the seed point in the other direction */
+  void InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted);
+
+  /** Convert State to Matrix */
+  void StateToMatrix(State &state, ukfMatrixType &matrix);
+
+  /** Convert Matrix to State */
+  void MatrixToState(ukfMatrixType &matrix, State &state);
 
   /** Vector of Pointers to Unscented Kalaman Filters. One for each thread. */
   std::vector<UnscentedKalmanFilter *> _ukf;
@@ -351,5 +370,83 @@ private:
 
   bool debug;
 };
+
+namespace itk
+{
+class DiffusionPropagatorCostFunction : public SingleValuedCostFunction
+{
+public:
+  /** Standard class typedefs. */
+  typedef DiffusionPropagatorCostFunction Self;
+  typedef SingleValuedCostFunction Superclass;
+  typedef SmartPointer<Self> Pointer;
+  typedef SmartPointer<const Self> ConstPointer;
+
+  /** Method for creation through the object factory. */
+  itkNewMacro(Self);
+
+  /** Run-time type information (and related methods). */
+  itkTypeMacro(DiffusionPropagatorCostFunction, SingleValuedCostFunction);
+
+  // We are estimating the parameters of the state for the
+  // diffusion propagator model. Number of rows in the state
+  // vector
+  unsigned int GetNumberOfParameters() const { return _NumberOfParameters; }
+  void SetNumberOfParameters(unsigned int NumberOfParameters) { _NumberOfParameters = NumberOfParameters; }
+
+  // The number of gradient directions in which the signal is estimated
+  unsigned int GetNumberOfValues() const { return _NumberOfValues; }
+  void SetNumberOfValues(unsigned int NumberOfValues) { _NumberOfValues = NumberOfValues; }
+
+  // Set the signal values = reference signal we are trying to fit
+  void SetSignalValues(ukfVectorType &signal)
+  {
+    _signal.resize(signal.size());
+    for (unsigned int it = 0; it < signal.size(); ++it)
+    {
+      _signal[it] = signal[it];
+    }
+  }
+
+  // Set the pointer to the model
+  void SetModel(FilterModel *model)
+  {
+    _model = model;
+  }
+
+  /** Compute the relative error between the signal estimate and the signal data */
+  void computeError(ukfMatrixType &signal_estimate, const ukfVectorType &signal, ukfPrecisionType &err) const
+  {
+    assert(signal_estimate.rows() == signal.size());
+
+    err = 0.0;
+    ukfPrecisionType norm_sq_signal = 0.0;
+
+    for (unsigned int i = 0; i < signal.size() / 2; ++i)
+    {
+      err += (signal_estimate(i, 0) - signal[i]) * (signal_estimate(i, 0) - signal[i]);
+      norm_sq_signal += signal[i] * signal[i];
+    }
+
+    err = err / norm_sq_signal;
+  }
+
+  MeasureType GetValue(const ParametersType &parameters) const;
+  void GetDerivative(const ParametersType &parameters, DerivativeType &derivative) const;
+
+protected:
+  DiffusionPropagatorCostFunction() {}
+  ~DiffusionPropagatorCostFunction() {}
+
+private:
+  DiffusionPropagatorCostFunction(const Self &); //purposely not implemented
+  void operator=(const Self &);                  //purposely not implemented
+
+  unsigned int _NumberOfParameters;
+  unsigned int _NumberOfValues;
+  ukfVectorType _signal;
+  FilterModel *_model;
+};
+} // end namespace itk
 
 #endif // TRACTOGRAPHY_H_
