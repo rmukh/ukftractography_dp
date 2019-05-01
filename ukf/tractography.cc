@@ -642,6 +642,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
   // Pack information for each seed point.
   int fa_too_low = 0;
+  std::cout << "Processing " << starting_points.size() << " starting points" << std::endl;
   for (size_t i = 0; i < starting_points.size(); ++i)
   {
     const ukfVectorType &param = starting_params[i];
@@ -770,6 +771,31 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
         tmp_info_inv_state[9] = tmp_info_inv_state[4]; //kappa
       }
     }
+    else if (_diffusion_propagator)
+    {
+      // STEP 1: Initialise the state based on the single estimated tensor
+      tmp_info_state.resize(24);
+      tmp_info_inv_state.resize(24);
+
+      // Diffusion directions, m1 = m2 = m3
+      tmp_info_state[0] = tmp_info_state[7] = tmp_info_state[14] = info.start_dir[0];
+      tmp_info_state[1] = tmp_info_state[8] = tmp_info_state[15] = info.start_dir[1];
+      tmp_info_state[2] = tmp_info_state[9] = tmp_info_state[16] = info.start_dir[2];
+
+      // Fast diffusing component,  lambdas l11, l21 = l1 from the single tensor
+      //                            lambdas l12, l21 = (l2 + l3) /2
+      // from the single tensor (avg already calculated and stored in l2)
+      tmp_info_state[3] = tmp_info_state[10] = tmp_info_state[17] = param[6];
+      tmp_info_state[4] = tmp_info_state[11] = tmp_info_state[18] = param[7];
+
+      // Slow diffusing component,  lambdas l13, l23, l33 = 0.2 * l1
+      //                            lambdas l14, l24, l34 = 0.2 * (l2 + l3) /2
+      tmp_info_state[5] = tmp_info_state[12] = tmp_info_state[19] = 0.7 * param[6];
+      tmp_info_state[6] = tmp_info_state[13] = tmp_info_state[20] = 0.7 * param[7];
+
+      // Free water volume fraction
+      tmp_info_state[23] = 0.9; // 0.9 as initial value
+    }
     else
     {
       tmp_info_state[3] = param[6];     // l1
@@ -777,6 +803,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       tmp_info_inv_state[3] = param[6]; // l1
       tmp_info_inv_state[4] = param[7]; // l2
     }
+
     // Duplicate/tripple states if we have several tensors.
     if (_num_tensors > 1 && !_noddi)
     {
@@ -1392,7 +1419,6 @@ void Tractography::UnpackTensor(const ukfVectorType &b, // b - bValues
                                 stdEigVec_t &ret)       // starting params [i][j] : i - signal number; j
                                                         // - param
 {
-
   // DEBUGGING
   // std::cout << "b's: ";
   // for (int i=0; i<b.size();++i) {
@@ -1403,22 +1429,48 @@ void Tractography::UnpackTensor(const ukfVectorType &b, // b - bValues
 
   // Build B matrix.
   const int signal_dim = _signal_data->GetSignalDimension();
+  int B_size = 0;
+
+  // We define the limits for the diffusionPropagator
+  const int HIGH_BVAL = 1500;
+  const int LOW_BVAL = 800;
+
+  // When we use the diffusion propagator, we would like to take into account only the gradients with a BValue between 800 and 1500 for the initialisation
+  // We count the number of gradient directions with LOW_BVAL < bval <= HIGH_BVAL
+  if (_diffusion_propagator)
+  {
+    for (int i = 0; i < signal_dim * 2; ++i)
+      if (b[i] > LOW_BVAL && b[i] <= HIGH_BVAL)
+        B_size++;
+  }
+  else
+  {
+    B_size = signal_dim * 2;
+  }
+
+  std::cout << "Using " << B_size / 2 << " out of " << signal_dim << " b-values during initialization, when estimating a single tensor" << std::endl;
+
   /**
   * A special type for holding 6 elements of tensor for each signal
   *  Only used in tractography.cc
   */
   typedef Eigen::Matrix<ukfPrecisionType, Eigen::Dynamic, 6> BMatrixType;
-  BMatrixType B(signal_dim * 2, 6); //HACK: Eigen::Matrix<ukfPrecisionType, DYNAMIC, 6> ??
+  BMatrixType B(B_size, 6); //HACK: Eigen::Matrix<ukfPrecisionType, DYNAMIC, 6> ??
 
+  int j = 0;
   for (int i = 0; i < signal_dim * 2; ++i)
   {
+    if ((b[i] <= LOW_BVAL || b[i] > HIGH_BVAL) && (_diffusion_propagator))
+      continue;
+
     const vec3_t &g = u[i];
-    B(i, 0) = (-b[i]) * (g[0] * g[0]);
-    B(i, 1) = (-b[i]) * (2.0 * g[0] * g[1]);
-    B(i, 2) = (-b[i]) * (2.0 * g[0] * g[2]);
-    B(i, 3) = (-b[i]) * (g[1] * g[1]);
-    B(i, 4) = (-b[i]) * (2.0 * g[1] * g[2]);
-    B(i, 5) = (-b[i]) * (g[2] * g[2]);
+    B(j, 0) = (-b[i]) * (g[0] * g[0]);
+    B(j, 1) = (-b[i]) * (2.0 * g[0] * g[1]);
+    B(j, 2) = (-b[i]) * (2.0 * g[0] * g[2]);
+    B(j, 3) = (-b[i]) * (g[1] * g[1]);
+    B(j, 4) = (-b[i]) * (2.0 * g[1] * g[2]);
+    B(j, 5) = (-b[i]) * (g[2] * g[2]);
+    ++j;
   }
   // Use QR decomposition to find the matrix representation of the tensor at the
   // seed point of the fiber. Raplacement of the gmm function gmm::least_squares_cg(..)
@@ -1433,18 +1485,23 @@ void Tractography::UnpackTensor(const ukfVectorType &b, // b - bValues
   // Unpack data
   for (stdEigVec_t::size_type i = 0; i < s.size(); ++i)
   {
+    // We create a temporary vector to store the signal when the log function is applied
+    ukfVectorType log_s;
+    log_s.resize(s[i].size());
+
     for (unsigned int j = 0; j < s[i].size(); ++j)
     {
       if (s[i][j] <= 0)
-      {
         s[i][j] = 10e-8;
-      }
-      s[i][j] = log(s[i][j]);
+
+      //s[i][j] = log(s[i][j]);
+      log_s[j] = log(s[i][j]);
     }
 
     // The six tensor components.
     //TODO: this could be fixed size
-    ukfVectorType d = qr.solve(s[i]);
+    //ukfVectorType d = qr.solve(s[i]);
+    ukfVectorType d = qr.solve(log_s);
 
     // symmetric diffusion tensor
     D(0, 0) = d[0];
@@ -1467,9 +1524,8 @@ void Tractography::UnpackTensor(const ukfVectorType &b, // b - bValues
 
     assert(sigma[0] >= sigma[1] && sigma[1] >= sigma[2]);
     if (Q.determinant() < ukfZero)
-    {
       Q = Q * (-ukfOne);
-    }
+
     assert(Q.determinant() > ukfZero);
 
     // Extract the three Euler Angles from the rotation matrix.

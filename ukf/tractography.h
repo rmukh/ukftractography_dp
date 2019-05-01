@@ -226,6 +226,7 @@ private:
   */
   void SwapState3T(State &state, ukfMatrixType &covariance, int i);
   void SwapState3T(stdVecState &state, ukfMatrixType &covariance, int i);
+
   /**
    * Swap the tensors in the state and covariance matrix for the 2-tensor case. This is used when the
    * principal direction of the minor tensor has more weight than the one of the current tensor.
