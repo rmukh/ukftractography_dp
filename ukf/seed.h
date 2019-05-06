@@ -18,7 +18,7 @@
  * complex/full representation.
 */
 class SeedPointInfo
-  {
+{
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   /** The state of the state-space represenation of the model. */
@@ -33,13 +33,15 @@ public:
   ukfPrecisionType fa;
   /** Fractional Anisotropy of the second tensor */
   ukfPrecisionType fa2;
+  /** Fractional Anisotropy of the third tensor */
+  ukfPrecisionType fa3;
   /** Trace of the first tensor */
   ukfPrecisionType trace;
   /** Trace of the second tensor */
   ukfPrecisionType trace2;
-  };
+};
 
 /** Writes debug information about seeds to stdout. */
-void PrintSeedInfo(const std::vector<SeedPointInfo>& seed_infos);
+void PrintSeedInfo(const std::vector<SeedPointInfo> &seed_infos);
 
 #endif
