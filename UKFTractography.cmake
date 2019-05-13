@@ -81,6 +81,15 @@ else()
 endif()
 
 #-----------------------------------------------------------------------------
+find_package(SphericalRidgelets REQUIRED)
+if(NOT ${PRIMARY_PROJECT_NAME}_SUPERBUILD)
+  set(SPHERICALRIDGELETS_LIB SphericalRidgelets)
+else()
+  find_library(SPHERICALRIDGELETS_LIB SphericalRidgelets PATHS ${CMAKE_CURRENT_BINARY_DIR}/../lib)
+  message("SPHERICALRIDGELETS_LIB:${SPHERICALRIDGELETS_LIB}")
+endif()
+
+#-----------------------------------------------------------------------------
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/common)
 add_subdirectory(ukf)
 add_subdirectory(UKFTractography)
@@ -107,4 +116,3 @@ if(${PRIMARY_PROJECT_NAME}_BUILD_SLICER_EXTENSION)
   include(${Slicer_EXTENSION_GENERATE_CONFIG})
   include(${Slicer_EXTENSION_CPACK})
 endif()
-
