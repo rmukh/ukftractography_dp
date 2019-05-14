@@ -57,7 +57,14 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
       ${${proj}_DEPENDENCIES}
     )
 
-  set(SphericalRidgelets_DIR ${EP_BINARY_DIR})
+  set(SphericalRidgelets_DIR ${EP_INSTALL_DIR}/lib/cmake/SphericalRidgelets)
+  set(SphericalRidgelets_ROOT ${EP_INSTALL_DIR})
+  set(SphericalRidgelets_INCLUDE_DIR ${SphericalRidgelets_DIR}/include/SphericalRidgelets)
+  if(WIN32)
+    set(SphericalRidgelets_LIBRARY ${SphericalRidgelets_DIR}/lib/Spherical_Ridgelets.lib)
+  else()
+    set(SphericalRidgelets_LIBRARY ${SphericalRidgelets_DIR}/lib/libSpherical_Ridgelets.a)
+  endif()
 
   #-----------------------------------------------------------------------------
   # Launcher setting specific to build tree
@@ -74,6 +81,10 @@ else()
 endif()
 
 mark_as_superbuild(
-  VARS SphericalRidgelets_DIR:PATH
+  VARS
+    SphericalRidgelets_ROOT:PATH
+    SphericalRidgelets_DIR:PATH
+    SphericalRidgelets_INCLUDE_DIR:PATH
+    SphericalRidgelets_LIBRARY:FILEPATH
   LABELS "FIND_PACKAGE"
   )

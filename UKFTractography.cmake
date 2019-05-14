@@ -82,12 +82,6 @@ endif()
 
 #-----------------------------------------------------------------------------
 find_package(SphericalRidgelets REQUIRED)
-if(NOT ${PRIMARY_PROJECT_NAME}_SUPERBUILD)
-  set(SPHERICALRIDGELETS_LIB SphericalRidgelets)
-else()
-  find_library(SPHERICALRIDGELETS_LIB SphericalRidgelets PATHS ${CMAKE_CURRENT_BINARY_DIR}/../lib)
-  message("SPHERICALRIDGELETS_LIB:${SPHERICALRIDGELETS_LIB}")
-endif()
 
 #-----------------------------------------------------------------------------
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/common)
