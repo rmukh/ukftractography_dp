@@ -31,12 +31,12 @@ public:
   /**
    * \brief Constructor
   */
-  VtkWriter(const ISignalData *signal_data, Tractography::model_type filter_model_type,  bool write_tensors);
+  VtkWriter(const ISignalData *signal_data, Tractography::model_type filter_model_type, bool write_tensors);
 
   /** Destructor */
   virtual ~VtkWriter()
-    {
-    }
+  {
+  }
 
   /**
    * \brief Writes the fibers to the VTK file and attaches the selected values to the fiber
@@ -46,21 +46,21 @@ public:
    * \param[in] store_glyphs Write glyphs (i.e. main tensor directions) to a file named glyphs_{tracts}.
    * \return EXIT_FAILURE or EXIT_SUCCESS
   */
-  int Write(const std::string& file_name,
-            const std::string & tractsWithSecondTensor,
-            const std::vector<UKFFiber>& fibers,
-             bool write_state, bool store_glyphs, bool if_noddi);
+  int Write(const std::string &file_name,
+            const std::string &tractsWithSecondTensor,
+            const std::vector<UKFFiber> &fibers,
+            bool write_state, bool store_glyphs, bool if_noddi, bool diffusionPropagator);
 
   /** Write the glyphs (i.e. main tensor directions) to  a file named glyphs_{tracts}.
    * \return EXIT_FAILURE or EXIT_SUCCESS
    */
-  int WriteGlyphs(const std::string& file_name, const std::vector<UKFFiber>& fibers);
+  int WriteGlyphs(const std::string &file_name, const std::vector<UKFFiber> &fibers);
 
   /** Sets the variable that toggles the transform from ijk to RAS before writing the fiber to VTK. */
   void set_transform_position(bool transform_position)
-    {
-      _transform_position = transform_position;
-    }
+  {
+    _transform_position = transform_position;
+  }
   /** set the WriteBinary flag */
   void SetWriteBinary(bool wb) { this->_writeBinary = wb; }
   void SetWriteCompressed(bool wc) { this->_writeCompressed = wc; }
@@ -68,8 +68,8 @@ public:
   /**
    * Writes the fibers and all values attached to them to a VTK file
   */
-  void PopulateFibersAndTensors(vtkPolyData* polyData,
-                                const std::vector<UKFFiber>& fibers);
+  void PopulateFibersAndTensors(vtkPolyData *polyData,
+                                const std::vector<UKFFiber> &fibers);
 
 protected:
   /**
@@ -81,37 +81,37 @@ protected:
    */
   template <typename TInput, typename TOutput>
   void WriteX(std::ofstream &output, const TInput toWrite)
+  {
+    TOutput tmp = toWrite;
+    switch (sizeof(TOutput))
     {
-      TOutput tmp = toWrite;
-      switch(sizeof(TOutput))
-        {
-        case 1:
-          break;
-        case 2:
-          vtkByteSwap::Swap2BE(&tmp);
-          break;
-        case 4:
-          vtkByteSwap::Swap4BE(&tmp);
-          break;
-        case 8:
-          vtkByteSwap::Swap8BE(&tmp);
-          break;
-        }
-      output.write(reinterpret_cast<const char *>(&tmp), sizeof(TOutput));
-      if(output.fail())
-        {
-        throw;
-        }
+    case 1:
+      break;
+    case 2:
+      vtkByteSwap::Swap2BE(&tmp);
+      break;
+    case 4:
+      vtkByteSwap::Swap4BE(&tmp);
+      break;
+    case 8:
+      vtkByteSwap::Swap8BE(&tmp);
+      break;
     }
+    output.write(reinterpret_cast<const char *>(&tmp), sizeof(TOutput));
+    if (output.fail())
+    {
+      throw;
+    }
+  }
 
-  void WritePolyData(vtkSmartPointer <vtkPolyData> pd, const char *filename) const;
+  void WritePolyData(vtkSmartPointer<vtkPolyData> pd, const char *filename) const;
 
   /**
    * \brief Reconstructs the tensor from the state for each case
    * \param[out] D The calculated diffusion tensor
    * \todo I think there is something wrong with choosing a orthonormal basis for the tensor
   */
-  void State2Tensor(const State & state, mat33_t & D, const int tensorNumber) const;
+  void State2Tensor(const State &state, mat33_t &D, const int tensorNumber) const;
 
   /** The diffusion weighted signal data */
   const ISignalData *_signal_data;
@@ -153,4 +153,4 @@ protected:
   bool _writeCompressed;
 };
 
-#endif  // VTK_WRITER_H_
+#endif // VTK_WRITER_H_

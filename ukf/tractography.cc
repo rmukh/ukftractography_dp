@@ -138,11 +138,6 @@ Tractography::~Tractography()
 
 void Tractography::UpdateFilterModelType()
 {
-  SPH_RIDG ridg(3, 1/2);
-	ukfMatrixType A;
-	ridg.RBasis(A, GradientDirections);
-	ridg.normBasis(A);
-
   if (!this->_signal_data)
   {
     return;
