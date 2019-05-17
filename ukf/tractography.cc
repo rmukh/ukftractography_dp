@@ -50,6 +50,7 @@
 
 // Spherical ridgelets
 #include "UtilMath.h"
+#include "SOLVERS.h"
 #include "SPH_RIDG.h"
 
 // TODO implement this switch
@@ -828,8 +829,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // Input of the filter
       State state = ConvertVector<stdVecState, State>(tmp_info_state);
       ukfMatrixType p(info.covariance);
-      // Estimate the initial state
 
+      // Estimate the initial state
       // ukfPrecisionType dNormMSE = 0.0;
       //InitLoopUKF(state, p, signal_values[i], dNormMSE);
       NonLinearLeastSquareOptimization(state, signal_values[i], _model);
@@ -859,6 +860,74 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       info_inv.fa3 = rtop3;
       info_inv.trace = rtop;
       info_inv.trace2 = rtopSignal;
+
+      // STEP 4: Adjust the seed state info, based on the number of branches found at the seed point.
+
+      // STEP 4.1 Compute number of branches at the seed point using spherical ridgelets
+
+      // Some ridgelets parameters hardcoded for now (need to add them in CLI)
+      ukfPrecisionType sph_rho = 3.125;
+      unsigned int sph_J = 2;
+      ukfPrecisionType fista_lambda = 0.01;
+      unsigned int lvl = 4;
+      ukfPrecisionType max_odf_thresh = 0.7;
+
+      // 4.1.1. Compute ridgelets basis...
+      // but first convert gradients to ukfMatrixType
+      const int signal_dim = _signal_data->GetSignalDimension() * 2;
+      ukfMatrixType GradientDirections(signal_dim, 3);
+      const stdVec_t &gradients = _signal_data->gradients();
+      for (int j = 0; j < signal_dim; ++j)
+      {
+        const vec3_t &u = gradients[j];
+        GradientDirections.row(j) = u;
+      }
+
+      // Now we can compute basis
+      SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
+      ukfMatrixType A;
+      ridg.RBasis(A, GradientDirections);
+      ridg.normBasis(A);
+
+      // 4.1.2. Ok, now we can compute ridegelets coefficients
+      ukfMatrixType C;
+      {
+        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, signal_values[i], fista_lambda);
+        slv.FISTA(C);
+      }
+
+      // 4.1.3. Next, let's compute ODF, but first we need to compute Q basis
+      UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
+      ukfMatrixType fcs;
+      ukfMatrixType nu;
+      ukfMatrixType Q;
+
+      if (!input_args.output_odf.empty() || !input_args.output_fiber_max_odf.empty())
+      {
+        m.icosahedron(nu, fcs, lvl);
+        ridg.QBasis(Q, nu); //Build a Q basis
+      }
+
+      // Now we can compute ODF
+      ukfVectorType ODF = Q * C;
+
+      // 4.1.4 Let's find Maxima of ODF and values in that direction
+      ukfMatrixType exe_vol;
+      ukfMatrixType dir_vol;
+      ukfVectorType ODF_val_at_max;
+
+      vector<vector<unsigned>> conn;
+      m.FindConnectivity(conn, fcs, nu.rows());
+      m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh);
+
+      for (unsigned j = 0; j < 6; ++j)
+      {
+        ODF_val_at_max(j) = ODF(exe_vol(j));
+      }
+
+      if (rtopSignal >= _rtop_min)
+      {
+      }
     }
     else
     {
