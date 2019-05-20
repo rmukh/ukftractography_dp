@@ -276,6 +276,19 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     }
   }
 
+  if (diffusionPropagator) {
+    if (maxUKFIterations == -1.0) {
+      ukf_setAndTell(maxUKFIterations, 5, "maxUKFIterations");
+    }
+    else {
+    if (maxUKFIterations < 0.0) {
+        std::cout<<"Error: maxUKFIterations cannot be negative. Exiting"<<std::endl;
+        exit(1);
+    }
+      ukf_tell(maxUKFIterations, "maxUKFIterations");
+    }
+
+
   if (l_Rs == 0.0)
   {
     if (diffusionPropagator)
@@ -444,6 +457,8 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
 
     s.rtop_min = minRTOP;
     s.max_nmse = maxNMSE;
+
+    s.maxUKFIterations = maxUKFIterations;
 
     // TODO these should be header-initialized once we use C++11
     s.p0 = P0;

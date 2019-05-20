@@ -409,6 +409,14 @@
       <default>0.0</default>
     </double>
 
+    <double>
+      <name>maxUKFIterations</name>
+      <longflag>maxUKFIterations</longflag>
+      <label>Maximum number of iterations of the Kalman filter at a given position when following a fiber</label>
+      <description>Maximum number of iterations of the Kalman filter at a given position when following a fiber (default is 5)</description>
+      <default>-1.0</default>
+    </double>
+
   </parameters>
 
   <parameters advanced="true">

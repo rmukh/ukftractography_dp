@@ -57,6 +57,7 @@ struct UKFSettings
   ukfPrecisionType rtop_min;
   bool record_rtop;
   ukfPrecisionType max_nmse;
+  int maxUKFIterations;
   ukfPrecisionType stepLength;
   ukfPrecisionType recordLength;
   ukfPrecisionType maxHalfFiberLength;
@@ -331,6 +332,7 @@ private:
   const ukfPrecisionType _rtop_min;
   bool _record_rtop;
   const ukfPrecisionType _max_nmse;
+  int _maxUKFIterations;
   /** Index of the weight in the state for the free water cases */
   int _nPosFreeWater;
 
