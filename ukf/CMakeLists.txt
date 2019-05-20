@@ -71,6 +71,7 @@ set(MODULE_SRCS
 set(MODULE_INCLUDE_DIRECTORIES
     ${Teem_INCLUDE_DIRS}
     ${Eigen_INCLUDE_DIR}
+    ${SphericalRidgelets_INCLUDE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../common
     ${CMAKE_CURRENT_SOURCE_DIR}/../UKFTractography

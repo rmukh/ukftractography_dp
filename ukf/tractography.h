@@ -17,6 +17,11 @@
 #include "itkSingleValuedCostFunction.h"
 #include "itkLBFGSBOptimizer.h"
 
+// Spherical ridgelets
+//#include "SOLVERS.h"
+//#include "SPH_RIDG.h"
+#include "UtilMath.h"
+
 class NrrdData;
 class vtkPolyData;
 class Tractography;

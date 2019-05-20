@@ -48,11 +48,6 @@
 #include "filter_Simple3T.h"
 #include "filter_ridg.h"
 
-// Spherical ridgelets
-#include "UtilMath.h"
-#include "SOLVERS.h"
-#include "SPH_RIDG.h"
-
 // TODO implement this switch
 //#include "config.h"
 

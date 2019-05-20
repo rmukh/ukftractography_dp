@@ -23,7 +23,7 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
 
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_TAG
-    "640946b35ac2bd4f7853121cdefe70bc4da120e1"
+    "f07fae7ebad81e7c4b5a290168bc0180d503c669"
   )
   
   ExternalProject_SetIfNotDefined(
@@ -59,11 +59,11 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
 
   set(SphericalRidgelets_DIR ${EP_INSTALL_DIR}/lib/cmake/SphericalRidgelets)
   set(SphericalRidgelets_ROOT ${EP_INSTALL_DIR})
-  set(SphericalRidgelets_INCLUDE_DIR ${SphericalRidgelets_DIR}/include/SphericalRidgelets)
+  set(SphericalRidgelets_INCLUDE_DIR ${EP_INSTALL_DIR}/include/SphericalRidgelets)
   if(WIN32)
-    set(SphericalRidgelets_LIBRARY ${SphericalRidgelets_DIR}/lib/Spherical_Ridgelets.lib)
+    set(SphericalRidgelets_LIBRARY ${EP_INSTALL_DIR}/lib/Spherical_Ridgelets.lib)
   else()
-    set(SphericalRidgelets_LIBRARY ${SphericalRidgelets_DIR}/lib/libSpherical_Ridgelets.a)
+    set(SphericalRidgelets_LIBRARY ${EP_INSTALL_DIR}/lib/libSpherical_Ridgelets.a)
   endif()
 
   #-----------------------------------------------------------------------------

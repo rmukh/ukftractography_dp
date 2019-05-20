@@ -287,7 +287,7 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     }
       ukf_tell(maxUKFIterations, "maxUKFIterations");
     }
-
+  }
 
   if (l_Rs == 0.0)
   {

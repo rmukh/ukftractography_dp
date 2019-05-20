@@ -272,6 +272,7 @@ void VtkWriter ::WritePolyData(vtkSmartPointer<vtkPolyData> pd, const char *file
 
     writer->Write();
   }
+}
 
   int VtkWriter ::Write(const std::string &file_name,
                         const std::string &tractsWithSecondTensor,
