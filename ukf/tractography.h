@@ -18,8 +18,8 @@
 #include "itkLBFGSBOptimizer.h"
 
 // Spherical ridgelets
-//#include "SOLVERS.h"
-//#include "SPH_RIDG.h"
+#include "SOLVERS.h"
+#include "SPH_RIDG.h"
 #include "UtilMath.h"
 
 class NrrdData;
@@ -264,6 +264,9 @@ private:
 
   /** Make the seed point in the other direction */
   void InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted);
+
+    /** Loop the UKF with 5 iterations, used by step 2T */
+  void LoopUKF(const int thread_id, State& state, ukfMatrixType& covariance, ukfVectorType& signal, State& state_new, ukfMatrixType& covariance_new, ukfPrecisionType& dNormMSE);
 
   /** Convert State to Matrix */
   void StateToMatrix(State &state, ukfMatrixType &matrix);

@@ -81,10 +81,10 @@ Tractography::Tractography(UKFSettings s) :
                                             _full_brain(false),
                                             _noddi(s.noddi),
                                             _diffusion_propagator(s.diffusion_propagator),
-                                            _maxUKFIterations(s.maxUKFIterations),
                                             _rtop_min(s.rtop_min),
                                             _record_rtop(s.record_rtop),
                                             _max_nmse(s.max_nmse),
+                                            _maxUKFIterations(s.maxUKFIterations),
                                             _fa_min(s.fa_min),
                                             _mean_signal_min(s.mean_signal_min),
                                             _seeding_threshold(s.seeding_threshold),
@@ -304,7 +304,7 @@ void Tractography::UpdateFilterModelType()
     std::cout << "maxNMSE parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
     throw;
   }
-  if (maxUKFIterations != 0 && !diffusionPropagator)
+  if (_maxUKFIterations != 0 && !_diffusion_propagator)
   {
     std::cout << "maxUKFIterations parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
     throw;
@@ -875,10 +875,10 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       // 4.1.1. Compute ridgelets basis...
       // but first convert gradients to ukfMatrixType
-      const int signal_dim = _signal_data->GetSignalDimension() * 2;
-      ukfMatrixType GradientDirections(signal_dim, 3);
+      const int s_dim = _signal_data->GetSignalDimension() * 2;
+      ukfMatrixType GradientDirections(s_dim, 3);
       const stdVec_t &gradients = _signal_data->gradients();
-      for (int j = 0; j < signal_dim; ++j)
+      for (int j = 0; j < s_dim; ++j)
       {
         const vec3_t &u = gradients[j];
         GradientDirections.row(j) = u;
@@ -891,7 +891,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       ridg.normBasis(A);
 
       // 4.1.2. Ok, now we can compute ridegelets coefficients
-      ukfMatrixType C;
+      ukfVectorType C;
       {
         SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, signal_values[i], fista_lambda);
         slv.FISTA(C);
@@ -981,7 +981,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       }
     }
 
-    if (!_diffusionPropagator)
+    if (!_diffusion_propagator)
     {
       const int state_dim = tmp_info_state.size();
 
@@ -1733,21 +1733,24 @@ void Tractography::Follow3T(const int thread_id,
     _model->H(state_tmp, signal_tmp);
 
     const ukfPrecisionType mean_signal = s2adc(signal_tmp);
-    const bool in_csf = (mean_signal < _mean_signal_min) ||
-                        (fa < _fa_min);
+    bool in_csf = (mean_signal < _mean_signal_min) ||
+                  (fa < _fa_min);
+
+    bool dNormMSE_too_high = false;
+    bool negative_free_water = false;
 
     if (_diffusion_propagator)
     {
       ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
       in_csf = rtopSignal < _rtop_min;
-      dNormMSE_too_high = dNormMSE > _maxNMSE;
+      dNormMSE_too_high = dNormMSE > _max_nmse;
       negative_free_water = state[23] < 0.0;
     }
 
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
     if (!is_brain || in_csf || stepnr > _max_length // Stop if the fiber is too long
-        || is_curving)
+        || is_curving || dNormMSE_too_high || negative_free_water)
     {
 
       break;
@@ -1879,7 +1882,7 @@ void Tractography::Follow3T(const int thread_id,
     }
     else if (is_branching && _diffusion_propagator)
     {
-      ukfPrecisionType scalar_product_ms
+      // do more here 
     }
   }
   FiberReserve(fiber, fiber_length);
@@ -2133,7 +2136,7 @@ void Tractography::Step3T(const int thread_id,
   ukfVectorType signal(_signal_data->GetSignalDimension() * 2);
   _signal_data->Interp3Signal(x, signal);
 
-  if (_diffusionPropagator)
+  if (_diffusion_propagator)
   {
     LoopUKF(thread_id, state, covariance, signal, state_new, covariance_new, dNormMSE);
   }
@@ -2146,7 +2149,7 @@ void Tractography::Step3T(const int thread_id,
 
   vec3_t old_dir = m1;
 
-  if (_diffusionPropagator)
+  if (_diffusion_propagator)
   {
     // lxx are not used
     vec3_t l11, l12, l21, l22, l31, l32;
