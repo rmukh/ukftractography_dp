@@ -19,11 +19,9 @@ endif()
 
 if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
 
-  set(EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS)
-
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_TAG
-    "bece6475789f52fc6f83a7379d4bff29a2216fe0"
+    "bb4e661517cc0300f89140442864016563157615"
   )
   
   ExternalProject_SetIfNotDefined(
@@ -47,12 +45,10 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
       # Not needed -DCMAKE_CXX_FLAGS:STRING=${ep_common_cxx_flags}
       -DCMAKE_C_COMPILER:FILEPATH=${CMAKE_C_COMPILER}
       -DCMAKE_C_FLAGS:STRING=${ep_common_c_flags}
-      ${CMAKE_PROJECT_INCLUDE_EXTERNAL_PROJECT_ARG}
       -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
       -DITK_DIR:PATH=${ITK_DIR}
       -DEigen3_DIR:PATH=${Eigen_DIR}
       -DSPH_DIR:PATH=${EP_SOURCE_DIR}/Ridgelets/SphericalRidgelets
-      ${EXTERNAL_PROJECT_OPTIONAL_CMAKE_CACHE_ARGS}
     DEPENDS
       ${${proj}_DEPENDENCIES}
     )

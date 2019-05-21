@@ -913,10 +913,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       ukfMatrixType exe_vol;
       ukfMatrixType dir_vol;
       ukfVectorType ODF_val_at_max;
+      unsigned n_of_dirs;
 
       vector<vector<unsigned>> conn;
       m.FindConnectivity(conn, fcs, nu.rows());
-      m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh);
+      m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 
       for (unsigned j = 0; j < 6; ++j)
       {
