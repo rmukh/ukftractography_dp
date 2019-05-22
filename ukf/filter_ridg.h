@@ -2,6 +2,11 @@
 #define RIDG_BiExp_FW__
 
 #include "filter_model.h"
+#include "ridgelets_inc.h"
+
+#include "SOLVERS.h"
+#include "SPH_RIDG.h"
+#include "UtilMath.h"
 /**
  * \struct RIDG
  * \brief Ridgelets model
@@ -14,11 +19,10 @@ class Ridg_BiExp_FW : public FilterModel
 public:
     Ridg_BiExp_FW(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType qt, ukfPrecisionType qw, ukfPrecisionType qwiso,
                   ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, const ukfPrecisionType diff_fw)
-        : FilterModel(24, rs, weights_on_tensors, constrained),
+        : FilterModel(24, rs, weights_on_tensors, constrained, true),
           _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000),
           _w_fast_diffusion(0.7), m_D_iso(SetIdentityScaled(diff_fw))
     {
-
         // size(X, 'column') == 24
         // X = [x10, x11, x12, l11, l12, l13, l14, x20, x21, x22, l21, l22, l23, l24, x30, x31, x32, l31, l32, l33, l34, w1, w2, wiso]'
         //     [0  , 1  , 2  , 3  , 4  , 5  , 6  , 7  , 8  , 9  , 10 , 11 , 12 , 13 , 14 , 15 , 16 , 17 , 18 , 19 , 20 , 21 , 22, 23]
@@ -121,6 +125,7 @@ public:
     }
 
     virtual void F(ukfMatrixType &X) const;
+    virtual void F_Ridg(ukfMatrixType &X, ukfMatrixType s) const;
 
     virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
 

@@ -33,7 +33,6 @@ public:
         _rs(rs), _signal_dim(0), _signal_data(NULL), weights_on_tensors_(weights_on_tensors),
         _constrained(constrained)
   {
-
     _Q.resize(_state_dim, _state_dim);
     _Q.setConstant(ukfZero); // necessary because otherwise there is memory left overs in the matrix
 
@@ -45,6 +44,33 @@ public:
     {
       std::cout << "Using unconstrained filter\n";
     }
+    _ridgelets_used = false;
+  }
+
+  FilterModel(const int local_state_dim, const ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, bool ridgelets_used)
+      : _state_dim(local_state_dim),
+        _rs(rs), _signal_dim(0), _signal_data(NULL), weights_on_tensors_(weights_on_tensors),
+        _constrained(constrained), _ridgelets_used(ridgelets_used)
+  {
+    _Q.resize(_state_dim, _state_dim);
+    _Q.setConstant(ukfZero); // necessary because otherwise there is memory left overs in the matrix
+
+    if (constrained)
+    {
+      std::cout << "Using constrained filter\n";
+    }
+    else
+    {
+      std::cout << "Using unconstrained filter\n";
+    }
+    if (ridgelets_used)
+    {
+      std::cout << "Using Spherical Ridgelets\n";
+    }
+    else
+    {
+      std::cout << "Using Spherical Ridgelets\n";
+    }
   }
 
   /** Destructor */
@@ -54,6 +80,7 @@ public:
 
   /** state transition function */
   virtual void F(ukfMatrixType &X) const = 0;
+  virtual void F_Ridg(ukfMatrixType &X, ukfMatrixType s) const = 0;
 
   /** observation, i.e. signal reconstruction */
   virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const = 0;
@@ -146,6 +173,12 @@ public:
     _signal_data = signal_data;
   }
 
+  /** Are we using Spherical Ridgelets **/
+  bool isRidgelets() const
+  {
+    return _ridgelets_used;
+  }
+
 protected:
   /** Checks if d is smaller than a small negative threshold. If yes an error is returned. Otherwise d is rounded to ukfZero
     */
@@ -175,11 +208,14 @@ protected:
   /** Inequality right hand side, only used for constrained UKF */
   ukfVectorType _d;
 
-  /** The weights of each tensor. (Most commonly equal all are equal) */
+  /** The weights of each tensor */
   const ukfVectorType weights_on_tensors_;
 
   /** Are we using the constrained filter */
   bool _constrained;
+
+  /** Are we using spherical ridgelets**/
+  bool _ridgelets_used;
 };
 
 inline mat33_t SetIdentityScaled(double diff_fw)

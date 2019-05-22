@@ -18,6 +18,7 @@
 #include "itkLBFGSBOptimizer.h"
 
 // Spherical ridgelets
+#include "ridgelets_inc.h"
 #include "SOLVERS.h"
 #include "SPH_RIDG.h"
 #include "UtilMath.h"
@@ -265,8 +266,8 @@ private:
   /** Make the seed point in the other direction */
   void InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted);
 
-    /** Loop the UKF with 5 iterations, used by step 2T */
-  void LoopUKF(const int thread_id, State& state, ukfMatrixType& covariance, ukfVectorType& signal, State& state_new, ukfMatrixType& covariance_new, ukfPrecisionType& dNormMSE);
+  /** Loop the UKF with 5 iterations, used by step 2T */
+  void LoopUKF(const int thread_id, State &state, ukfMatrixType &covariance, ukfVectorType &signal, State &state_new, ukfMatrixType &covariance_new, ukfPrecisionType &dNormMSE);
 
   /** Convert State to Matrix */
   void StateToMatrix(State &state, ukfMatrixType &matrix);
@@ -380,6 +381,19 @@ private:
   FilterModel *_model;
 
   bool debug;
+
+  // Spherical Ridgelets helper functions
+  UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
+  SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
+
+  // Spherical Ridgelets bases
+  ukfMatrixType A;
+  ukfMatrixType Q;
+
+  // Sphereical Ridgelets helper matricies/vectors
+  ukfMatrixType fcs;
+  ukfMatrixType nu;
+  vector<vector<unsigned>> conn;
 };
 
 namespace itk

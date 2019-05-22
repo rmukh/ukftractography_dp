@@ -1,17 +1,13 @@
 #include "filter_ridg.h"
 
-// TODO: Check with model on my notebook and adjust model in H function
-
 // 2T Bi-Exponential model with spherical ridgelets //
-// Functions for 2-tensor bi-exponential simple model.
+// Functions for 3-tensor bi-exponential simple model.
 void Ridg_BiExp_FW::F(ukfMatrixType &X) const
 {
     assert(_signal_dim > 0);
     assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
            (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
             X.cols() == 1));
-
-    // Need to add ridgelets here
 
     for (unsigned int i = 0; i < X.cols(); ++i)
     {
@@ -86,8 +82,26 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X) const
         X(13, i) = std::min(X(20, i), _lambda_max_diffusion);
 
         // Free water
-        X(23, i) = CheckZero(X(14, i));
+        X(23, i) = CheckZero(X(23, i));
     }
+}
+
+void Ridg_BiExp_FW::F_Ridg(ukfMatrixType &X, ukfMatrixType s) const
+{
+    ukfVectorType C;
+    {
+        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, s, fista_lambda);
+        slv.FISTA(C);
+    }
+
+    ukfVectorType ODF = Q * C;
+
+    ukfMatrixType exe_vol;
+    ukfMatrixType dir_vol;
+    ukfVectorType ODF_val_at_max;
+
+    m.FindConnectivity(conn, fcs, nu.rows());
+    m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 }
 
 void Ridg_BiExp_FW::H(const ukfMatrixType &X,
@@ -161,6 +175,11 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X,
             m3 = -m3;
         }
 
+        // Get compartments weights
+        const ukfPrecisionType w1 = CheckZero(X(21, i));
+        const ukfPrecisionType w2 = CheckZero(X(22, i));
+        const ukfPrecisionType w3 = 1.0 - w1 - w2;
+
         // Get free water weight from state
         const ukfPrecisionType w = CheckZero(X(23, i));
 
@@ -205,10 +224,10 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X,
             const vec3_t &u = gradients[j];
 
             Y(j, i) =
-                (1 - w) * (weights_on_tensors_[0] * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D1 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D1t * u))) +
-                 weights_on_tensors_[1] * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D2 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D2t * u))) + 
-                 weights_on_tensors_[2] * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D3 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D3t * u)))) + 
-                 w * std::exp(-b[j] * u.dot(m_D_iso * u));
+                (1 - w) * (w1 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D1 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D1t * u))) +
+                           w2 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D2 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D2t * u))) +
+                           w3 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D3 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D3t * u)))) +
+                w * std::exp(-b[j] * u.dot(m_D_iso * u));
         }
     }
 }

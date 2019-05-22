@@ -247,7 +247,7 @@ void Tractography::UpdateFilterModelType()
     }
   }
 
-  // Diffusion propagator part
+  // Diffusion propagator model
   if (_diffusion_propagator)
   {
     if (_noddi)
@@ -782,9 +782,64 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
     }
     else if (_diffusion_propagator)
     {
+      // STEP 0: Find number of branches in one voxel.
+
+      // STEP 0.1 Compute number of branches at the seed point using spherical ridgelets
+
+      // 0.1.1. Compute ridgelets basis...
+      // but first convert gradients to ukfMatrixType
+      const int s_dim = _signal_data->GetSignalDimension() * 2;
+      ukfMatrixType GradientDirections(s_dim, 3);
+      const stdVec_t &gradients = _signal_data->gradients();
+      for (int j = 0; j < s_dim; ++j)
+      {
+        const vec3_t &u = gradients[j];
+        GradientDirections.row(j) = u;
+      }
+
+      // Now we can compute basis
+      ridg.RBasis(A, GradientDirections);
+      ridg.normBasis(A);
+
+      // 0.1.2. Ok, now we can compute ridegelets coefficients
+      ukfVectorType C;
+      {
+        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, signal_values[i], fista_lambda);
+        slv.FISTA(C);
+      }
+
+      // 0.1.3. Next, let's compute ODF, but first we need to compute Q basis
+      m.icosahedron(nu, fcs, lvl);
+      ridg.QBasis(Q, nu); //Build a Q basis
+
+      // Now we can compute ODF
+      ukfVectorType ODF = Q * C;
+
+      // 0.1.4 Let's find Maxima of ODF and values in that direction
+      ukfMatrixType exe_vol;
+      ukfMatrixType dir_vol;
+      ukfVectorType ODF_val_at_max;
+      unsigned n_of_dirs;
+
+      m.FindConnectivity(conn, fcs, nu.rows());
+      m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
+
+      for (unsigned j = 0; j < 6; ++j)
+      {
+        ODF_val_at_max(j) = ODF(exe_vol(j));
+      }
+
       // STEP 1: Initialise the state based on the single estimated tensor
       tmp_info_state.resize(24);
       tmp_info_inv_state.resize(24);
+
+      ukfPrecisionType w1_init = ODF_val_at_max(0);
+      ukfPrecisionType w2_init = 0;
+
+      if (n_of_dirs > 1)
+      {
+        w2_init = ODF_val_at_max(2);
+      }
 
       // Diffusion directions, m1 = m2 = m3
       tmp_info_state[0] = tmp_info_state[7] = tmp_info_state[14] = info.start_dir[0];
@@ -802,8 +857,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       tmp_info_state[5] = tmp_info_state[12] = tmp_info_state[19] = 0.7 * param[6];
       tmp_info_state[6] = tmp_info_state[13] = tmp_info_state[20] = 0.7 * param[7];
 
-      tmp_info_state[21] = 0.8;
-      tmp_info_state[22] = 0.5;
+      tmp_info_state[21] = w1_init;
+      tmp_info_state[22] = w2_init;
 
       // Free water volume fraction
       tmp_info_state[23] = 0.9; // 0.9 as initial value
@@ -833,7 +888,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       // Estimate the initial state
       // ukfPrecisionType dNormMSE = 0.0;
-      //InitLoopUKF(state, p, signal_values[i], dNormMSE);
+      // InitLoopUKF(state, p, signal_values[i], dNormMSE);
       NonLinearLeastSquareOptimization(state, signal_values[i], _model);
 
       // Output of the filter
@@ -849,7 +904,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       computeRTOPfromSignal(rtopSignal, signal_values[i]);
 
       // These values are stored so that: rtop1 -> fa; rtop2 -> fa2; rtop3 -> fa3; rtop -> trace; rtopSignal -> trace2
-
       info.fa = rtop1;
       info.fa2 = rtop2;
       info.fa3 = rtop3;
@@ -862,72 +916,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       info_inv.trace = rtop;
       info_inv.trace2 = rtopSignal;
 
-      // STEP 4: Adjust the seed state info, based on the number of branches found at the seed point.
-
-      // STEP 4.1 Compute number of branches at the seed point using spherical ridgelets
-
-      // Some ridgelets parameters hardcoded for now (need to add them in CLI)
-      ukfPrecisionType sph_rho = 3.125;
-      unsigned int sph_J = 2;
-      ukfPrecisionType fista_lambda = 0.01;
-      unsigned int lvl = 4;
-      ukfPrecisionType max_odf_thresh = 0.7;
-
-      // 4.1.1. Compute ridgelets basis...
-      // but first convert gradients to ukfMatrixType
-      const int s_dim = _signal_data->GetSignalDimension() * 2;
-      ukfMatrixType GradientDirections(s_dim, 3);
-      const stdVec_t &gradients = _signal_data->gradients();
-      for (int j = 0; j < s_dim; ++j)
-      {
-        const vec3_t &u = gradients[j];
-        GradientDirections.row(j) = u;
-      }
-
-      // Now we can compute basis
-      SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
-      ukfMatrixType A;
-      ridg.RBasis(A, GradientDirections);
-      ridg.normBasis(A);
-
-      // 4.1.2. Ok, now we can compute ridegelets coefficients
-      ukfVectorType C;
-      {
-        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, signal_values[i], fista_lambda);
-        slv.FISTA(C);
-      }
-
-      // 4.1.3. Next, let's compute ODF, but first we need to compute Q basis
-      UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
-      ukfMatrixType fcs;
-      ukfMatrixType nu;
-      ukfMatrixType Q;
-
-      m.icosahedron(nu, fcs, lvl);
-      ridg.QBasis(Q, nu); //Build a Q basis
-
-      // Now we can compute ODF
-      ukfVectorType ODF = Q * C;
-
-      // 4.1.4 Let's find Maxima of ODF and values in that direction
-      ukfMatrixType exe_vol;
-      ukfMatrixType dir_vol;
-      ukfVectorType ODF_val_at_max;
-      unsigned n_of_dirs;
-
-      vector<vector<unsigned>> conn;
-      m.FindConnectivity(conn, fcs, nu.rows());
-      m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
-
-      for (unsigned j = 0; j < 6; ++j)
-      {
-        ODF_val_at_max(j) = ODF(exe_vol(j));
-      }
-
       if (rtopSignal >= _rtop_min)
       {
-        // Need to write rules on how to pick right number of directions in voxel!!!
-
         // Create the opposite seed
         InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
 
@@ -940,6 +930,35 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
         info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
         seed_infos.push_back(info);
         seed_infos.push_back(info_inv);
+
+        if (n_of_dirs > 1)
+        {
+          SwapState3T(tmp_info_state, p, 2);
+          info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
+          info.state = ConvertVector<stdVecState, State>(tmp_info_state);
+          seed_infos.push_back(info);
+
+          // Create the seed for the opposite direction, keep the other parameters as set for the first direction
+          InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
+
+          info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
+          info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
+          seed_infos.push_back(info_inv);
+          if (n_of_dirs > 2)
+          {
+            SwapState3T(tmp_info_state, p, 3);
+            info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
+            info.state = ConvertVector<stdVecState, State>(tmp_info_state);
+            seed_infos.push_back(info);
+
+            // Create the seed for the opposite direction, keep the other parameters as set for the first direction
+            InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
+
+            info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
+            info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
+            seed_infos.push_back(info_inv);
+          }
+        }
       }
     }
     else
@@ -1753,7 +1772,6 @@ void Tractography::Follow3T(const int thread_id,
     if (!is_brain || in_csf || stepnr > _max_length // Stop if the fiber is too long
         || is_curving || dNormMSE_too_high || negative_free_water)
     {
-
       break;
     }
 
@@ -1880,10 +1898,6 @@ void Tractography::Follow3T(const int thread_id,
           local_seed.fa = fa_3;
         }
       }
-    }
-    else if (is_branching && _diffusion_propagator)
-    {
-      // do more here 
     }
   }
   FiberReserve(fiber, fiber_length);
@@ -2190,6 +2204,7 @@ void Tractography::Step3T(const int thread_id,
     _model->State2Tensor3T(state, old_dir, m1, l1, m2, l2, m3, l3);
     trace = l1[0] + l1[1] + l1[2];
     trace2 = l2[0] + l2[1] + l2[2];
+    n_of_dirs = 0;
   }
 
   ukfPrecisionType dot1 = m1.dot(old_dir);
