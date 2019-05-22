@@ -382,13 +382,9 @@ private:
 
   bool debug;
 
-  // Spherical Ridgelets helper functions
-  UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
-  SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
-
   // Spherical Ridgelets bases
-  ukfMatrixType A;
-  ukfMatrixType Q;
+  ukfMatrixType ARidg;
+  ukfMatrixType QRidg;
 
   // Sphereical Ridgelets helper matricies/vectors
   ukfMatrixType fcs;

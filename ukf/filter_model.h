@@ -80,7 +80,7 @@ public:
 
   /** state transition function */
   virtual void F(ukfMatrixType &X) const = 0;
-  virtual void F_Ridg(ukfMatrixType &X, ukfMatrixType s) const = 0;
+  virtual void F(ukfMatrixType &X, ukfMatrixType s) const = 0;
 
   /** observation, i.e. signal reconstruction */
   virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const = 0;

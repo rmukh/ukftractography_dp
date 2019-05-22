@@ -798,22 +798,26 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       }
 
       // Now we can compute basis
-      ridg.RBasis(A, GradientDirections);
-      ridg.normBasis(A);
+      // Spherical Ridgelets helper functions
+      UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
+      SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
+
+      ridg.RBasis(ARidg, GradientDirections);
+      ridg.normBasis(ARidg);
 
       // 0.1.2. Ok, now we can compute ridegelets coefficients
       ukfVectorType C;
       {
-        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, signal_values[i], fista_lambda);
+        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(ARidg, signal_values[i], fista_lambda);
         slv.FISTA(C);
       }
 
       // 0.1.3. Next, let's compute ODF, but first we need to compute Q basis
       m.icosahedron(nu, fcs, lvl);
-      ridg.QBasis(Q, nu); //Build a Q basis
+      ridg.QBasis(QRidg, nu); //Build a Q basis
 
       // Now we can compute ODF
-      ukfVectorType ODF = Q * C;
+      ukfVectorType ODF = QRidg * C;
 
       // 0.1.4 Let's find Maxima of ODF and values in that direction
       ukfMatrixType exe_vol;
@@ -2204,7 +2208,6 @@ void Tractography::Step3T(const int thread_id,
     _model->State2Tensor3T(state, old_dir, m1, l1, m2, l2, m3, l3);
     trace = l1[0] + l1[1] + l1[2];
     trace2 = l2[0] + l2[1] + l2[2];
-    n_of_dirs = 0;
   }
 
   ukfPrecisionType dot1 = m1.dot(old_dir);

@@ -33,6 +33,8 @@ void NODDI2F::F(ukfMatrixType& X) const
     }
 }
 
+void NODDI2F::F(ukfMatrixType& X, ukfMatrixType s) const {}
+
 void NODDI2F::H(const  ukfMatrixType& X,
                 ukfMatrixType& Y) const
 {

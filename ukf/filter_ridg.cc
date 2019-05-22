@@ -2,12 +2,27 @@
 
 // 2T Bi-Exponential model with spherical ridgelets //
 // Functions for 3-tensor bi-exponential simple model.
-void Ridg_BiExp_FW::F(ukfMatrixType &X) const
+void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfMatrixType s) const
 {
     assert(_signal_dim > 0);
     assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
            (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
             X.cols() == 1));
+
+                // ukfVectorType C;
+    // {
+    //     SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, s, fista_lambda);
+    //     slv.FISTA(C);
+    // }
+
+    // ukfVectorType ODF = Q * C;
+
+    // ukfMatrixType exe_vol;
+    // ukfMatrixType dir_vol;
+    // ukfVectorType ODF_val_at_max;
+
+    // m.FindConnectivity(conn, fcs, nu.rows());
+    // m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 
     for (unsigned int i = 0; i < X.cols(); ++i)
     {
@@ -84,24 +99,6 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X) const
         // Free water
         X(23, i) = CheckZero(X(23, i));
     }
-}
-
-void Ridg_BiExp_FW::F_Ridg(ukfMatrixType &X, ukfMatrixType s) const
-{
-    ukfVectorType C;
-    {
-        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, s, fista_lambda);
-        slv.FISTA(C);
-    }
-
-    ukfVectorType ODF = Q * C;
-
-    ukfMatrixType exe_vol;
-    ukfMatrixType dir_vol;
-    ukfVectorType ODF_val_at_max;
-
-    m.FindConnectivity(conn, fcs, nu.rows());
-    m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 }
 
 void Ridg_BiExp_FW::H(const ukfMatrixType &X,

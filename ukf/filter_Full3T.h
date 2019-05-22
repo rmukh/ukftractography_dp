@@ -12,9 +12,9 @@
 class Full3T : public FilterModel
 {
 public:
-  Full3T(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType rs, const ukfVectorType& weights_on_tensors,
+  Full3T(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType rs, const ukfVectorType &weights_on_tensors,
          bool constrained)
-    : FilterModel(18, rs, weights_on_tensors, constrained), _lambda_min(100.0)
+      : FilterModel(18, rs, weights_on_tensors, constrained), _lambda_min(100.0)
   {
     _Q(0, 0) = _Q(1, 1) = _Q(2, 2) = qs;
     _Q(6, 6) = _Q(7, 7) = _Q(8, 8) = qs;
@@ -29,15 +29,13 @@ public:
   {
   }
 
-  virtual void F(ukfMatrixType& X) const;
+  virtual void F(ukfMatrixType &X) const;
+  virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
 
-  virtual void H(const  ukfMatrixType& X, ukfMatrixType& Y) const;
-
-  virtual void State2Tensor3T(const State& x, const vec3_t& old_m, vec3_t& m1, vec3_t& l1, vec3_t& m2, vec3_t& l2,
-                              vec3_t& m3, vec3_t& l3);
+  virtual void State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2,
+                              vec3_t &m3, vec3_t &l3);
 
   /** The minimum value of the eigenvalues. Clamped in each step */
   const ukfPrecisionType _lambda_min;
-
 };
 #endif // FULL3T_H__

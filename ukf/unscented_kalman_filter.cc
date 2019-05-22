@@ -165,7 +165,7 @@ void UnscentedKalmanFilter::Filter(const State &x,
 
   {
     if (localConstFilterModel->isRidgelets())
-      localConstFilterModel->F_Ridg(X, z_Eigen); // slightly negative fw is fixed here
+      localConstFilterModel->F(X, z_Eigen); // slightly negative fw is fixed here
     else
       localConstFilterModel->F(X); // slightly negative fw is fixed here
   }

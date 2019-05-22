@@ -98,3 +98,4 @@ void createProtocol(const ukfVectorType& _b_values,
   }
 }
 
+void FilterModel::F(ukfMatrixType& X, ukfMatrixType s) {}
