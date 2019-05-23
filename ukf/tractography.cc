@@ -48,6 +48,8 @@
 #include "filter_Simple3T.h"
 #include "filter_ridg.h"
 
+#include "ridgelets_inc.h"
+
 // TODO implement this switch
 //#include "config.h"
 

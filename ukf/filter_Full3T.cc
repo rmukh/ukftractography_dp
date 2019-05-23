@@ -21,6 +21,8 @@ void Full3T::F(ukfMatrixType& X) const
     }
 }
 
+void Full3T::F(ukfMatrixType &X, ukfMatrixType s) const {};
+
 void Full3T::H(const  ukfMatrixType& X,
                ukfMatrixType& Y) const
 {

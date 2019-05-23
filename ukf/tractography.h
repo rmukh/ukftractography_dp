@@ -18,7 +18,6 @@
 #include "itkLBFGSBOptimizer.h"
 
 // Spherical ridgelets
-#include "ridgelets_inc.h"
 #include "SOLVERS.h"
 #include "SPH_RIDG.h"
 #include "UtilMath.h"

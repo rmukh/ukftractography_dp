@@ -2,7 +2,6 @@
 #define RIDG_BiExp_FW__
 
 #include "filter_model.h"
-#include "ridgelets_inc.h"
 
 #include "SOLVERS.h"
 #include "SPH_RIDG.h"
@@ -49,9 +48,7 @@ public:
 
         _d.resize(N_constr);
 
-        /* 
-        Setting the constraints according to D'*x >= -d 
-        */
+        /* Setting the constraints according to D'*x >= -d */
 
         // Free water
         _D(23, 0) = -1;
@@ -125,6 +122,7 @@ public:
     }
 
     virtual void F(ukfMatrixType &X, ukfMatrixType s) const;
+    virtual void F(ukfMatrixType &X) const;
     virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
 
     virtual void State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3);

@@ -8,7 +8,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfMatrixType s) const
     assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
            (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
             X.cols() == 1));
-
+    std::cout << s << endl;
                 // ukfVectorType C;
     // {
     //     SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, s, fista_lambda);
@@ -100,6 +100,8 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfMatrixType s) const
         X(23, i) = CheckZero(X(23, i));
     }
 }
+
+void Ridg_BiExp_FW::F(ukfMatrixType &X) const {};
 
 void Ridg_BiExp_FW::H(const ukfMatrixType &X,
                       ukfMatrixType &Y) const

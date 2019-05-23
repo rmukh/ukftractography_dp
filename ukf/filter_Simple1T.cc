@@ -24,7 +24,7 @@ void Simple1T::F(ukfMatrixType& X) const
     X(4, i) = std::max(X(4, i), _lambda_min);
     }
 }
-
+void Simple1T::F(ukfMatrixType &X, ukfMatrixType s) const {};
 void Simple1T::H(const  ukfMatrixType& X,
                  ukfMatrixType& Y) const
 {

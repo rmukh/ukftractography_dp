@@ -21,7 +21,7 @@ void Full1T_FW::F(ukfMatrixType& X) const
       }
     }
 }
-
+void Full1T_FW::F(ukfMatrixType &X, ukfMatrixType s) const {};
 void Full1T_FW::H(const ukfMatrixType& X,
                   ukfMatrixType& Y) const
 {
