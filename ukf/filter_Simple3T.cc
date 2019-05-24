@@ -52,7 +52,7 @@ void Simple3T::F(ukfMatrixType& X) const
     }
 }
 
-void Simple3T::F(ukfMatrixType &X, ukfVectorType s) const {};
+void Simple3T::F(ukfMatrixType & /** X **/, ukfVectorType /** s **/) const {};
 
 void Simple3T::H(const  ukfMatrixType& X,
                  ukfMatrixType& Y) const

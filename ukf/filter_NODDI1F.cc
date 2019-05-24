@@ -21,7 +21,7 @@ void NODDI1F::F(ukfMatrixType& X) const
     X(2, i) *= norm_inv;
     }
 }
-void NODDI1F::F(ukfMatrixType &X, ukfVectorType s) const {};
+void NODDI1F::F(ukfMatrixType & /** X **/, ukfVectorType /** s **/) const {};
 void NODDI1F::H(const  ukfMatrixType& X, ukfMatrixType& Y) const
 {
   assert(_signal_dim > 0);

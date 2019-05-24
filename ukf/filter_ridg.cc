@@ -106,15 +106,15 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
     }
 }
 
-double Ridg_BiExp_FW::cosine_similarity(double *A, double *B, unsigned int vec_len)
+double Ridg_BiExp_FW::cosine_similarity(double *F, double *S, unsigned int vec_len)
 {
     double dot = 0.0, den_a = 0.0, den_b = 0.0;
 
     for (unsigned int i = 0; i < vec_len; ++i)
     {
-        dot += A[i] * B[i];
-        den_a += A[i] * A[i];
-        den_b += B[i] * B[i];
+        dot += F[i] * S[i];
+        den_a += F[i] * F[i];
+        den_b += S[i] * S[i];
     }
 
     if (den_a == 0.0 || den_b == 0.0)

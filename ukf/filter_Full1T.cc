@@ -14,7 +14,7 @@ void Full1T::F(ukfMatrixType& X) const
     X(5, i) = std::max(X(5, i), _lambda_min);
     }
 }
-void Full1T::F(ukfMatrixType &X, ukfVectorType s) const {};
+void Full1T::F(ukfMatrixType & /** X **/, ukfVectorType /** s **/) const {};
 void Full1T::H(const  ukfMatrixType& X,
                ukfMatrixType& Y) const
 {
