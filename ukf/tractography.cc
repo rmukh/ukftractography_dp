@@ -48,8 +48,6 @@
 #include "filter_Simple3T.h"
 #include "filter_ridg.h"
 
-#include "ridgelets_inc.h"
-
 // TODO implement this switch
 //#include "config.h"
 
@@ -383,6 +381,32 @@ void Tractography::UpdateFilterModelType()
     weights_on_tensors.norm(); // Normalize for all to add up to 1.
   }
 
+  // 0.1.1. Compute ridgelets basis...
+  // but first convert gradients to ukfMatrixType
+  const int s_dim = _signal_data->GetSignalDimension() * 2;
+  ukfMatrixType GradientDirections(s_dim, 3);
+  const stdVec_t &gradients = _signal_data->gradients();
+  for (int j = 0; j < s_dim; ++j)
+  {
+    const vec3_t &u = gradients[j];
+    GradientDirections.row(j) = u;
+  }
+
+  // Compute A basis
+  // Spherical Ridgelets helper functions
+  UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
+  SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
+
+  ridg.RBasis(ARidg, GradientDirections);
+  ridg.normBasis(ARidg);
+
+  // Compute Q basis
+  m.icosahedron(nu, fcs, lvl);
+  ridg.QBasis(QRidg, nu); //Build a Q basis
+
+  // Compute connectivity
+  m.FindConnectivity(conn, fcs, nu.rows());
+
   // TODO refactor this NODDI switch
   if (this->_filter_model_type == _1T_FW && this->_noddi && this->_num_tensors == 1)
   {
@@ -435,7 +459,8 @@ void Tractography::UpdateFilterModelType()
   else if (this->_filter_model_type == _3T_BIEXP_RIDG)
   {
     // Qwiso = 0.002 ?
-    _model = new Ridg_BiExp_FW(Qm, Ql, Qt, Qw, Qwiso, Rs, this->weights_on_tensors, this->_free_water, D_ISO);
+    _model = new Ridg_BiExp_FW(Qm, Ql, Qt, Qw, Qwiso, Rs, this->weights_on_tensors, this->_free_water,
+                               D_ISO, ARidg, QRidg, fcs, nu, conn, fista_lambda, max_odf_thresh);
   }
   else
   {
@@ -787,36 +812,14 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // STEP 0: Find number of branches in one voxel.
 
       // STEP 0.1 Compute number of branches at the seed point using spherical ridgelets
-
-      // 0.1.1. Compute ridgelets basis...
-      // but first convert gradients to ukfMatrixType
-      const int s_dim = _signal_data->GetSignalDimension() * 2;
-      ukfMatrixType GradientDirections(s_dim, 3);
-      const stdVec_t &gradients = _signal_data->gradients();
-      for (int j = 0; j < s_dim; ++j)
-      {
-        const vec3_t &u = gradients[j];
-        GradientDirections.row(j) = u;
-      }
-
-      // Now we can compute basis
-      // Spherical Ridgelets helper functions
       UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
-      SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
 
-      ridg.RBasis(ARidg, GradientDirections);
-      ridg.normBasis(ARidg);
-
-      // 0.1.2. Ok, now we can compute ridegelets coefficients
+      // we can compute ridegelets coefficients
       ukfVectorType C;
       {
         SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(ARidg, signal_values[i], fista_lambda);
         slv.FISTA(C);
       }
-
-      // 0.1.3. Next, let's compute ODF, but first we need to compute Q basis
-      m.icosahedron(nu, fcs, lvl);
-      ridg.QBasis(QRidg, nu); //Build a Q basis
 
       // Now we can compute ODF
       ukfVectorType ODF = QRidg * C;
@@ -827,7 +830,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       ukfVectorType ODF_val_at_max;
       unsigned n_of_dirs;
 
-      m.FindConnectivity(conn, fcs, nu.rows());
       m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 
       for (unsigned j = 0; j < 6; ++j)

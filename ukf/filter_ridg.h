@@ -17,10 +17,13 @@ class Ridg_BiExp_FW : public FilterModel
 {
 public:
     Ridg_BiExp_FW(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType qt, ukfPrecisionType qw, ukfPrecisionType qwiso,
-                  ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, const ukfPrecisionType diff_fw)
+                  ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, const ukfPrecisionType diff_fw, 
+                  ukfMatrixType Aridg, ukfMatrixType Qridg, ukfMatrixType fcsridg, ukfMatrixType nuridg, vector<vector<unsigned>> connridg,
+                  ukfPrecisionType fl, ukfPrecisionType mot)
         : FilterModel(24, rs, weights_on_tensors, constrained, true),
           _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000),
-          _w_fast_diffusion(0.7), m_D_iso(SetIdentityScaled(diff_fw))
+          _w_fast_diffusion(0.7), m_D_iso(SetIdentityScaled(diff_fw)), A(Aridg), Q(Qridg), fcs(fcsridg), nu(nuridg), conn(connridg),
+          fista_lambda(fl), max_odf_thresh(mot)
     {
         // size(X, 'column') == 24
         // X = [x10, x11, x12, l11, l12, l13, l14, x20, x21, x22, l21, l22, l23, l24, x30, x31, x32, l31, l32, l33, l34, w1, w2, wiso]'
@@ -121,8 +124,9 @@ public:
     {
     }
 
-    virtual void F(ukfMatrixType &X, ukfMatrixType s) const;
-    virtual void F(ukfMatrixType &X) const;
+    virtual void F(ukfMatrixType & /* X */, ukfVectorType /* s */) const;
+    double cosine_similarity(double *A, double *B, unsigned int size);
+    virtual void F(ukfMatrixType & /* X */) const;
     virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
 
     virtual void State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3);
@@ -137,6 +141,16 @@ public:
 
     /** apparent diffusion coefficient of free water */
     mat33_t m_D_iso;
+
+    /** Ridgelets matricies/vectors **/
+    ukfMatrixType &A;
+    ukfMatrixType &Q;
+    ukfMatrixType &fcs;
+    ukfMatrixType &nu;
+    vector<vector<unsigned>> &conn;
+
+    ukfPrecisionType fista_lambda;
+    ukfPrecisionType max_odf_thresh;
 };
 
 #endif //RIDG_BiExp_FW__

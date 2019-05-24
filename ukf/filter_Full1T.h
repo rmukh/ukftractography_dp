@@ -25,7 +25,7 @@ public:
   }
 
   virtual void F(ukfMatrixType &X) const;
-  virtual void F(ukfMatrixType &X, ukfMatrixType s) const;
+  virtual void F(ukfMatrixType &X, ukfVectorType s) const;
 
   virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
 

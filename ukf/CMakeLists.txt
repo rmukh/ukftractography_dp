@@ -65,7 +65,6 @@ set(MODULE_SRCS
   filter_Simple3T.cc
   filter_ridg.h
   filter_ridg.cc
-  ridgelets_inc.h
   UKFTractographyCLP.h
   )
 

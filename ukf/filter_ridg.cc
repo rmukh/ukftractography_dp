@@ -2,27 +2,27 @@
 
 // 2T Bi-Exponential model with spherical ridgelets //
 // Functions for 3-tensor bi-exponential simple model.
-void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfMatrixType s) const
+void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
 {
     assert(_signal_dim > 0);
     assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
            (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
             X.cols() == 1));
-    std::cout << s << endl;
-                // ukfVectorType C;
-    // {
-    //     SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, s, fista_lambda);
-    //     slv.FISTA(C);
-    // }
 
-    // ukfVectorType ODF = Q * C;
+    UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
 
-    // ukfMatrixType exe_vol;
-    // ukfMatrixType dir_vol;
-    // ukfVectorType ODF_val_at_max;
+    ukfVectorType C;
+    {
+        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, s, fista_lambda);
+        slv.FISTA(C);
+    }
 
-    // m.FindConnectivity(conn, fcs, nu.rows());
-    // m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
+    ukfVectorType ODF = Q * C;
+
+    ukfMatrixType exe_vol;
+    ukfMatrixType dir_vol;
+    unsigned int n_of_dirs;
+    m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 
     for (unsigned int i = 0; i < X.cols(); ++i)
     {
@@ -99,9 +99,35 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfMatrixType s) const
         // Free water
         X(23, i) = CheckZero(X(23, i));
     }
+
+    for (unsigned int v = 0; v < n_of_dirs; ++v)
+    {
+        dir_vol.row(v) * X;
+    }
 }
 
-void Ridg_BiExp_FW::F(ukfMatrixType &X) const {};
+double Ridg_BiExp_FW::cosine_similarity(double *A, double *B, unsigned int vec_len)
+{
+    double dot = 0.0, den_a = 0.0, den_b = 0.0;
+
+    for (unsigned int i = 0; i < vec_len; ++i)
+    {
+        dot += A[i] * B[i];
+        den_a += A[i] * A[i];
+        den_b += B[i] * B[i];
+    }
+
+    if (den_a == 0.0 || den_b == 0.0)
+    {
+        throw std::logic_error(
+            "cosine similarity is not defined whenever one or both "
+            "input vectors are zero-vectors.");
+    }
+
+    return dot / (std::sqrt(den_a) * std::sqrt(den_b));
+}
+
+void Ridg_BiExp_FW::F(ukfMatrixType &) const {};
 
 void Ridg_BiExp_FW::H(const ukfMatrixType &X,
                       ukfMatrixType &Y) const

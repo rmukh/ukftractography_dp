@@ -389,6 +389,13 @@ private:
   ukfMatrixType fcs;
   ukfMatrixType nu;
   vector<vector<unsigned>> conn;
+
+  // Spherical Ridgelets helper variables
+  ukfPrecisionType sph_rho = 3.125;
+  unsigned int sph_J = 2;
+  ukfPrecisionType fista_lambda = 0.01;
+  unsigned int lvl = 4;
+  ukfPrecisionType max_odf_thresh = 0.7;
 };
 
 namespace itk
