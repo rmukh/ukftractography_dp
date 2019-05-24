@@ -125,7 +125,7 @@ public:
     }
 
     virtual void F(ukfMatrixType & /* X */, ukfVectorType /* s */) const;
-    double cosine_similarity(double *A, double *B, unsigned int size);
+    ukfPrecisionType cosine_similarity(vec3_t& F, vec3_t& S) const;
     virtual void F(ukfMatrixType & /* X */) const;
     virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
 

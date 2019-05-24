@@ -24,6 +24,19 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
     unsigned int n_of_dirs;
     m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 
+    ukfVectorType closest;
+    closest.resize(exe_vol.rows());
+    vec3_t m1;
+    vec3_t o1;
+    vec3_t m2;
+    vec3_t o2;
+    vec3_t m3;
+    vec3_t o3;
+
+    o1.setZero();
+    o2.setZero();
+    o3.setZero();
+
     for (unsigned int i = 0; i < X.cols(); ++i)
     {
         // Normalize the direction vectors.
@@ -98,24 +111,68 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
 
         // Free water
         X(23, i) = CheckZero(X(23, i));
-    }
 
-    for (unsigned int v = 0; v < n_of_dirs; ++v)
-    {
-        dir_vol.row(v) * X;
-    }
+        // Compute final state using ridgelets
+        m1 << X(0, i), X(1, i), X(2, i);
+        m2 << X(7, i), X(8, i), X(9, i);
+        m3 << X(14, i), X(15, i), X(16, i);
+
+        for (unsigned int v = 0; v < exe_vol.rows(); ++v)
+        {
+            o1 = dir_vol.row(v);
+            closest(v) = cosine_similarity(m1, o1);
+        }
+
+        ukfVectorType::Index maxInd;
+        closest.maxCoeff(&maxInd);
+
+        o1 = dir_vol.row(maxInd);
+
+        if (n_of_dirs == 2)
+        {
+            for (unsigned int v = 0; v < exe_vol.rows(); ++v)
+            {
+                o2 = dir_vol.row(v);
+                closest(v) = cosine_similarity(m2, o2);
+            }
+
+            closest.maxCoeff(&maxInd);
+            o2 = dir_vol.row(maxInd);
+        }
+        if (n_of_dirs > 2)
+        {
+            for (unsigned int v = 0; v < exe_vol.rows(); ++v)
+            {
+                o3 = dir_vol.row(v);
+                closest(v) = cosine_similarity(m3, o3);
+            }
+
+            closest.maxCoeff(&maxInd);
+            o3 = dir_vol.row(maxInd);
+        }
+
+        // Average of direction from state and ridgelets for 1st tensor
+        X(0, i) = 0.5 * (m1(0) + o1(0));
+        X(1, i) = 0.5 * (m1(1) + o1(1));
+        X(2, i) = 0.5 * (m1(2) + o1(2));
+
+        // Average of direction from state and ridgelets for 2st tensor
+        X(7, i) = 0.5 * (m2(0) + o2(0));
+        X(8, i) = 0.5 * (m2(1) + o2(1));
+        X(9, i) = 0.5 * (m2(2) + o2(2));
+
+        // Average of direction from state and ridgelets for 3st tensor
+        X(14, i) = 0.5 * (m3(0) + o3(0));
+        X(15, i) = 0.5 * (m3(1) + o3(1));
+        X(16, i) = 0.5 * (m3(2) + o3(2));
+    } //for X.cols()
 }
 
-double Ridg_BiExp_FW::cosine_similarity(double *F, double *S, unsigned int vec_len)
+ukfPrecisionType Ridg_BiExp_FW::cosine_similarity(vec3_t &F, vec3_t &S) const
 {
-    double dot = 0.0, den_a = 0.0, den_b = 0.0;
-
-    for (unsigned int i = 0; i < vec_len; ++i)
-    {
-        dot += F[i] * S[i];
-        den_a += F[i] * F[i];
-        den_b += S[i] * S[i];
-    }
+    ukfPrecisionType dot = F.dot(S);
+    ukfPrecisionType den_a = F.norm();
+    ukfPrecisionType den_b = S.norm();
 
     if (den_a == 0.0 || den_b == 0.0)
     {
@@ -124,7 +181,7 @@ double Ridg_BiExp_FW::cosine_similarity(double *F, double *S, unsigned int vec_l
             "input vectors are zero-vectors.");
     }
 
-    return dot / (std::sqrt(den_a) * std::sqrt(den_b));
+    return dot / (den_a * den_b);
 }
 
 void Ridg_BiExp_FW::F(ukfMatrixType &) const {};
