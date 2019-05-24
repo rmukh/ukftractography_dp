@@ -811,10 +811,10 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
     {
       // STEP 0: Find number of branches in one voxel.
 
-      // STEP 0.1 Compute number of branches at the seed point using spherical ridgelets
+      // Compute number of branches at the seed point using spherical ridgelets
       UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
 
-      // we can compute ridegelets coefficients
+      // We can compute ridegelets coefficients
       ukfVectorType C;
       {
         SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(ARidg, signal_values[i], fista_lambda);
@@ -824,7 +824,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // Now we can compute ODF
       ukfVectorType ODF = QRidg * C;
 
-      // 0.1.4 Let's find Maxima of ODF and values in that direction
+      // Let's find Maxima of ODF and values in that direction
       ukfMatrixType exe_vol;
       ukfMatrixType dir_vol;
       ukfVectorType ODF_val_at_max;
@@ -840,19 +840,51 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // STEP 1: Initialise the state based on the single estimated tensor
       tmp_info_state.resize(24);
       tmp_info_inv_state.resize(24);
+      mat33_t dir_init;
+      dir_init.setZero();
 
       ukfPrecisionType w1_init = ODF_val_at_max(0);
+      dir_init.row(0) = dir_vol.row(0);
+
       ukfPrecisionType w2_init = 0;
 
-      if (n_of_dirs > 1)
+      if (n_of_dirs == 1)
       {
+        ukfVectorType orthogonal;
+        orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], dir_vol.row(0)[2];
+        dir_init.row(1) = orthogonal;
+        dir_init.row(2) = orthogonal;
+      }
+      else if (n_of_dirs > 1)
+      {
+        if (n_of_dirs == 2)
+        {
+          vec3_t v1 = dir_vol.row(0);
+          vec3_t v2 = dir_vol.row(2);
+          vec3_t orthogonal = v1.cross(v2);
+          dir_init.row(1) = dir_vol.row(2);
+          dir_init.row(2) = orthogonal;
+        }
+        if (n_of_dirs > 2)
+        {
+          dir_init.row(1) = dir_vol.row(2);
+          dir_init.row(2) = dir_vol.row(4);
+        }
         w2_init = ODF_val_at_max(2);
       }
 
       // Diffusion directions, m1 = m2 = m3
-      tmp_info_state[0] = tmp_info_state[7] = tmp_info_state[14] = info.start_dir[0];
-      tmp_info_state[1] = tmp_info_state[8] = tmp_info_state[15] = info.start_dir[1];
-      tmp_info_state[2] = tmp_info_state[9] = tmp_info_state[16] = info.start_dir[2];
+      tmp_info_state[0] = dir_init.row(0)[0];
+      tmp_info_state[1] = dir_init.row(0)[1];
+      tmp_info_state[2] = dir_init.row(0)[2];
+
+      tmp_info_state[7] = dir_init.row(1)[0];
+      tmp_info_state[8] = dir_init.row(1)[1];
+      tmp_info_state[9] = dir_init.row(1)[2];
+
+      tmp_info_state[14] = dir_init.row(2)[0];
+      tmp_info_state[15] = dir_init.row(2)[1];
+      tmp_info_state[16] = dir_init.row(2)[2];
 
       // Fast diffusing component,  lambdas l11, l21 = l1 from the single tensor
       //                            lambdas l12, l21 = (l2 + l3) /2
@@ -895,7 +927,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       ukfMatrixType p(info.covariance);
 
       // Estimate the initial state
-      // ukfPrecisionType dNormMSE = 0.0;
       // InitLoopUKF(state, p, signal_values[i], dNormMSE);
       NonLinearLeastSquareOptimization(state, signal_values[i], _model);
 

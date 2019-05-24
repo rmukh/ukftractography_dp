@@ -155,7 +155,7 @@ void UnscentedKalmanFilter::Filter(const State &x,
     Constrain(X, p);
   }
 
-    // copy step needed because z is a const variable and can't be referenced
+  // copy step needed because z is a const variable and can't be referenced
   ukfVectorType z_Eigen(z.size());
   for (unsigned int i = 0; i < z.size(); ++i)
   {
