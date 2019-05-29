@@ -61,14 +61,13 @@
 #include <cli.h>
 #include "BRAINSThreadControl.h"
 
-static Tractography* g_tracto;
+static Tractography *g_tracto;
 
 //----------------------------------------------------------------------------
 vtkStandardNewMacro(vtkSlicerInteractiveUKFLogic);
 
 //----------------------------------------------------------------------------
-vtkSlicerInteractiveUKFLogic::vtkSlicerInteractiveUKFLogic() :
-  producer(vtkTrivialProducer::New())
+vtkSlicerInteractiveUKFLogic::vtkSlicerInteractiveUKFLogic() : producer(vtkTrivialProducer::New())
 {
 }
 
@@ -79,12 +78,12 @@ vtkSlicerInteractiveUKFLogic::~vtkSlicerInteractiveUKFLogic()
 }
 
 //----------------------------------------------------------------------------
-void vtkSlicerInteractiveUKFLogic::PrintSelf(ostream& os, vtkIndent indent)
+void vtkSlicerInteractiveUKFLogic::PrintSelf(ostream &os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
 
-static int CLILoader(int argc, char** argv)
+static int CLILoader(int argc, char **argv)
 {
   UKFSettings ukf_settings;
   ukf_parse_cli(argc, argv, ukf_settings);
@@ -114,14 +113,14 @@ static int CLILoader(int argc, char** argv)
 }
 
 //---------------------------------------------------------------------------
-bool vtkSlicerInteractiveUKFLogic::InitTractography(vtkMRMLCommandLineModuleNode* n)
+bool vtkSlicerInteractiveUKFLogic::InitTractography(vtkMRMLCommandLineModuleNode *n)
 {
   assert(this->GetMRMLScene());
   assert(this->GetMRMLApplicationLogic());
 
   std::stringstream entrypoint;
   entrypoint << "slicer:";
-  entrypoint << reinterpret_cast<void*>(&CLILoader);
+  entrypoint << reinterpret_cast<void *>(&CLILoader);
 
   vtkNew<vtkMRMLCommandLineModuleNode> cli;
   cli->Copy(n);
@@ -137,7 +136,7 @@ bool vtkSlicerInteractiveUKFLogic::InitTractography(vtkMRMLCommandLineModuleNode
   return EXIT_SUCCESS;
 }
 //---------------------------------------------------------------------------
-void vtkSlicerInteractiveUKFLogic::SetMRMLSceneInternal(vtkMRMLScene * newScene)
+void vtkSlicerInteractiveUKFLogic::SetMRMLSceneInternal(vtkMRMLScene *newScene)
 {
   vtkNew<vtkIntArray> events;
   events->InsertNextValue(vtkMRMLScene::NodeAddedEvent);
@@ -159,32 +158,29 @@ void vtkSlicerInteractiveUKFLogic::UpdateFromMRMLScene()
 }
 
 //---------------------------------------------------------------------------
-void vtkSlicerInteractiveUKFLogic
-::OnMRMLSceneNodeAdded(vtkMRMLNode* vtkNotUsed(node))
+void vtkSlicerInteractiveUKFLogic ::OnMRMLSceneNodeAdded(vtkMRMLNode *vtkNotUsed(node))
 {
 }
 
 //---------------------------------------------------------------------------
-void vtkSlicerInteractiveUKFLogic
-::OnMRMLSceneNodeRemoved(vtkMRMLNode* vtkNotUsed(node))
+void vtkSlicerInteractiveUKFLogic ::OnMRMLSceneNodeRemoved(vtkMRMLNode *vtkNotUsed(node))
 {
 }
 
 //---------------------------------------------------------------------------
-void setWriterProps(vtkMRMLVolumeNode* vol, vtkTeemNRRDWriter* writer)
+void setWriterProps(vtkMRMLVolumeNode *vol, vtkTeemNRRDWriter *writer)
 {
   vtkNew<vtkMatrix4x4> ijkToRas;
   vol->GetIJKToRASMatrix(ijkToRas.GetPointer());
   writer->SetIJKToRASMatrix(ijkToRas.GetPointer());
 }
 
-
 //---------------------------------------------------------------------------
 void vtkSlicerInteractiveUKFLogic::SetDataNodes(
-    vtkMRMLDiffusionWeightedVolumeNode* dwiNode,
-    vtkMRMLScalarVolumeNode* maskNode,
-    vtkMRMLScalarVolumeNode* seedNode,
-    vtkMRMLModelNode* fbNode)
+    vtkMRMLDiffusionWeightedVolumeNode *dwiNode,
+    vtkMRMLScalarVolumeNode *maskNode,
+    vtkMRMLScalarVolumeNode *seedNode,
+    vtkMRMLModelNode *fbNode)
 {
   assert(dwiNode->IsA("vtkMRMLDiffusionWeightedVolumeNode"));
   assert(maskNode->IsA("vtkMRMLScalarVolumeNode"));
@@ -193,13 +189,13 @@ void vtkSlicerInteractiveUKFLogic::SetDataNodes(
   vtkNew<vtkTeemNRRDWriter> writer;
 
   writer->SetInputConnection(dwiNode->GetImageDataConnection());
-  setWriterProps((vtkMRMLVolumeNode*)dwiNode, writer.GetPointer());
+  setWriterProps((vtkMRMLVolumeNode *)dwiNode, writer.GetPointer());
   vtkNew<vtkMatrix4x4> mf;
   dwiNode->GetMeasurementFrameMatrix(mf.GetPointer());
   writer->SetMeasurementFrameMatrix(mf.GetPointer());
 
-  vtkDoubleArray* grads = NULL;
-  vtkDoubleArray* bValues = NULL;
+  vtkDoubleArray *grads = NULL;
+  vtkDoubleArray *bValues = NULL;
   grads = dwiNode->GetDiffusionGradients();
   bValues = dwiNode->GetBValues();
 
@@ -208,34 +204,34 @@ void vtkSlicerInteractiveUKFLogic::SetDataNodes(
   if (bValues)
     writer->SetBValues(bValues);
 
-  Nrrd* nrrd = (Nrrd*)writer->MakeNRRD();
+  Nrrd *nrrd = (Nrrd *)writer->MakeNRRD();
 
   vtkNew<vtkTeemNRRDWriter> maskWriter;
   maskWriter->SetInputConnection(maskNode->GetImageDataConnection());
-  setWriterProps((vtkMRMLVolumeNode*)maskNode, maskWriter.GetPointer());
+  setWriterProps((vtkMRMLVolumeNode *)maskNode, maskWriter.GetPointer());
 
-  Nrrd* mask = (Nrrd*)maskWriter->MakeNRRD();
+  Nrrd *mask = (Nrrd *)maskWriter->MakeNRRD();
 
   vtkNew<vtkTeemNRRDWriter> seedWriter;
-  Nrrd* seed = NULL;
+  Nrrd *seed = NULL;
   if (seedNode)
-    {
+  {
     seedWriter->SetInputConnection(seedNode->GetImageDataConnection());
-    setWriterProps((vtkMRMLVolumeNode*)seedNode, seedWriter.GetPointer());
-    seed = (Nrrd*)seedWriter->MakeNRRD();
-    }
+    setWriterProps((vtkMRMLVolumeNode *)seedNode, seedWriter.GetPointer());
+    seed = (Nrrd *)seedWriter->MakeNRRD();
+  }
 
-  Tractography* tract = dynamic_cast<Tractography*>(g_tracto);
+  Tractography *tract = dynamic_cast<Tractography *>(g_tracto);
   if (!tract)
-    {
+  {
     std::cerr << "Uninitialized UKFTractography!" << std::endl;
     return;
-    }
+  }
 
   tract->SetData(nrrd, mask, seed, false /*normalizedDWIData*/);
   tract->UpdateFilterModelType();
 
-  vtkPolyData* pd = vtkPolyData::New();
+  vtkPolyData *pd = vtkPolyData::New();
   //SafeDownCast(producer->GetOutputDataObject(0));
   this->producer->SetOutput(pd);
   pd->Delete();
@@ -244,10 +240,9 @@ void vtkSlicerInteractiveUKFLogic::SetDataNodes(
 }
 
 //---------------------------------------------------------------------------
-void vtkSlicerInteractiveUKFLogic::RunFromSeedPoints
-      (vtkMRMLDiffusionWeightedVolumeNode* dwiNode,
-       vtkMRMLModelNode* fbNode,
-       vtkMRMLMarkupsFiducialNode* markupsNode)
+void vtkSlicerInteractiveUKFLogic::RunFromSeedPoints(vtkMRMLDiffusionWeightedVolumeNode *dwiNode,
+                                                     vtkMRMLModelNode *fbNode,
+                                                     vtkMRMLMarkupsFiducialNode *markupsNode)
 {
 #ifdef NDEBUG
   (void)fbNode;
@@ -257,20 +252,20 @@ void vtkSlicerInteractiveUKFLogic::RunFromSeedPoints
   assert(markupsNode->IsA("vtkMRMLMarkupsNode"));
   assert(dwiNode->IsA("vtkMRMLDiffusionWeightedVolumeNode"));
 
-  Tractography* tract = dynamic_cast<Tractography*>(g_tracto);
+  Tractography *tract = dynamic_cast<Tractography *>(g_tracto);
   if (!tract)
-    {
+  {
     std::cerr << "Uninitialized UKFTractography!" << std::endl;
     return;
-    }
+  }
 
-  vtkPolyData* pd = vtkPolyData::SafeDownCast(producer->GetOutputDataObject(0));
+  vtkPolyData *pd = vtkPolyData::SafeDownCast(producer->GetOutputDataObject(0));
   if (!pd)
-    {
+  {
     std::cerr << "No polydata!" << std::endl;
     assert(pd);
     return;
-    }
+  }
   // avoid crashes and sync issues during update
   pd->Reset();
 
@@ -281,13 +276,13 @@ void vtkSlicerInteractiveUKFLogic::RunFromSeedPoints
   stdVec_t seeds;
 
   for (int i = 0; i < markupsNode->GetNumberOfFiducials(); i++)
-    {
+  {
     vec3_t pos_in, pos_out;
     markupsNode->GetNthFiducialPosition(i, pos_in.data());
     RASxfmIJK->TransformPoint(pos_in.data(), pos_out.data());
     pos_out = vec3_t(pos_out[2], pos_out[1], pos_out[0]); // axis order for nrrd
     seeds.push_back(pos_out);
-    }
+  }
 
   tract->SetSeeds(seeds);
 
@@ -300,46 +295,86 @@ void vtkSlicerInteractiveUKFLogic::RunFromSeedPoints
   this->producer->Modified();
 }
 
-void vtkSlicerInteractiveUKFLogic::set_seedsPerVoxel(double val) {
-  if (!g_tracto) return;
+void vtkSlicerInteractiveUKFLogic::set_seedsPerVoxel(double val)
+{
+  if (!g_tracto)
+    return;
   g_tracto->_seeds_per_voxel = val;
 }
 
-void vtkSlicerInteractiveUKFLogic::set_stoppingFA(double val){
-  if (!g_tracto) return;
+void vtkSlicerInteractiveUKFLogic::set_stoppingFA(double val)
+{
+  if (!g_tracto)
+    return;
   g_tracto->_fa_min = val;
 }
-void vtkSlicerInteractiveUKFLogic::set_seedingThreshold(double val) {
-  if (!g_tracto) return;
+void vtkSlicerInteractiveUKFLogic::set_seedingThreshold(double val)
+{
+  if (!g_tracto)
+    return;
   g_tracto->_seeding_threshold = val;
 }
-void vtkSlicerInteractiveUKFLogic::set_stoppingThreshold(double val) {
-  if (!g_tracto) return;
+
+void vtkSlicerInteractiveUKFLogic::set_rtopMin(double val)
+{
+  if (!g_tracto)
+    return;
+  g_tracto->_rtop_min = val;
+}
+
+void vtkSlicerInteractiveUKFLogic::set_maxNMSE(double val)
+{
+  if (!g_tracto)
+    return;
+  g_tracto->_max_nmse = val;
+}
+
+void vtkSlicerInteractiveUKFLogic::set_maxUKFIterations(double val)
+{
+  if (!g_tracto)
+    return;
+  g_tracto->_maxUKFIterations = val;
+}
+
+void vtkSlicerInteractiveUKFLogic::set_stoppingThreshold(double val)
+{
+  if (!g_tracto)
+    return;
   g_tracto->_mean_signal_min = val;
 }
-void vtkSlicerInteractiveUKFLogic::set_stepLength(double val) {
-  if (!g_tracto) return;
+void vtkSlicerInteractiveUKFLogic::set_stepLength(double val)
+{
+  if (!g_tracto)
+    return;
   g_tracto->_stepLength = val;
 }
-void vtkSlicerInteractiveUKFLogic::set_recordLength(double val) {
-  if (!g_tracto) return;
-  g_tracto->_steps_per_record = val/g_tracto->_stepLength;
+void vtkSlicerInteractiveUKFLogic::set_recordLength(double val)
+{
+  if (!g_tracto)
+    return;
+  g_tracto->_steps_per_record = val / g_tracto->_stepLength;
 }
 
 // these calls invalidate the model and must call UpdateFilterModelType()
-void vtkSlicerInteractiveUKFLogic::set_numTensor(size_t val) {
-  if (!g_tracto) return;
+void vtkSlicerInteractiveUKFLogic::set_numTensor(size_t val)
+{
+  if (!g_tracto)
+    return;
   g_tracto->_num_tensors = val;
   g_tracto->UpdateFilterModelType();
 }
-void vtkSlicerInteractiveUKFLogic::set_noddi(bool val) {
-  if (!g_tracto) return;
+void vtkSlicerInteractiveUKFLogic::set_noddi(bool val)
+{
+  if (!g_tracto)
+    return;
   g_tracto->_noddi = val;
   g_tracto->UpdateFilterModelType();
 }
 
-void vtkSlicerInteractiveUKFLogic::set_freeWater(bool val) {
-  if (!g_tracto) return;
+void vtkSlicerInteractiveUKFLogic::set_freeWater(bool val)
+{
+  if (!g_tracto)
+    return;
   g_tracto->_free_water = val;
   g_tracto->UpdateFilterModelType();
 }

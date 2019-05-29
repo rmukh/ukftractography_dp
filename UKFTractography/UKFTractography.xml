@@ -138,6 +138,7 @@
       <default>2</default>
       <element>1</element>
       <element>2</element>
+      <element>3</element>
     </integer-enumeration>
 
 

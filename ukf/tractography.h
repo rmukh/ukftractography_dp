@@ -337,7 +337,7 @@ private:
   ukfVectorType _gradientStrength, _pulseSeparation;
   /** Diffustion propagator parameters **/
   bool _diffusion_propagator;
-  const ukfPrecisionType _rtop_min;
+  ukfPrecisionType _rtop_min;
   bool _record_rtop;
   const ukfPrecisionType _max_nmse;
   int _maxUKFIterations;

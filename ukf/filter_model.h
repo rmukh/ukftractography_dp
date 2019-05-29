@@ -67,10 +67,6 @@ public:
     {
       std::cout << "Using Spherical Ridgelets\n";
     }
-    else
-    {
-      std::cout << "Using Spherical Ridgelets\n";
-    }
   }
 
   /** Destructor */

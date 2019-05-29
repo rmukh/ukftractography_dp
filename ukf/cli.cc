@@ -79,6 +79,10 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   ukfPrecisionType l_maxBranchingAngle = maxBranchingAngle;
   ukfPrecisionType l_minBranchingAngle = minBranchingAngle;
 
+  ukfPrecisionType l_minRTOP = minRTOP;
+  ukfPrecisionType l_maxNMSE = maxNMSE;
+  ukfPrecisionType l_maxUKFIterations = maxUKFIterations;
+
   // If sigmaSignal is not set minimum of voxel size is used for interpolation
   ukfPrecisionType SIGMA_SIGNAL = sigmaSignal;
 
@@ -127,8 +131,10 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   }
 
   // SETTING THE DEFAULT PARAMETERS
-  std::string strModel = fullTensorModel ? "full model" : "simple model";
+  std::string strModel = fullTensorModel ? "full model" : "simple";
   std::string strFreeWater = freeWater ? " with free water estimation" : "";
+  if (diffusionPropagator)
+    strModel = "DP model";
 
   std::cout << "Using the " << numTensor << "T " << strModel << strFreeWater << ". Setting the default parameters accordingly:\n";
   std::cout << "\"*\": set by user\n";
@@ -219,7 +225,7 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     {
       if (diffusionPropagator)
       {
-        ukf_setAndTell(l_Ql, 150, "Ql");
+        ukf_setAndTell(l_Ql, 150.0, "Ql");
       }
       else if (numTensor == 1)
       {
@@ -244,7 +250,7 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   {
     if (l_Qt == 0.0)
     {
-      ukf_setAndTell(l_Qt, 50, "Qt");
+      ukf_setAndTell(l_Qt, 50.0, "Qt");
     }
     else
     {
@@ -254,38 +260,38 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
 
   if (diffusionPropagator)
   {
-    if (minRTOP == 0.0)
+    if (l_minRTOP == 0.0)
     {
-      ukf_setAndTell(minRTOP, 60.0, "minRTOP");
+      ukf_setAndTell(l_minRTOP, 60.0, "minRTOP");
     }
     else
     {
-      ukf_tell(minRTOP, "minRTOP");
+      ukf_tell(l_minRTOP, "minRTOP");
     }
   }
 
   if (diffusionPropagator)
   {
-    if (maxNMSE == 0.0)
+    if (l_maxNMSE == 0.0)
     {
-      ukf_setAndTell(maxNMSE, 0.15, "maxNMSE");
+      ukf_setAndTell(l_maxNMSE, 0.15, "maxNMSE");
     }
     else
     {
-      ukf_tell(maxNMSE, "maxNMSE");
+      ukf_tell(l_maxNMSE, "maxNMSE");
     }
   }
 
   if (diffusionPropagator) {
-    if (maxUKFIterations == -1.0) {
-      ukf_setAndTell(maxUKFIterations, 5, "maxUKFIterations");
+    if (l_maxUKFIterations == -1.0) {
+      ukf_setAndTell(l_maxUKFIterations, 5, "maxUKFIterations");
     }
     else {
-    if (maxUKFIterations < 0.0) {
+    if (l_maxUKFIterations < 0.0) {
         std::cout<<"Error: maxUKFIterations cannot be negative. Exiting"<<std::endl;
         exit(1);
     }
-      ukf_tell(maxUKFIterations, "maxUKFIterations");
+      ukf_tell(l_maxUKFIterations, "maxUKFIterations");
     }
   }
 
@@ -455,10 +461,9 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.Qvic = l_Qvic;
     s.Rs = l_Rs;
 
-    s.rtop_min = minRTOP;
-    s.max_nmse = maxNMSE;
-
-    s.maxUKFIterations = maxUKFIterations;
+    s.rtop_min = l_minRTOP;
+    s.max_nmse = l_maxNMSE;
+    s.maxUKFIterations = l_maxUKFIterations;
 
     // TODO these should be header-initialized once we use C++11
     s.p0 = P0;

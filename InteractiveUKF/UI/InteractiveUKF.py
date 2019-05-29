@@ -251,6 +251,9 @@ class InteractiveUKFWidget(ScriptedLoadableModuleWidget):
     self.c_Qm.connect('valueChanged(double)', self.on_Qm)
     self.c_seedsPerVoxel.connect('valueChanged(double)', self.on_seedsPerVoxel)
     self.c_seedingThreshold.connect('valueChanged(double)', self.on_seedingThreshold)
+    self.c_rtopMin.connect('valueChanged(double)', self.on_rtopMin)
+    self.c_maxNMSE.connect('valueChanged(double)', self.on_maxNMSE)
+    self.c_maxUKFIterations.connect('valueChanged(double)', self.on_maxUKFIterations)
     self.c_stoppingFA.connect('valueChanged(double)', self.on_stoppingFA)
     self.c_stoppingThreshold.connect('valueChanged(double)', self.on_stoppingThreshold)
     self.c_numTensor.connect('valueChanged()', self.on_numTensor)
@@ -265,6 +268,9 @@ class InteractiveUKFWidget(ScriptedLoadableModuleWidget):
 
     self.c_seedsPerVoxel.disconnect('valueChanged(double)', self.on_seedsPerVoxel)
     self.c_seedingThreshold.disconnect('valueChanged(double)', self.on_seedingThreshold)
+    self.c_rtopMin.disconnect('valueChanged(double)', self.on_rtopMin)
+    self.c_maxNMSE.disconnect('valueChanged(double)', self.on_maxNMSE)
+    self.c_maxUKFIterations.disconnect('valueChanged(double)', self.on_maxUKFIterations)
     self.c_stoppingFA.disconnect('valueChanged(double)', self.on_stoppingFA)
     self.c_stoppingThreshold.disconnect('valueChanged(double)', self.on_stoppingThreshold)
     self.c_numTensor.disconnect('valueChanged()', self.on_numTensor)
@@ -369,6 +375,18 @@ class InteractiveUKFWidget(ScriptedLoadableModuleWidget):
 
   def on_seedsPerVoxel(self, value):
     self.logic.set_seedsPerVoxel(value)
+    self.rerunSeeding()
+
+  def on_rtopMin(self, value):
+    self.logic.set_rtopMin(value)
+    self.rerunSeeding()
+
+  def on_maxNMSE(self, value):
+    self.logic.set_maxNMSE(value)
+    self.rerunSeeding()
+
+  def on_maxUKFIterations(self, value):
+    self.logic.set_maxUKFIterations(value)
     self.rerunSeeding()
 
   def on_seedingThreshold(self, value):

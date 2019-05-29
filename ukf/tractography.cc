@@ -147,6 +147,8 @@ void Tractography::UpdateFilterModelType()
 
   this->_filter_model_type = Tractography::_1T;
   bool simpleTensorModel = !(this->_is_full_model);
+  if (_diffusion_propagator)
+    simpleTensorModel = false;
 
   if (_noddi)
   {
@@ -214,16 +216,16 @@ void Tractography::UpdateFilterModelType()
       std::cout << "Using 3-tensor simple model." << std::endl;
       this->_filter_model_type = Tractography::_3T;
     }
+    else if (_diffusion_propagator)
+    {
+      std::cout << "Using Diffusion Propagator model (3 tensors, free water, bi-exponential)" << std::endl;
+      this->_filter_model_type = Tractography::_3T_BIEXP_RIDG;
+    }
     else
     {
       std::cout << "Using 3-tensor full model." << std::endl;
       this->_filter_model_type = Tractography::_3T_FULL;
     }
-  }
-  else if (_diffusion_propagator)
-  {
-    std::cout << "Using Diffusion Propagator model (3 tensors, free water, bi-exponential)" << std::endl;
-    this->_filter_model_type = Tractography::_3T_BIEXP_RIDG;
   }
 
   if ((_cos_theta_max != ukfOne) && (_cos_theta_max <= _cos_theta_min))
@@ -266,12 +268,6 @@ void Tractography::UpdateFilterModelType()
     {
       std::cout << "Since the Diffusion Propagator model is used, the free water parameter will be estimated" << std::endl;
       _free_water = true;
-    }
-
-    if (!simpleTensorModel)
-    {
-      std::cout << "Since the Diffusion Propagator model is used, the simple tensor model will be used" << std::endl;
-      simpleTensorModel = true;
     }
 
     if (_num_tensors != 3)
@@ -459,14 +455,17 @@ void Tractography::UpdateFilterModelType()
   else if (this->_filter_model_type == _3T_BIEXP_RIDG)
   {
     // Qwiso = 0.002 ?
+    std::cout << "m r 1 " << _rtop_min << std::endl;
     _model = new Ridg_BiExp_FW(Qm, Ql, Qt, Qw, Qwiso, Rs, this->weights_on_tensors, this->_free_water,
                                D_ISO, ARidg, QRidg, fcs, nu, conn, fista_lambda, max_odf_thresh);
+    std::cout << "m r 2 " << _rtop_min << std::endl;
   }
   else
   {
     std::cerr << "Unknown filter type!" << std::endl;
     assert(false);
   }
+  std::cout << "m r 3 " << _rtop_min << std::endl;
 
   _model->set_signal_data(_signal_data);
   _model->set_signal_dim(_signal_data->GetSignalDimension() * 2);
@@ -676,6 +675,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   // Pack information for each seed point.
   int fa_too_low = 0;
   std::cout << "Processing " << starting_points.size() << " starting points" << std::endl;
+  std::cout << "Min rtop thresh " << _rtop_min << std::endl;
   for (size_t i = 0; i < starting_points.size(); ++i)
   {
     const ukfVectorType &param = starting_params[i];
@@ -692,6 +692,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
     if (_num_tensors >= 2)
     {
       fa2 = fa;
+      fa3 = fa;
       trace2 = trace;
     }
 
@@ -832,6 +833,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 
+      ODF_val_at_max.resize(6, 1);
       for (unsigned j = 0; j < 6; ++j)
       {
         ODF_val_at_max(j) = ODF(exe_vol(j));
@@ -850,7 +852,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       if (n_of_dirs == 1)
       {
-        ukfVectorType orthogonal;
+        vec3_t orthogonal;
         orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], dir_vol.row(0)[2];
         dir_init.row(1) = orthogonal;
         dir_init.row(2) = orthogonal;
@@ -954,6 +956,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       info_inv.fa3 = rtop3;
       info_inv.trace = rtop;
       info_inv.trace2 = rtopSignal;
+      std::cout << "rtopSignal " << rtopSignal << std::endl;
 
       if (rtopSignal >= _rtop_min)
       {
@@ -1062,6 +1065,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
                                       // original direction
     }
   }
+
+  cout << "Seeds vector size " << seed_infos.size() << std::endl;
 }
 
 bool Tractography::Run()
