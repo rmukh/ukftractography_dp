@@ -31,7 +31,7 @@ public:
   FilterModel(const int local_state_dim, const ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained)
       : _state_dim(local_state_dim),
         _rs(rs), _signal_dim(0), _signal_data(NULL), weights_on_tensors_(weights_on_tensors),
-        _constrained(constrained)
+        _constrained(constrained), _ridgelets_used(false)
   {
     _Q.resize(_state_dim, _state_dim);
     _Q.setConstant(ukfZero); // necessary because otherwise there is memory left overs in the matrix
@@ -44,7 +44,6 @@ public:
     {
       std::cout << "Using unconstrained filter\n";
     }
-    _ridgelets_used = false;
   }
 
   FilterModel(const int local_state_dim, const ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, bool ridgelets_used)

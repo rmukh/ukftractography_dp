@@ -130,11 +130,17 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     return 1;
   }
 
+  if (!freeWater && diffusionPropagator)
+  {
+    std::cout << "Since the Biexponential model is used, the free water parameter will be estimated" << std::endl;
+    freeWater = true;
+  }
+
   // SETTING THE DEFAULT PARAMETERS
   std::string strModel = fullTensorModel ? "full model" : "simple";
   std::string strFreeWater = freeWater ? " with free water estimation" : "";
   if (diffusionPropagator)
-    strModel = "DP model";
+    strModel = "Biexponential Spherical Ridgelets model";
 
   std::cout << "Using the " << numTensor << "T " << strModel << strFreeWater << ". Setting the default parameters accordingly:\n";
   std::cout << "\"*\": set by user\n";
@@ -282,15 +288,19 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     }
   }
 
-  if (diffusionPropagator) {
-    if (l_maxUKFIterations == -1.0) {
+  if (diffusionPropagator)
+  {
+    if (l_maxUKFIterations == -1.0)
+    {
       ukf_setAndTell(l_maxUKFIterations, 5, "maxUKFIterations");
     }
-    else {
-    if (l_maxUKFIterations < 0.0) {
-        std::cout<<"Error: maxUKFIterations cannot be negative. Exiting"<<std::endl;
+    else
+    {
+      if (l_maxUKFIterations < 0.0)
+      {
+        std::cout << "Error: maxUKFIterations cannot be negative. Exiting" << std::endl;
         exit(1);
-    }
+      }
       ukf_tell(l_maxUKFIterations, "maxUKFIterations");
     }
   }
@@ -301,7 +311,7 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     {
       ukf_setAndTell(l_Rs, 0.015, "Rs");
     }
-    if (numTensor == 1)
+    else if (numTensor == 1)
     {
       ukf_setAndTell(l_Rs, 0.01, "Rs"); //l_Rs = 0.02;
     }

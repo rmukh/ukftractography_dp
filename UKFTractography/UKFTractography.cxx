@@ -52,9 +52,7 @@ extern "C"
     bool outputNormalizedDWIData = false;
 
     // initializing super object
-    std::cout << "min rtop debug 1" << ukf_settings.rtop_min << std::endl;
     Tractography *tract = new Tractography(ukf_settings);
-    std::cout << "min rtop debug 2" << ukf_settings.rtop_min << std::endl;
 
     // if specified on command line, write out binary tract file
     tract->SetWriteBinary(!ukf_settings.writeAsciiTracts);
@@ -70,13 +68,9 @@ extern "C"
       {
         itkGenericExceptionMacro(<< "::LoadFiles failed with unknown error.");
       }
-      std::cout << "min rtop debug 3" << ukf_settings.rtop_min << std::endl;
       tract->UpdateFilterModelType();
-      std::cout << "min rtop debug 4" << ukf_settings.rtop_min << std::endl;
-
       // Run the tractography.
       writeStatus = tract->Run();
-      std::cout << "min rtop debug 5" << ukf_settings.rtop_min << std::endl;
     }
     catch (itk::ExceptionObject &err)
     {

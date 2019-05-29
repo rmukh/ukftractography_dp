@@ -18,8 +18,8 @@ class Ridg_BiExp_FW : public FilterModel
 public:
     Ridg_BiExp_FW(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType qt, ukfPrecisionType qw, ukfPrecisionType qwiso,
                   ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, const ukfPrecisionType diff_fw, 
-                  ukfMatrixType Aridg, ukfMatrixType Qridg, ukfMatrixType fcsridg, ukfMatrixType nuridg, vector<vector<unsigned>> connridg,
-                  ukfPrecisionType fl, ukfPrecisionType mot)
+                  ukfMatrixType &Aridg, ukfMatrixType &Qridg, ukfMatrixType &fcsridg, ukfMatrixType &nuridg, 
+                  vector<vector<unsigned>> &connridg, ukfPrecisionType fl, ukfPrecisionType mot)
         : FilterModel(24, rs, weights_on_tensors, constrained, true),
           _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000),
           _w_fast_diffusion(0.7), m_D_iso(SetIdentityScaled(diff_fw)), A(Aridg), Q(Qridg), fcs(fcsridg), nu(nuridg), conn(connridg),
@@ -43,7 +43,7 @@ public:
         // d is the contraint value
         // D'*x >= -d
 
-        const unsigned int N_constr = 25;
+        const unsigned int N_constr = 26;
 
         // N_constr constraints for the 24 dimensions of the state
         _D.resize(24, N_constr);
@@ -149,8 +149,8 @@ public:
     ukfMatrixType &nu;
     vector<vector<unsigned>> &conn;
 
-    ukfPrecisionType fista_lambda;
-    ukfPrecisionType max_odf_thresh;
+    const ukfPrecisionType fista_lambda;
+    const ukfPrecisionType max_odf_thresh;
 };
 
 #endif //RIDG_BiExp_FW__

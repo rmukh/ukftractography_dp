@@ -115,9 +115,13 @@ Tractography::Tractography(UKFSettings s) :
 
                                             _filter_model_type(Tractography::_1T),
                                             _model(NULL),
-                                            debug(false)
+                                            debug(false),
+                                            sph_rho(3.125),
+                                            sph_J(2),
+                                            fista_lambda(0.01),
+                                            lvl(4),
+                                            max_odf_thresh(0.7)
 // end initializer list
-
 {
 }
 
@@ -309,8 +313,7 @@ void Tractography::UpdateFilterModelType()
   // Double check branching.
   _is_branching = _num_tensors > 1 && _cos_theta_max < ukfOne; // The branching is enabled when the maximum branching
                                                                // angle is not 0
-  std::cout << "Branching " << (_is_branching ? "enabled" : "disabled") << std::endl
-            << std::endl;
+  std::cout << "Branching " << (_is_branching ? "enabled" : "disabled") << std::endl;
   if (!_is_branching)
   {
     _branches_only = false;
@@ -453,19 +456,16 @@ void Tractography::UpdateFilterModelType()
     _model = new Full3T(Qm, Ql, Rs, this->weights_on_tensors, this->_free_water);
   }
   else if (this->_filter_model_type == _3T_BIEXP_RIDG)
-  {
-    // Qwiso = 0.002 ?
-    std::cout << "m r 1 " << _rtop_min << std::endl;
+  {               
     _model = new Ridg_BiExp_FW(Qm, Ql, Qt, Qw, Qwiso, Rs, this->weights_on_tensors, this->_free_water,
-                               D_ISO, ARidg, QRidg, fcs, nu, conn, fista_lambda, max_odf_thresh);
-    std::cout << "m r 2 " << _rtop_min << std::endl;
+                               D_ISO, ARidg, QRidg, fcs, nu, conn, fista_lambda,
+                               max_odf_thresh);
   }
   else
   {
     std::cerr << "Unknown filter type!" << std::endl;
     assert(false);
   }
-  std::cout << "m r 3 " << _rtop_min << std::endl;
 
   _model->set_signal_data(_signal_data);
   _model->set_signal_dim(_signal_data->GetSignalDimension() * 2);
@@ -675,7 +675,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   // Pack information for each seed point.
   int fa_too_low = 0;
   std::cout << "Processing " << starting_points.size() << " starting points" << std::endl;
-  std::cout << "Min rtop thresh " << _rtop_min << std::endl;
+
   for (size_t i = 0; i < starting_points.size(); ++i)
   {
     const ukfVectorType &param = starting_params[i];
@@ -956,7 +956,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       info_inv.fa3 = rtop3;
       info_inv.trace = rtop;
       info_inv.trace2 = rtopSignal;
-      std::cout << "rtopSignal " << rtopSignal << std::endl;
 
       if (rtopSignal >= _rtop_min)
       {
@@ -1012,7 +1011,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
     }
 
     // Duplicate/tripple states if we have several tensors.
-    if (_num_tensors > 1 && !_noddi)
+    if (_num_tensors > 1 && !_noddi && !_diffusion_propagator)
     {
       size_t size = tmp_info_state.size();
       for (size_t j = 0; j < size; ++j)
