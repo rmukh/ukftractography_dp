@@ -1796,11 +1796,8 @@ void Tractography::Follow3T(const int thread_id,
   while (true)
   {
     ++stepnr;
-    std::cout << "stepnr " << stepnr << std::endl;
 
     Step3T(thread_id, x, m1, l1, m2, l2, m3, l3, fa, fa2, fa3, state, p, dNormMSE, trace, trace2);
-    std::cout << "fa after step " << fa << std::endl;
-    std::cout << "fa2 after step " << fa2 << std::endl;
 
     // Check if we should abort following this fiber. We abort if we reach the
     // CSF, if FA or GA get too small, if the curvature get's too high or if
@@ -1839,7 +1836,6 @@ void Tractography::Follow3T(const int thread_id,
       // If fibersize is more than initally allocated size resizing further
       fiber_size += 100;
       FiberReserve(fiber, fiber_size);
-      std::cout << " FiberReserve used " << std::endl;
     }
 
     if ((stepnr + 1) % _steps_per_record == 0)
@@ -2266,9 +2262,6 @@ void Tractography::Step3T(const int thread_id,
     trace2 = l2[0] + l2[1] + l2[2];
   }
 
-  std::cout << "fa in step 1" << fa << std::endl;
-  std::cout << "fa2 in step 1" << fa2 << std::endl;
-
   ukfPrecisionType dot1 = m1.dot(old_dir);
   ukfPrecisionType dot2 = m2.dot(old_dir);
   ukfPrecisionType dot3 = m3.dot(old_dir);
@@ -2312,14 +2305,17 @@ void Tractography::Step3T(const int thread_id,
   // Update FA. If the first lamba is not the largest anymore the FA is set to
   // 0, and the 0 FA value will lead to abortion in the tractography loop.
   // NEED TO FIX BELOW
-  if (l1[0] < l1[1] || l1[0] < l1[2])
+  if (!_diffusion_propagator)
   {
-    fa = ukfZero;
-  }
-  else
-  {
-    fa = l2fa(l1[0], l1[1], l1[2]);
-    fa2 = l2fa(l2[0], l2[1], l2[2]);
+    if (l1[0] < l1[1] || l1[0] < l1[2])
+    {
+      fa = ukfZero;
+    }
+    else
+    {
+      fa = l2fa(l1[0], l1[1], l1[2]);
+      fa2 = l2fa(l2[0], l2[1], l2[2]);
+    }
   }
 
   const vec3_t &voxel = _signal_data->voxel();
@@ -2633,7 +2629,6 @@ void Tractography::SwapState3T_BiExp(State &state,
   assert(i == 2 || i == 3);
   int ishift = i - 1;
 
-  std::cout << "Biexp used " << i << std::endl;
   int state_dim = _model->state_dim();
   assert(state_dim == 24);
 
