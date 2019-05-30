@@ -592,6 +592,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       rand_dirs.push_back(dir);
     }
   }
+
   // Calculate all starting points.
   stdVec_t starting_points;
   stdEigVec_t signal_values;
@@ -974,7 +975,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
         if (n_of_dirs > 1)
         {
-          SwapState3T(tmp_info_state, p, 2);
+          SwapState3T_BiExp(tmp_info_state, p, 2);
           info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
           info.state = ConvertVector<stdVecState, State>(tmp_info_state);
           seed_infos.push_back(info);
@@ -987,7 +988,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
           seed_infos.push_back(info_inv);
           if (n_of_dirs > 2)
           {
-            SwapState3T(tmp_info_state, p, 3);
+            SwapState3T_BiExp(tmp_info_state, p, 3);
             info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
             info.state = ConvertVector<stdVecState, State>(tmp_info_state);
             seed_infos.push_back(info);
@@ -2284,7 +2285,10 @@ void Tractography::Step3T(const int thread_id,
     l2 = tmp;
 
     // Swap state.
-    SwapState3T(state, covariance, 2);
+    if (_diffusion_propagator)
+      SwapState3T_BiExp(state, covariance, 2);
+    else
+      SwapState3T(state, covariance, 2);
   }
 
   // NEED TO FIX
@@ -2299,7 +2303,10 @@ void Tractography::Step3T(const int thread_id,
     l3 = tmp;
 
     // Swap state.
-    SwapState3T(state, covariance, 3);
+    if (_diffusion_propagator)
+      SwapState3T_BiExp(state, covariance, 3);
+    else
+      SwapState3T(state, covariance, 3);
   }
 
   // Update FA. If the first lamba is not the largest anymore the FA is set to
@@ -2579,16 +2586,13 @@ void Tractography::SwapState3T(State &state,
                                ukfMatrixType &covariance,
                                int i)
 {
-
-  // This function is only for 3T.
-  // NEED TO FIX!
+  // This function is only for 3T. No free water
   assert(i == 2 || i == 3);
 
   int state_dim = _model->state_dim();
   ukfMatrixType tmp(state_dim, state_dim);
   state_dim /= 3;
-  state_dim--;
-  assert(state_dim == 5 || state_dim == 6 || state_dim == 7);
+  assert(state_dim == 5 || state_dim == 6);
   --i;
   int j = i == 1 ? 2 : 1;
   i *= state_dim;
@@ -2605,14 +2609,70 @@ void Tractography::SwapState3T(State &state,
   covariance.block(j, 0, state_dim, state_dim) = tmp.block(j, i, state_dim, state_dim);
   covariance.block(i, j, state_dim, state_dim) = tmp.block(0, j, state_dim, state_dim);
   covariance.block(0, j, state_dim, state_dim) = tmp.block(i, j, state_dim, state_dim);
-  std::cout << "i " << i << std::endl;
-  std::cout << "state_dim " << state_dim << std::endl;
+
   // Swap the state.
   const ukfVectorType tmp_vec = state;
-  std::cout << "state before\n " << state << std::endl;
   state.segment(i, state_dim) = tmp_vec.segment(0, state_dim);
   state.segment(0, state_dim) = tmp_vec.segment(i, state_dim);
-  std::cout << "state after\n " << state << std::endl;
+}
+
+void Tractography::SwapState3T_BiExp(stdVecState &state,
+                                     ukfMatrixType &covariance,
+                                     int i)
+{
+  State tmp_state = ConvertVector<stdVecState, State>(state);
+  SwapState3T_BiExp(tmp_state, covariance, i);
+  state = ConvertVector<State, stdVecState>(tmp_state);
+}
+
+void Tractography::SwapState3T_BiExp(State &state,
+                                     ukfMatrixType &covariance,
+                                     int i)
+{
+  // This function is only for Bi-exp model
+  assert(i == 2 || i == 3);
+  int ishift = i - 1;
+
+  std::cout << "Biexp used " << i << std::endl;
+  int state_dim = _model->state_dim();
+  assert(state_dim == 24);
+
+  ukfMatrixType tmp(state_dim, state_dim);
+  state_dim = 7;
+  --i;
+  int j = i == 1 ? 2 : 1;
+  i *= state_dim;
+  j *= state_dim;
+
+  int tshift = 3 * state_dim;
+  int mshift = ishift * state_dim;
+
+  tmp.setConstant(ukfZero);
+  tmp = covariance;
+  covariance.block(i, i, state_dim, state_dim) = tmp.block(0, 0, state_dim, state_dim);
+  covariance.block(0, 0, state_dim, state_dim) = tmp.block(i, i, state_dim, state_dim);
+
+  covariance.block(0, i, state_dim, state_dim) = tmp.block(i, 0, state_dim, state_dim);
+  covariance.block(i, 0, state_dim, state_dim) = tmp.block(0, i, state_dim, state_dim);
+
+  covariance.block(j, i, state_dim, state_dim) = tmp.block(j, 0, state_dim, state_dim);
+  covariance.block(j, 0, state_dim, state_dim) = tmp.block(j, i, state_dim, state_dim);
+
+  covariance.block(i, j, state_dim, state_dim) = tmp.block(0, j, state_dim, state_dim);
+  covariance.block(0, j, state_dim, state_dim) = tmp.block(i, j, state_dim, state_dim);
+
+  // Swap weights in covariance matrix
+  // Lower parp
+  covariance.block(tshift, mshift, 3, state_dim) = tmp.block(tshift, 0, 3, state_dim);
+  covariance.block(tshift, 0, 3, state_dim) = tmp.block(tshift, mshift, 3, state_dim);
+  // Right part
+  covariance.block(mshift, tshift, state_dim, 3) = tmp.block(0, tshift, state_dim, 3);
+  covariance.block(0, tshift, state_dim, 3) = tmp.block(mshift, tshift, state_dim, 3);
+
+  // Swap the state.
+  const ukfVectorType tmp_vec = state;
+  state.segment(i, state_dim) = tmp_vec.segment(0, state_dim);
+  state.segment(0, state_dim) = tmp_vec.segment(i, state_dim);
 }
 
 void Tractography::SwapState2T(State &state,
