@@ -17,8 +17,8 @@ class Ridg_BiExp_FW : public FilterModel
 {
 public:
     Ridg_BiExp_FW(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType qt, ukfPrecisionType qw, ukfPrecisionType qwiso,
-                  ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, const ukfPrecisionType diff_fw, 
-                  ukfMatrixType &Aridg, ukfMatrixType &Qridg, ukfMatrixType &fcsridg, ukfMatrixType &nuridg, 
+                  ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, const ukfPrecisionType diff_fw,
+                  ukfMatrixType &Aridg, ukfMatrixType &Qridg, ukfMatrixType &fcsridg, ukfMatrixType &nuridg,
                   vector<vector<unsigned>> &connridg, ukfPrecisionType fl, ukfPrecisionType mot)
         : FilterModel(24, rs, weights_on_tensors, constrained, true),
           _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000),
@@ -43,7 +43,7 @@ public:
         // d is the contraint value
         // D'*x >= -d
 
-        const unsigned int N_constr = 26;
+        const unsigned int N_constr = 30;
 
         // N_constr constraints for the 24 dimensions of the state
         _D.resize(24, N_constr);
@@ -55,9 +55,9 @@ public:
 
         // Free water
         _D(23, 0) = -1;
-        _d(0) = 1; // w <= 1
+        _d(0) = 1; // wiso <= 1
         _D(23, 1) = 1;
-        _d(1) = 0; // w >= 0
+        _d(1) = 0; // wiso >= 0
 
         // Tensor 1 (minimal values)
         _D(3, 2) = 1;
@@ -118,6 +118,17 @@ public:
         _d(24) = _lambda_max_diffusion; // l33 <= max
         _D(20, 25) = -1;
         _d(25) = _lambda_max_diffusion; // l34 <= max
+
+        // Weights
+        _D(21, 26) = -1;
+        _d(26) = 1; // w1 <= 1
+        _D(21, 27) = 1;
+        _d(27) = 0; // w1 >= 0
+
+        _D(22, 28) = -1;
+        _d(28) = 1; // w2 <= 1
+        _D(22, 29) = 1;
+        _d(29) = 0; // w2 >= 0
     }
 
     virtual ~Ridg_BiExp_FW()
@@ -125,7 +136,7 @@ public:
     }
 
     virtual void F(ukfMatrixType & /* X */, ukfVectorType /* s */) const;
-    ukfPrecisionType cosine_similarity(vec3_t& F, vec3_t& S) const;
+    ukfPrecisionType cosine_similarity(vec3_t &F, vec3_t &S) const;
     virtual void F(ukfMatrixType & /* X */) const;
     virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
 

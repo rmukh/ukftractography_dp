@@ -104,10 +104,14 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
         X(19, i) = std::max(X(19, i), _lambda_min_slow_diffusion);
         X(20, i) = std::max(X(20, i), _lambda_min_slow_diffusion);
 
-        X(10, i) = std::min(X(17, i), _lambda_max_diffusion);
-        X(11, i) = std::min(X(18, i), _lambda_max_diffusion);
-        X(12, i) = std::min(X(19, i), _lambda_max_diffusion);
-        X(13, i) = std::min(X(20, i), _lambda_max_diffusion);
+        X(17, i) = std::min(X(17, i), _lambda_max_diffusion);
+        X(18, i) = std::min(X(18, i), _lambda_max_diffusion);
+        X(19, i) = std::min(X(19, i), _lambda_max_diffusion);
+        X(20, i) = std::min(X(20, i), _lambda_max_diffusion);
+
+        // Weights
+        X(21, i) = CheckZero(X(21, i));
+        X(22, i) = CheckZero(X(22, i));
 
         // Free water
         X(23, i) = CheckZero(X(23, i));
@@ -139,6 +143,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
             closest.maxCoeff(&maxInd);
             o2 = dir_vol.row(maxInd);
         }
+
         if (n_of_dirs > 2)
         {
             for (unsigned int v = 0; v < exe_vol.rows(); ++v)
@@ -165,6 +170,10 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
         X(14, i) = 0.5 * (m3(0) + o3(0));
         X(15, i) = 0.5 * (m3(1) + o3(1));
         X(16, i) = 0.5 * (m3(2) + o3(2));
+
+        // Average weights
+        //X(21, i) = 0.5 * (X(21, i) + o3(0));
+        //X(22, i) = 0.5 * (X(22, i) + o3(1));
     } //for X.cols()
 }
 
@@ -200,6 +209,7 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X,
 
     const stdVec_t &gradients = _signal_data->gradients();
     const ukfVectorType &b = _signal_data->GetBValues();
+
     for (unsigned int i = 0; i < X.cols(); ++i)
     {
         // Normalize directions.

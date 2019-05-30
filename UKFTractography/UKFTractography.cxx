@@ -39,8 +39,9 @@ extern "C"
 #if ITK_VERSION_MAJOR >= 5
     const int actualNumThreadsUsed = itk::MultiThreaderBase::GetGlobalDefaultNumberOfThreads();
 #else
-    const int actualNumThreadsUsed = itk::MultiThreader::GetGlobalDefaultNumberOfThreads();
+    const int actualNumThreadsUsed = 1; //itk::MultiThreader::GetGlobalDefaultNumberOfThreads();
 #endif
+
     ukf_settings.num_threads = actualNumThreadsUsed;
     {
       std::cout << "Found " << actualNumThreadsUsed << " cores on your system." << std::endl;

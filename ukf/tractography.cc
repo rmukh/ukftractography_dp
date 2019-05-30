@@ -456,7 +456,7 @@ void Tractography::UpdateFilterModelType()
     _model = new Full3T(Qm, Ql, Rs, this->weights_on_tensors, this->_free_water);
   }
   else if (this->_filter_model_type == _3T_BIEXP_RIDG)
-  {               
+  {
     _model = new Ridg_BiExp_FW(Qm, Ql, Qt, Qw, Qwiso, Rs, this->weights_on_tensors, this->_free_water,
                                D_ISO, ARidg, QRidg, fcs, nu, conn, fista_lambda,
                                max_odf_thresh);
@@ -1065,7 +1065,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
     }
   }
 
-  cout << "Seeds vector size " << seed_infos.size() << std::endl;
+  cout << "Final seeds vector size " << seed_infos.size() << std::endl;
 }
 
 bool Tractography::Run()
@@ -1090,6 +1090,7 @@ bool Tractography::Run()
   // const int num_of_threads = 8;
 
   assert(num_of_threads > 0);
+  std::cout << "n_of_th " << num_of_threads << std::endl;
   _ukf.reserve(num_of_threads); //Allocate, but do not assign
   for (int i = 0; i < num_of_threads; i++)
   {
@@ -1320,18 +1321,19 @@ void Tractography::computeRTOPfromState(stdVecState &state, ukfPrecisionType &rt
 
   ukfPrecisionType w1 = state[21];
   ukfPrecisionType w2 = state[22];
-  ukfPrecisionType w3 = 1 - w1 - w2;
+  ukfPrecisionType w3 = 1.0 - w1 - w2;
   ukfPrecisionType wiso = state[23];
 
   ukfPrecisionType det_l1 = l11 * l12;
   ukfPrecisionType det_t1 = l13 * l14;
+
   ukfPrecisionType det_l2 = l21 * l22;
   ukfPrecisionType det_t2 = l23 * l24;
+
   ukfPrecisionType det_l3 = l31 * l32;
   ukfPrecisionType det_t3 = l33 * l34;
 
-  // !!! D_ISO value hardcoded...
-  ukfPrecisionType det_fw = 0.003 * 0.003 * 0.003;
+  ukfPrecisionType det_fw = D_ISO * D_ISO * D_ISO;
 
   ukfPrecisionType PI_COEFF = std::pow(UKF_PI, 1.5);
 
@@ -1370,6 +1372,14 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
   }
 
   // w for freeWater
+  if (localState(21, 0) < 0.0)
+  {
+    localState(21, 0) = 0.0;
+  }
+  if (localState(22, 0) < 0.0)
+  {
+    localState(22, 0) = 0.0;
+  }
   if (localState(23, 0) < 0.0)
   {
     localState(23, 0) = 0.0;
@@ -1752,6 +1762,7 @@ void Tractography::Follow3T(const int thread_id,
                             std::vector<SeedPointInfo> &branching_seeds,
                             std::vector<BranchingSeedAffiliation> &branching_seed_affiliation)
 {
+  std::cout << "seed_index " << seed_index << std::endl;
   int fiber_size = 100;
   int fiber_length = 0;
   assert(_model->signal_dim() == _signal_data->GetSignalDimension() * 2);
@@ -1784,8 +1795,11 @@ void Tractography::Follow3T(const int thread_id,
   while (true)
   {
     ++stepnr;
+    std::cout << "stepnr " << stepnr << std::endl;
 
     Step3T(thread_id, x, m1, l1, m2, l2, m3, l3, fa, fa2, fa3, state, p, dNormMSE, trace, trace2);
+    std::cout << "fa after step " << fa << std::endl;
+    std::cout << "fa2 after step " << fa2 << std::endl;
 
     // Check if we should abort following this fiber. We abort if we reach the
     // CSF, if FA or GA get too small, if the curvature get's too high or if
@@ -1793,6 +1807,7 @@ void Tractography::Follow3T(const int thread_id,
     const bool is_brain = _signal_data->ScalarMaskValue(x) > 0; //_signal_data->Interp3ScalarMask(x) > 0.1;
 
     state_tmp.col(0) = state;
+
     _model->H(state_tmp, signal_tmp);
 
     const ukfPrecisionType mean_signal = s2adc(signal_tmp);
@@ -1823,6 +1838,7 @@ void Tractography::Follow3T(const int thread_id,
       // If fibersize is more than initally allocated size resizing further
       fiber_size += 100;
       FiberReserve(fiber, fiber_size);
+      std::cout << " FiberReserve used " << std::endl;
     }
 
     if ((stepnr + 1) % _steps_per_record == 0)
@@ -2249,9 +2265,14 @@ void Tractography::Step3T(const int thread_id,
     trace2 = l2[0] + l2[1] + l2[2];
   }
 
+  std::cout << "fa in step 1" << fa << std::endl;
+  std::cout << "fa2 in step 1" << fa2 << std::endl;
+
   ukfPrecisionType dot1 = m1.dot(old_dir);
   ukfPrecisionType dot2 = m2.dot(old_dir);
   ukfPrecisionType dot3 = m3.dot(old_dir);
+
+  // NEED TO FIX
   if (dot1 < dot2 && dot3 < dot2)
   {
     // Switch dirs and lambdas.
@@ -2263,9 +2284,10 @@ void Tractography::Step3T(const int thread_id,
     l2 = tmp;
 
     // Swap state.
-
     SwapState3T(state, covariance, 2);
   }
+
+  // NEED TO FIX
   else if (dot1 < dot3)
   {
     // Switch dirs and lambdas.
@@ -2282,6 +2304,7 @@ void Tractography::Step3T(const int thread_id,
 
   // Update FA. If the first lamba is not the largest anymore the FA is set to
   // 0, and the 0 FA value will lead to abortion in the tractography loop.
+  // NEED TO FIX BELOW
   if (l1[0] < l1[1] || l1[0] < l1[2])
   {
     fa = ukfZero;
@@ -2558,12 +2581,14 @@ void Tractography::SwapState3T(State &state,
 {
 
   // This function is only for 3T.
+  // NEED TO FIX!
   assert(i == 2 || i == 3);
 
   int state_dim = _model->state_dim();
   ukfMatrixType tmp(state_dim, state_dim);
   state_dim /= 3;
-  assert(state_dim == 5 || state_dim == 6);
+  state_dim--;
+  assert(state_dim == 5 || state_dim == 6 || state_dim == 7);
   --i;
   int j = i == 1 ? 2 : 1;
   i *= state_dim;
@@ -2580,11 +2605,14 @@ void Tractography::SwapState3T(State &state,
   covariance.block(j, 0, state_dim, state_dim) = tmp.block(j, i, state_dim, state_dim);
   covariance.block(i, j, state_dim, state_dim) = tmp.block(0, j, state_dim, state_dim);
   covariance.block(0, j, state_dim, state_dim) = tmp.block(i, j, state_dim, state_dim);
-
+  std::cout << "i " << i << std::endl;
+  std::cout << "state_dim " << state_dim << std::endl;
   // Swap the state.
   const ukfVectorType tmp_vec = state;
+  std::cout << "state before\n " << state << std::endl;
   state.segment(i, state_dim) = tmp_vec.segment(0, state_dim);
   state.segment(0, state_dim) = tmp_vec.segment(i, state_dim);
+  std::cout << "state after\n " << state << std::endl;
 }
 
 void Tractography::SwapState2T(State &state,
@@ -2797,6 +2825,7 @@ void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
     if (_num_tensors >= 2)
     {
       fiber.fa2.reserve(fiber_size);
+      fiber.fa3.reserve(fiber_size);
     }
   }
   if (_record_free_water || _record_Viso)
