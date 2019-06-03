@@ -26,6 +26,7 @@ eval $BINARY \
  --diffusionPropagator \
  --tracts $output_path \
  --seedsFile $seeds_path \
+ --minRTOP 20 \
  --seedsPerVoxel 5 \
  --numTensor 3 | tee -a $logFile
  end=`date +%s`

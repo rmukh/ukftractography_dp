@@ -1095,7 +1095,7 @@ bool Tractography::Run()
   // const int num_of_threads = 8;
 
   assert(num_of_threads > 0);
-  std::cout << "n_of_th " << num_of_threads << std::endl;
+
   _ukf.reserve(num_of_threads); //Allocate, but do not assign
   for (int i = 0; i < num_of_threads; i++)
   {
@@ -1769,7 +1769,6 @@ void Tractography::Follow3T(const int thread_id,
                             UKFFiber &fiber)
 {
   // For ridgelets bi-exp model only!
-  std::cout << "seed_index " << seed_index << std::endl;
   int fiber_size = 100;
   int fiber_length = 0;
   assert(_model->signal_dim() == _signal_data->GetSignalDimension() * 2);
@@ -2760,11 +2759,11 @@ void Tractography::SwapState3T_BiExp(State &state,
 
   // Swap weights in covariance matrix
   // Lower parp
-  covariance.block(tshift, mshift, 3, state_dim) = tmp.block(tshift, 0, 3, state_dim);
-  covariance.block(tshift, 0, 3, state_dim) = tmp.block(tshift, mshift, 3, state_dim);
+  covariance.block(tshift, mshift, 4, state_dim) = tmp.block(tshift, 0, 4, state_dim);
+  covariance.block(tshift, 0, 4, state_dim) = tmp.block(tshift, mshift, 4, state_dim);
   // Right part
-  covariance.block(mshift, tshift, state_dim, 3) = tmp.block(0, tshift, state_dim, 3);
-  covariance.block(0, tshift, state_dim, 3) = tmp.block(mshift, tshift, state_dim, 3);
+  covariance.block(mshift, tshift, state_dim, 4) = tmp.block(0, tshift, state_dim, 4);
+  covariance.block(0, tshift, state_dim, 4) = tmp.block(mshift, tshift, state_dim, 4);
 
   // Swap the state.
   const ukfVectorType tmp_vec = state;
