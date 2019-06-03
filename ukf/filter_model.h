@@ -105,6 +105,11 @@ public:
     assert(!"Not implemented");
   }
 
+  virtual void State2Tensor3T(const State &, const vec3_t &, vec3_t &, vec3_t &, vec3_t &)
+  {
+    assert(!"Not implemented");
+  }
+
   /** Returns the dimension of the state */
   int state_dim() const
   {

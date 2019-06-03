@@ -115,3 +115,7 @@ void Full3T::State2Tensor3T(const State& x, const vec3_t& old_m, vec3_t& m1,
   l3[1] = std::max(x[16], _lambda_min);
   l3[2] = std::max(x[17], _lambda_min);
 }
+
+void Full3T::State2Tensor3T(const State & /* x */, const vec3_t & /* old_m */, vec3_t & /* m1 */, vec3_t & /* m2 */, vec3_t & /* m3 */)
+{
+}

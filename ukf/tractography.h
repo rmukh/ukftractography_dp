@@ -169,9 +169,11 @@ public:
   /**
    * Follows one seed point for the 3 Tensor case
   */
-  void Follow3T(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber,
-                bool is_branching, std::vector<SeedPointInfo> &branching_seeds,
-                std::vector<BranchingSeedAffiliation> &branching_seed_affiliation);
+  void Follow3T(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber);
+
+  void Follow3T_Other(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber,
+                      bool is_branching, std::vector<SeedPointInfo> &branching_seeds,
+                      std::vector<BranchingSeedAffiliation> &branching_seed_affiliation);
 
   /**
    * Follows one seed point for the 2 Tensor case
@@ -217,6 +219,10 @@ private:
   void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3,
               ukfPrecisionType &fa, ukfPrecisionType &fa2, ukfPrecisionType &fa3, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE,
               ukfPrecisionType &trace, ukfPrecisionType &trace2);
+
+  /** One step for ridgelets bi-exp case */
+  void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &m2, vec3_t &m3, State &state, ukfMatrixType &covariance,
+              ukfPrecisionType &dNormMSE, ukfPrecisionType &trace, ukfPrecisionType &trace2);
 
   /** One step along the fiber for the 2-tensor case. */
   void Step2T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, ukfPrecisionType &fa, ukfPrecisionType &fa2,

@@ -36,6 +36,8 @@ public:
   virtual void State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2,
                               vec3_t &m3, vec3_t &l3);
 
+  virtual void State2Tensor3T(const State & /* x */, const vec3_t & /* old_m */, vec3_t & /* m1 */, vec3_t & /* m2 */, vec3_t & /* m3 */);
+
   /** The minimum value of the eigenvalues. Clamped in each step */
   const ukfPrecisionType _lambda_min;
 };

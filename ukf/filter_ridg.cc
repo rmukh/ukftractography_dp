@@ -349,8 +349,29 @@ void Ridg_BiExp_FW::State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &
     l3[1] = std::max(x(18), _lambda_min_fast_diffusion);
     l3[2] = l3[1];
 
-    // Flip orientations if necessary. (For m1 it should not happen, maybe for
-    // m2.)
+    // Flip orientations if necessary.
+    if (m1[0] * old_m[0] + m1[1] * old_m[1] + m1[2] * old_m[2] < 0)
+    {
+        m1 = -m1;
+    }
+    if (m2[0] * old_m[0] + m2[1] * old_m[1] + m2[2] * old_m[2] < 0)
+    {
+        m2 = -m2;
+    }
+    if (m3[0] * old_m[0] + m3[1] * old_m[1] + m3[2] * old_m[2] < 0)
+    {
+        m3 = -m3;
+    }
+}
+
+void Ridg_BiExp_FW::State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &m2, vec3_t &m3)
+{
+    // Orientations;
+    initNormalized(m1, x[0], x[1], x[2]);
+    initNormalized(m2, x[7], x[8], x[9]);
+    initNormalized(m3, x[14], x[15], x[16]);
+
+    // Flip orientations if necessary.
     if (m1[0] * old_m[0] + m1[1] * old_m[1] + m1[2] * old_m[2] < 0)
     {
         m1 = -m1;
