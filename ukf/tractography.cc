@@ -354,7 +354,7 @@ void Tractography::UpdateFilterModelType()
   else if (_num_tensors == 3)
   {
     if (_diffusion_propagator)
-      _nPosFreeWater = 23;
+      _nPosFreeWater = 24;
   }
 
   // set up tensor weights
@@ -841,8 +841,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       }
 
       // STEP 1: Initialise the state based on the single estimated tensor
-      tmp_info_state.resize(24);
-      tmp_info_inv_state.resize(24);
+      tmp_info_state.resize(25);
+      tmp_info_inv_state.resize(25);
       mat33_t dir_init;
       dir_init.setZero();
 
@@ -850,6 +850,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       dir_init.row(0) = dir_vol.row(0);
 
       ukfPrecisionType w2_init = 0;
+      ukfPrecisionType w3_init = 0;
 
       if (n_of_dirs == 1)
       {
@@ -872,6 +873,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
         {
           dir_init.row(1) = dir_vol.row(2);
           dir_init.row(2) = dir_vol.row(4);
+
+          w3_init = ODF_val_at_max(2);
         }
         w2_init = ODF_val_at_max(2);
       }
@@ -902,9 +905,10 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       tmp_info_state[21] = w1_init;
       tmp_info_state[22] = w2_init;
+      tmp_info_state[23] = w3_init;
 
       // Free water volume fraction
-      tmp_info_state[23] = 0.9; // 0.9 as initial value
+      tmp_info_state[24] = 0.9; // 0.9 as initial value
 
       // STEP 2.1: Use L-BFGS-B from ITK library at the same point in space.
       // The UKF is an estimator, and we want to find the estimate with the smallest error through the iterations
@@ -1302,8 +1306,8 @@ void Tractography::computeRTOPfromSignal(ukfPrecisionType &rtopSignal, ukfVector
 
 void Tractography::computeRTOPfromState(stdVecState &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3)
 {
-  // Control input: state should have 24 rows
-  assert(state.size() == 24);
+  // Control input: state should have 25 rows
+  assert(state.size() == 25);
 
   ukfPrecisionType l11 = state[3] * 1e-6;
   ukfPrecisionType l12 = state[4] * 1e-6;
@@ -1322,8 +1326,8 @@ void Tractography::computeRTOPfromState(stdVecState &state, ukfPrecisionType &rt
 
   ukfPrecisionType w1 = state[21];
   ukfPrecisionType w2 = state[22];
-  ukfPrecisionType w3 = 1.0 - w1 - w2;
-  ukfPrecisionType wiso = state[23];
+  ukfPrecisionType w3 = state[23];
+  ukfPrecisionType wiso = state[24];
 
   ukfPrecisionType det_l1 = l11 * l12;
   ukfPrecisionType det_t1 = l13 * l14;
@@ -1354,8 +1358,8 @@ void Tractography::PrintState(State &state)
   std::cout << "\t l21 .. l24: " << state[10] << " " << state[11] << " " << state[12] << " " << state[13] << std::endl;
   std::cout << "\t m3: " << state[14] << " " << state[15] << " " << state[16] << std::endl;
   std::cout << "\t l31 .. l34: " << state[17] << " " << state[18] << " " << state[19] << " " << state[20] << std::endl;
-  std::cout << "\t w1, w2: " << state[21] << " " << state[22] << std::endl;
-  std::cout << "\t wiso: " << state[23] << std::endl;
+  std::cout << "\t w1, w2: " << state[21] << " " << state[22] << "" << state[23] << std::endl;
+  std::cout << "\t wiso: " << state[24] << std::endl;
   std::cout << " --- " << std::endl;
 }
 
@@ -1363,7 +1367,7 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
 {
   MeasureType residual = 0.0;
 
-  assert(this->GetNumberOfParameters() == 24);
+  assert(this->GetNumberOfParameters() == 25);
 
   // Convert the parameter to the ukfMtarixType
   ukfMatrixType localState(this->GetNumberOfParameters(), 1);
@@ -1384,6 +1388,10 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
   if (localState(23, 0) < 0.0)
   {
     localState(23, 0) = 0.0;
+  }
+  if (localState(24, 0) < 0.0)
+  {
+    localState(24, 0) = 0.0;
   }
 
   // Estimate the signal
@@ -1501,10 +1509,10 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   lowerBound[17] = lowerBound[18] = 1.0;
   lowerBound[19] = lowerBound[20] = 0.1;
 
-  // w1 & w2 in [0,1]
-  lowerBound[21] = lowerBound[22] = 0.0;
+  // w1 & w2 & w3 in [0,1]
+  lowerBound[21] = lowerBound[22] = lowerBound[23] = 0.0;
   // free water between 0 and 1
-  lowerBound[23] = 0.0;
+  lowerBound[24] = 0.0;
 
   // Upper bound
   // First bi-exponential
@@ -1519,8 +1527,8 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   upperBound[14] = upperBound[15] = upperBound[16] = 1.0;
   upperBound[17] = upperBound[18] = upperBound[19] = upperBound[20] = 3000.0;
 
-  upperBound[21] = upperBound[22] = 1.0;
-  upperBound[23] = 1.0;
+  upperBound[21] = upperBound[22] = upperBound[23] = 1.0;
+  upperBound[24] = 1.0;
 
   optimizer->SetBoundSelection(boundSelect);
   optimizer->SetUpperBound(upperBound);
@@ -1540,8 +1548,8 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
 
 void Tractography::InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted)
 {
-  assert(reference.size() == 24);
-  assert(inverted.size() == 24);
+  assert(reference.size() == 25);
+  assert(inverted.size() == 25);
 
   for (unsigned int it = 0; it < reference.size(); ++it)
   {
@@ -1815,7 +1823,7 @@ void Tractography::Follow3T(const int thread_id,
     ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
     in_csf = rtopSignal < _rtop_min;
     dNormMSE_too_high = dNormMSE > _max_nmse;
-    negative_free_water = state[23] < 0.0;
+    negative_free_water = state[24] < 0.0;
 
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
@@ -2724,7 +2732,7 @@ void Tractography::SwapState3T_BiExp(State &state,
   int ishift = i - 1;
 
   int state_dim = _model->state_dim();
-  assert(state_dim == 24);
+  assert(state_dim == 25);
 
   ukfMatrixType tmp(state_dim, state_dim);
   state_dim = 7;

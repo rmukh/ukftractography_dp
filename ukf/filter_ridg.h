@@ -20,14 +20,14 @@ public:
                   ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, const ukfPrecisionType diff_fw,
                   ukfMatrixType &Aridg, ukfMatrixType &Qridg, ukfMatrixType &fcsridg, ukfMatrixType &nuridg,
                   vector<vector<unsigned>> &connridg, ukfPrecisionType fl, ukfPrecisionType mot)
-        : FilterModel(24, rs, weights_on_tensors, constrained, true),
+        : FilterModel(25, rs, weights_on_tensors, constrained, true),
           _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000),
           _w_fast_diffusion(0.7), m_D_iso(SetIdentityScaled(diff_fw)), A(Aridg), Q(Qridg), fcs(fcsridg), nu(nuridg), conn(connridg),
           fista_lambda(fl), max_odf_thresh(mot)
     {
-        // size(X, 'column') == 24
-        // X = [x10, x11, x12, l11, l12, l13, l14, x20, x21, x22, l21, l22, l23, l24, x30, x31, x32, l31, l32, l33, l34, w1, w2, wiso]'
-        //     [0  , 1  , 2  , 3  , 4  , 5  , 6  , 7  , 8  , 9  , 10 , 11 , 12 , 13 , 14 , 15 , 16 , 17 , 18 , 19 , 20 , 21 , 22, 23]
+        // size(X, 'column') == 25
+        // X = [x10, x11, x12, l11, l12, l13, l14, x20, x21, x22, l21, l22, l23, l24, x30, x31, x32, l31, l32, l33, l34, w1, w2, w3, wiso]'
+        //     [0  , 1  , 2  , 3  , 4  , 5  , 6  , 7  , 8  , 9  , 10 , 11 , 12 , 13 , 14 , 15 , 16 , 17 , 18 , 19 , 20 , 21 , 22, 23, 24]
         // There are three tensors at max in this model, and we have a bi-exponential model
 
         // Q is the injected process noise bias. It is a diagonal matrix. It is used in the state transfer function.
@@ -35,18 +35,18 @@ public:
         _Q(0, 0) = _Q(1, 1) = _Q(2, 2) = _Q(7, 7) = _Q(8, 8) = _Q(9, 9) = _Q(14, 14) = _Q(15, 15) = _Q(16, 16) = qs; // noise for the main direction
         _Q(3, 3) = _Q(4, 4) = _Q(10, 10) = _Q(11, 11) = _Q(17, 17) = _Q(18, 18) = ql;                                // noise for the lambdas (fast diffusion)
         _Q(5, 5) = _Q(6, 6) = _Q(12, 12) = _Q(13, 13) = _Q(19, 19) = _Q(20, 20) = qt;                                // noise for the lambdas (slow diffusion)
-        _Q(21, 21) = _Q(22, 22) = qw;                                                                                // noise for the omega's
-        _Q(23, 23) = qwiso;                                                                                          // noise for the free water weight
+        _Q(21, 21) = _Q(22, 22) = _Q(23, 23) = qw;                                                                   // noise for the omega's
+        _Q(24, 24) = qwiso;                                                                                          // noise for the free water weight
 
         // D is the constraint matrix.
         // The 1st dim of D is used to select which component of x we want to constraint, the 2nd is for the inequality (*-1 -> reverse the inequality)
         // d is the contraint value
         // D'*x >= -d
 
-        const unsigned int N_constr = 30;
+        const unsigned int N_constr = 32;
 
-        // N_constr constraints for the 24 dimensions of the state
-        _D.resize(24, N_constr);
+        // N_constr constraints for the 25 dimensions of the state
+        _D.resize(25, N_constr);
         _D.setConstant(ukfZero);
 
         _d.resize(N_constr);
@@ -54,9 +54,9 @@ public:
         /* Setting the constraints according to D'*x >= -d */
 
         // Free water
-        _D(23, 0) = -1;
+        _D(24, 0) = -1;
         _d(0) = 1; // wiso <= 1
-        _D(23, 1) = 1;
+        _D(24, 1) = 1;
         _d(1) = 0; // wiso >= 0
 
         // Tensor 1 (minimal values)
@@ -129,6 +129,11 @@ public:
         _d(28) = 1; // w2 <= 1
         _D(22, 29) = 1;
         _d(29) = 0; // w2 >= 0
+
+        _D(23, 30) = -1;
+        _d(30) = 1; // w2 <= 1
+        _D(23, 31) = 1;
+        _d(31) = 0; // w2 >= 0
     }
 
     virtual ~Ridg_BiExp_FW()

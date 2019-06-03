@@ -112,9 +112,10 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
         // Weights
         X(21, i) = CheckZero(X(21, i));
         X(22, i) = CheckZero(X(22, i));
+        X(23, i) = CheckZero(X(22, i));
 
         // Free water
-        X(23, i) = CheckZero(X(23, i));
+        X(24, i) = CheckZero(X(24, i));
 
         // Compute final state using ridgelets
         m1 << X(0, i), X(1, i), X(2, i);
@@ -270,10 +271,10 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X,
         // Get compartments weights
         const ukfPrecisionType w1 = CheckZero(X(21, i));
         const ukfPrecisionType w2 = CheckZero(X(22, i));
-        const ukfPrecisionType w3 = 1.0 - w1 - w2;
+        const ukfPrecisionType w3 = CheckZero(X(23, i));
 
         // Get free water weight from state
-        const ukfPrecisionType w = CheckZero(X(23, i));
+        const ukfPrecisionType w = CheckZero(X(24, i));
 
         // Fill in lambdas matricies
         diagmat3_t lambdas11, lambdas12, lambdas21, lambdas22, lambdas31, lambdas32;
