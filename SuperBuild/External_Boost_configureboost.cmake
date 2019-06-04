@@ -19,4 +19,4 @@ else()
 
 endif()
 
-return(${bootstrap_result})
+return(${boostrap_result})
