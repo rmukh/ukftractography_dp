@@ -2474,11 +2474,7 @@ void Tractography::LoopUKF(const int thread_id,
                            ukfMatrixType &covariance_new,
                            ukfPrecisionType &dNormMSE)
 {
-
   _ukf[thread_id]->Filter(state, covariance, signal, state_new, covariance_new, dNormMSE);
-  std::cout << "state new sum after " << state_new(21) + state_new(22) + state_new(23) << std::endl;
-  if (state_new(21) + state_new(22) + state_new(23))
-    std::cout << "state > 1 " << state_new << std::endl;
 
   state = state_new;
   covariance = covariance_new;
@@ -2491,13 +2487,11 @@ void Tractography::LoopUKF(const int thread_id,
 
   State state_prev = state;
 
-  int max_iter = _maxUKFIterations;
-
-  for (int jj = 0; jj < max_iter; ++jj)
+  for (int jj = 0; jj < _maxUKFIterations; ++jj)
   {
     _ukf[thread_id]->Filter(state, covariance, signal, state_new, covariance_new, dNormMSE);
     state = state_new;
-    //covariance = covariance_new;
+    covariance = covariance_new;
 
     er_org = er;
     er = dNormMSE;
@@ -2509,6 +2503,16 @@ void Tractography::LoopUKF(const int thread_id,
 
     state_prev = state;
   }
+
+  //     std::cout << "state sum " << state(21) + state(22) + state(23) << std::endl;
+  //  if (state(21) + state(22) + state(23) > 1.1) {
+  //   std::cout << "state_prev > 1 " << state_prev << std::endl;
+  //   std::cout << "state > 1 " << state << std::endl;
+  //   std::cout << "state_new > 1 " << state_new << std::endl;
+  //   std::cout << "dNormMSE > 1 " << dNormMSE << std::endl;
+  // } else {
+  //   std::cout << "dNormMSE > 1 " << dNormMSE << std::endl;
+  // }
 
   state = state_prev;
 }

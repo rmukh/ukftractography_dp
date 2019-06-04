@@ -93,6 +93,7 @@ void UnscentedKalmanFilter::Constrain(ukfVectorType &x, const ukfMatrixType &W)
 // matrix version
 void UnscentedKalmanFilter::Constrain(ukfMatrixType &localX, const ukfMatrixType &localW)
 {
+
   const unsigned int numCols = localX.cols();
 
   for (unsigned int i = 0; i < numCols; ++i)
@@ -110,6 +111,16 @@ bool UnscentedKalmanFilter::violatesContraints(ukfVectorType &x)
                                                                                  // broken
   {
     if (d_test[i] > (m_FilterModel->d())[i])
+    {
+      return true;
+    }
+  }
+
+  const ukfVectorType e_test = (-ukfOne) * (m_FilterModel->E().transpose()) * x; // -D'*x
+  for (unsigned int i = 0; i < e_test.size(); ++i)                               // if any(-E'*x != e) constraint is
+                                                                                 // broken
+  {
+    if (e_test[i] != (m_FilterModel->e())[i])
     {
       return true;
     }
@@ -141,11 +152,14 @@ void UnscentedKalmanFilter::Filter(const State &x,
   const int signal_dim = localConstFilterModel->signal_dim();
 
   /** The state spread out according to the unscented transform */
+
   ukfMatrixType X(dim, 2 * dim + 1);
   X.setConstant(ukfZero);
   // Create sigma points.
   SigmaPoints(x, p, X); // doesnt change p, its const
-  // std::cout <<"\n state:"<<x;
+
+  // X contains values > 1 for weights after sigma points
+
   if (localConstFilterModel->isConstrained())
   {
     // ukfMatrixType p_tmp = p; // will be changed in QuadProg
@@ -190,6 +204,8 @@ void UnscentedKalmanFilter::Filter(const State &x,
   // exit(1);
   ukfMatrixType Z(signal_dim, 2 * dim + 1);
   Z.setConstant(ukfZero);
+
+  //here is biased X passed to H()!!!
   localConstFilterModel->H(X, Z);
   /** Used for the estimation of the signal */
 
@@ -229,9 +245,17 @@ void UnscentedKalmanFilter::Filter(const State &x,
   p_new = (Yk + I).inverse();
   // std::cout <<"\n p_new:"<<p_new;
   ukfVectorType x_new_Eigen = p_new * (i + yhat);
+  ukfVectorType x_new_Eigen_temp = x_new_Eigen;
+
   if (localConstFilterModel->isConstrained())
   {
     Constrain(x_new_Eigen, Yk + I);
+  }
+
+  if (x_new_Eigen(21) + x_new_Eigen(22) + x_new_Eigen(23) > 1.1)
+  {
+    std::cout << "x_new_Eigen new " << x_new_Eigen.transpose() << std::endl;
+    std::cout << "x_new_Eigen old " << x_new_Eigen_temp.transpose() << std::endl;
   }
   x_new = x_new_Eigen;
 }

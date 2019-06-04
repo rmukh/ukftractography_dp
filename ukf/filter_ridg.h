@@ -43,7 +43,7 @@ public:
         // d is the contraint value
         // D'*x >= -d
 
-        const unsigned int N_constr = 29;
+        const unsigned int N_constr = 32;
 
         // N_constr constraints for the 25 dimensions of the state
         _D.resize(25, N_constr);
@@ -116,18 +116,24 @@ public:
         // Weights
         _D(21, 24) = 1;
         _d(24) = 0; // w1 >= 0
+        _D(21, 25) = -1;
+        _d(25) = 1; // w1 <= 1
 
-        _D(22, 25) = 1;
-        _d(25) = 0; // w2 >= 0
+        _D(22, 26) = 1;
+        _d(26) = 0; // w2 >= 0
+        _D(22, 27) = -1;
+        _d(27) = 1; // w2 <= 1
 
-        _D(23, 26) = 1;
-        _d(26) = 0; // w3 >= 0
+        _D(23, 28) = 1;
+        _d(28) = 0; // w3 >= 0
+        _D(23, 29) = -1;
+        _d(29) = 1; // w3 <= 1
 
         // Free water
-        _D(24, 27) = -1;
-        _d(27) = 1; // wiso <= 1
-        _D(24, 28) = 1;
-        _d(28) = 0; // wiso >= 0
+        _D(24, 30) = 1;
+        _d(30) = 0; // wiso >= 0
+        _D(24, 31) = -1;
+        _d(31) = 1; // wiso <= 1
 
         // experimental!!!
         // Equality constrain (w1 + w2 + w3 = 1)
@@ -135,8 +141,8 @@ public:
         _E.setConstant(ukfZero);
         _e.resize(1);
 
-        _E(21, 0) = _E(22, 0) = _E(23, 0) = 1.0;
-        _e(0) = -1;
+        _E(21, 0) = _E(22, 0) = _E(23, 0) = -1.0;
+        _e(0) = 1;
     }
 
     virtual ~Ridg_BiExp_FW()

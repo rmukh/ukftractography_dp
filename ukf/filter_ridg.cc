@@ -161,6 +161,21 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
             max_odf(2) = ODF(exe_vol(maxInd));
         }
 
+        // Normalize max odf weights
+        if (n_of_dirs == 2)
+        {
+            ukfPrecisionType denom = max_odf(0) + max_odf(1);
+            max_odf(0) = max_odf(0) / denom;
+            max_odf(1) = max_odf(1) / denom;
+        }
+        else if (n_of_dirs > 2)
+        {
+            ukfPrecisionType denom = max_odf(0) + max_odf(1) + max_odf(2);
+            max_odf(0) = max_odf(0) / denom;
+            max_odf(1) = max_odf(1) / denom;
+            max_odf(2) = max_odf(2) / denom;
+        }
+
         // Average of direction from state and ridgelets for 1st tensor
         X(0, i) = 0.5 * (m1(0) + o1(0));
         X(1, i) = 0.5 * (m1(1) + o1(1));
@@ -322,9 +337,9 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X,
             const vec3_t &u = gradients[j];
 
             Y(j, i) =
-                (1 - w) * (w1 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D1 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D1t * u))) +
-                           w2 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D2 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D2t * u))) +
-                           w3 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D3 * u)) + (1 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D3t * u)))) +
+                (1.0 - w) * (w1 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D1 * u)) + (1.0 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D1t * u))) +
+                             w2 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D2 * u)) + (1.0 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D2t * u))) +
+                             w3 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D3 * u)) + (1.0 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D3t * u)))) +
                 w * std::exp(-b[j] * u.dot(m_D_iso * u));
         }
     }
