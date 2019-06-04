@@ -48,9 +48,6 @@
 #include "filter_Simple3T.h"
 #include "filter_ridg.h"
 
-#include "QuadProg++_Eigen.h"
-using namespace QuadProgPP;
-
 // TODO implement this switch
 //#include "config.h"
 
@@ -1082,40 +1079,6 @@ bool Tractography::Run()
   assert(_signal_data); // The _signal_data is initialized in Tractography::LoadFiles(),
   // Thus Run() must be invoked after LoadFiles()
   // Initialize and prepare seeds.
-
-  ukfMatrixType G, CE, CI;
-  ukfVectorType g0, ce0, ci0, x;
-  int n, m, p;
-  double sum = 0.0;
-  char ch;
-
-  n = 2;
-  G.resize(n, n);
-  G << 4, -2,
-      -2, 4;
-
-  g0.resize(n);
-  g0 << 6.0, 0.0;
-
-  m = 1;
-  CE.resize(n, m);
-  CE << 1.0, 1.0;
-
-  ce0.resize(m);
-  ce0 << -3.0;
-
-  p = 3;
-  CI.resize(n, p);
-  CI << 1.0, 0.0, 1.0,
-      0.0, 1.0, 1.0;
-
-  ci0.resize(p);
-  ci0 << 0.0, 0.0, -2.0;
-
-  x.resize(n);
-
-  std::cout << "f: " << solve_quadprog(G, g0, CE, ce0, CI, ci0, x) << std::endl;
-  std::cout << "x: " << x << std::endl;
 
   std::vector<SeedPointInfo> primary_seed_infos;
   std::vector<SeedPointInfo> branch_seed_infos;                  // The info of branching seeds
@@ -2479,11 +2442,8 @@ void Tractography::LoopUKF(const int thread_id,
   state = state_new;
   covariance = covariance_new;
 
-  ukfPrecisionType er_org = 0.0;
-  ukfPrecisionType er = 0.0;
-
-  er_org = dNormMSE;
-  er = er_org;
+  ukfPrecisionType er_org = dNormMSE;
+  ukfPrecisionType er = er_org;
 
   State state_prev = state;
 
@@ -2491,28 +2451,15 @@ void Tractography::LoopUKF(const int thread_id,
   {
     _ukf[thread_id]->Filter(state, covariance, signal, state_new, covariance_new, dNormMSE);
     state = state_new;
-    covariance = covariance_new;
 
     er_org = er;
     er = dNormMSE;
 
     if (er_org - er < 0.001)
-    {
       break;
-    }
 
     state_prev = state;
   }
-
-  //     std::cout << "state sum " << state(21) + state(22) + state(23) << std::endl;
-  //  if (state(21) + state(22) + state(23) > 1.1) {
-  //   std::cout << "state_prev > 1 " << state_prev << std::endl;
-  //   std::cout << "state > 1 " << state << std::endl;
-  //   std::cout << "state_new > 1 " << state_new << std::endl;
-  //   std::cout << "dNormMSE > 1 " << dNormMSE << std::endl;
-  // } else {
-  //   std::cout << "dNormMSE > 1 " << dNormMSE << std::endl;
-  // }
 
   state = state_prev;
 }
@@ -2810,6 +2757,49 @@ void Tractography::SwapState3T_BiExp(State &state,
   covariance.block(mshift, tshift, state_dim, 4) = tmp.block(0, tshift, state_dim, 4);
   covariance.block(0, tshift, state_dim, 4) = tmp.block(mshift, tshift, state_dim, 4);
 
+  // Lower right 4x4 matrix
+  int corn_shift = tshift + ishift;
+  covariance(corn_shift, corn_shift) = tmp(tshift, tshift);
+  covariance(tshift, tshift) = tmp(corn_shift, corn_shift);
+
+  covariance(tshift, corn_shift) = tmp(corn_shift, tshift);
+  covariance(corn_shift, tshift) = tmp(tshift, corn_shift);
+
+  int oneshift = tshift + 1;
+  int twoshift = tshift + 2;
+
+  if (ishift == 1)
+  {
+    covariance.block(twoshift, tshift, 2, 1) = tmp.block(twoshift, oneshift, 2, 1);
+    covariance.block(twoshift, oneshift, 2, 1) = tmp.block(twoshift, tshift, 2, 1);
+
+    covariance.block(tshift, twoshift, 1, 2) = tmp.block(oneshift, twoshift, 1, 2);
+    covariance.block(oneshift, twoshift, 1, 2) = tmp.block(tshift, twoshift, 1, 2);
+  }
+  else if (ishift == 2)
+  {
+    // Horizontal mid
+    covariance(oneshift, tshift) = tmp(oneshift, twoshift);
+    covariance(oneshift, twoshift) = tmp(oneshift, tshift);
+
+    // Vertical mid
+    covariance(twoshift, oneshift) = tmp(tshift, oneshift);
+    covariance(tshift, oneshift) = tmp(twoshift, oneshift);
+
+    int threeshift = tshift + 3;
+    // Horizontal bottom
+    covariance(threeshift, twoshift) = covariance(threeshift, tshift);
+    covariance(threeshift, tshift) = tmp(threeshift, twoshift);
+    // Vertical right
+    covariance(twoshift, threeshift) = tmp(tshift, threeshift);
+    covariance(tshift, threeshift) = tmp(twoshift, threeshift);
+  }
+  else
+  {
+    std::cout << "Error: BiExp swap state function works only for 3 Tensors.\n";
+    throw;
+  }
+
   // Swap the state
   const ukfVectorType tmp_vec = state;
   state.segment(i, state_dim) = tmp_vec.segment(0, state_dim);
@@ -2819,8 +2809,6 @@ void Tractography::SwapState3T_BiExp(State &state,
   int iw = 21 + ishift;
   state(21) = state(iw);
   state(iw) = tmp_weight;
-
-  std::cout << "remaining corner\n " << covariance.block(tshift, tshift, 4, 4) << std::endl;
 }
 
 void Tractography::SwapState2T(State &state,

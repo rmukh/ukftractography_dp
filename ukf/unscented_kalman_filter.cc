@@ -205,7 +205,6 @@ void UnscentedKalmanFilter::Filter(const State &x,
   ukfMatrixType Z(signal_dim, 2 * dim + 1);
   Z.setConstant(ukfZero);
 
-  //here is biased X passed to H()!!!
   localConstFilterModel->H(X, Z);
   /** Used for the estimation of the signal */
 

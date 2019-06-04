@@ -20,6 +20,10 @@ seeds_path="$SRC/Data/Input/seeds_tc.nhdr"
 # OUTPUT FIBER
 output_path='./seeds_tc.vtk'
 
+if [ -f $logFile ]; then
+	rm $logFile
+fi
+
 eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
