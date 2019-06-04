@@ -41,6 +41,11 @@ public:
     _d(2) = 0; // l1 >= 0
     _D(4, 3) = 1;
     _d(3) = 0; // l2 >= 0
+
+    _E.resize(6, 1);
+    _E.setConstant(ukfZero);
+    _e.resize(1);
+    _e.setConstant(ukfZero);
   }
 
   virtual ~Simple1T_FW()

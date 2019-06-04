@@ -80,10 +80,6 @@ private:
 
   /** A fixed parameters used for spreading of the sigma points */
   ukfPrecisionType m_SigmaPointSpread;
-
-  //DUMMY VARIABLES TAHT ARE ALWAYS ZERO and not used.
-  ukfMatrixType m_DummyZeroCE;
-  ukfVectorType m_DummyZeroce0;
 };
 
 #endif  // UNSCENTED_KALMAN_FILTER_H_

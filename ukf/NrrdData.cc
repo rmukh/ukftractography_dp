@@ -451,6 +451,7 @@ bool NrrdData::LoadSignal(Nrrd* input_nrrd, const bool normalizedDWIData)
     if( !key.compare("DWMRI_b-value") )   // NOTE:compare returns 0 if strings match DWMRI_b-value
       {
       bValue = atof(_data_nrrd->kvp[i + 1]);
+      std::cout << "b-value " << bValue << std::endl;
       }
     else if( key.length() > 14 &&
              !key.substr(0, 14).compare("DWMRI_gradient") )

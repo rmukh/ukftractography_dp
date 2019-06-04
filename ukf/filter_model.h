@@ -161,6 +161,18 @@ public:
     return _d;
   }
 
+  /** The equality constraint matrix for the constrained UKF */
+  const ukfMatrixType &E() const
+  {
+    return _E;
+  }
+
+  /** The equality constraint right hand side for the constrained UKF */
+  const ukfVectorType &e() const
+  {
+    return _e;
+  }
+
   /** Are we running the contrained version of the filter? */
   bool isConstrained() const
   {
@@ -207,6 +219,12 @@ protected:
 
   /** Inequality right hand side, only used for constrained UKF */
   ukfVectorType _d;
+
+  /** Equality constraint matrix, only used for constrained UKF */
+  ukfMatrixType _E;
+
+  /** Equality right hand side, only used for constrained UKF */
+  ukfVectorType _e;
 
   /** The weights of each tensor */
   const ukfVectorType weights_on_tensors_;

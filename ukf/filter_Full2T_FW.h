@@ -50,6 +50,11 @@ public:
     _d(6) = 0; // l22 >= 0
     _D(11, 7) = 1;
     _d(7) = 0; // l32 >= 0
+
+    _E.resize(13, 1);
+    _E.setConstant(ukfZero);
+    _e.resize(1);
+    _e.setConstant(ukfZero);
   }
 
   virtual ~Full2T_FW()

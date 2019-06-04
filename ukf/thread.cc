@@ -91,7 +91,7 @@ ITK_THREAD_RETURN_TYPE ThreadCallback(void *arg)
     if (str->num_tensors_ == 3)
     {
       // For bi-exp ridg model only for now
-      str->tractography_->Follow3T(id_, *it, seed_infos_[*it], output_fiber_group_[*it]);
+      str->tractography_->Follow3T(id_, seed_infos_[*it], output_fiber_group_[*it]);
     }
     else if (str->num_tensors_ == 2)
     {

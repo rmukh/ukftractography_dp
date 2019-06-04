@@ -38,12 +38,6 @@ UnscentedKalmanFilter::UnscentedKalmanFilter(FilterModel *filter_model)
 
   assert(static_cast<unsigned int>((m_FilterModel->Q()).rows()) == dim &&
          static_cast<unsigned int>((m_FilterModel->Q()).cols()) == dim);
-
-  //DUMMY VARIABLES TAHT ARE ALWAYS ZERO and not used.
-  m_DummyZeroCE.resize(dim, 1);
-  m_DummyZeroCE.setConstant(ukfZero);
-  m_DummyZeroce0.resize(1);
-  m_DummyZeroce0.setConstant(ukfZero);
 }
 
 void UnscentedKalmanFilter::SigmaPoints(const State &x,
@@ -83,9 +77,12 @@ void UnscentedKalmanFilter::Constrain(ukfVectorType &x, const ukfMatrixType &W)
     ukfVectorType g0 = -ukfOne * (W_tmp.transpose()) * x;
     const ukfVectorType d = m_FilterModel->d(); // the inequality constraints
     const ukfMatrixType D = m_FilterModel->D(); // -- " --
-    // The equality constraints are just dummy variables. The solve_quadprog function has been changed
-    // to ignore equality constraints.
-    const ukfPrecisionType error = solve_quadprog(W_tmp, g0, m_DummyZeroCE, m_DummyZeroce0, D, d, x);
+
+    const ukfVectorType e = m_FilterModel->e(); // the equality constraints
+    const ukfMatrixType E = m_FilterModel->E(); // -- " --
+
+    const ukfPrecisionType error = solve_quadprog(W_tmp, g0, E, e, D, d, x);
+    //std::cout << "after " << x(21) << " " << x(22) << " " << x(23) << " sum " << x(21) + x(22) + x(23) << std::endl;
     if (error > 0.01) // error usually much smaller than that, if solve_quadprog fails it returns inf
     {
       throw std::logic_error("solve_quadprog error exceeds threshold 0.01!");

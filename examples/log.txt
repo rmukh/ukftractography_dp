@@ -1,0 +1,42 @@
+Since the Biexponential model is used, the free water parameter will be estimated
+Using the 3T Biexponential Spherical Ridgelets model with free water estimation. Setting the default parameters accordingly:
+"*": set by user
+"-": default setting
+- stoppingFA: 0.15
+* seedingThreshold: 0.18
+- Qm: 0.0001
+- Ql: 150
+- Qt: 50
+* minRTOP: 20
+- maxNMSE: 0.15
+- maxUKFIterations: 5
+- Rs: 0.015
+- stepLength: 0.5
+* recordLength: 0.9
+- Qw: 0.002
+- Qwiso: 0.002
+* stoppingThreshold: 0.1
+* seedsPerVoxel: 5
+Found 1 cores on your system.
+Running tractography with 1 thread(s).
+Number of non-zero gradients: 51
+Number of zero gradients: 8
+Permuting the axis order to: 3 0 1 2
+Resizing the data to: 51 144 144 85
+Computing the baseline image
+Dividing the signal by baseline image
+Converting the world coordinate system to RAS
+Data normalization finished!
+
+b-value 900
+Using BiExponential model (3 tensors, free water, spherical ridgelets)
+Branching disabled
+Start computing R basis...
+Start computing icosahedron...
+Start computing Q basis...
+Using constrained filter
+Using Spherical Ridgelets
+f: 12
+x: 1
+2
+Processing 120 starting points

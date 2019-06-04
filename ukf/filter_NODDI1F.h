@@ -37,6 +37,11 @@ public:
 
     _D(4, 4) = 1;
     _d(4) = 0; // kappa >= 0
+
+    _E.resize(6, 1);
+    _E.setConstant(ukfZero);
+    _e.resize(1);
+    _e.setConstant(ukfZero);
   }
 
   virtual ~NODDI1F()

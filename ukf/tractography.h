@@ -169,7 +169,7 @@ public:
   /**
    * Follows one seed point for the 3 Tensor case
   */
-  void Follow3T(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber);
+  void Follow3T(const int thread_id, const SeedPointInfo &seed, UKFFiber &fiber);
 
   void Follow3T_Other(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber,
                       bool is_branching, std::vector<SeedPointInfo> &branching_seeds,

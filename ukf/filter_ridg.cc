@@ -32,13 +32,13 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
     vec3_t o2;
     vec3_t m3;
     vec3_t o3;
-
-    o1.setZero();
-    o2.setZero();
-    o3.setZero();
+    vec3_t max_odf;
 
     for (unsigned int i = 0; i < X.cols(); ++i)
     {
+        max_odf.setZero();
+        o2.setZero();
+        o3.setZero();
         // Normalize the direction vectors.
 
         // Tensor 1
@@ -112,7 +112,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
         // Weights
         X(21, i) = CheckZero(X(21, i));
         X(22, i) = CheckZero(X(22, i));
-        X(23, i) = CheckZero(X(22, i));
+        X(23, i) = CheckZero(X(23, i));
 
         // Free water
         X(24, i) = CheckZero(X(24, i));
@@ -132,8 +132,9 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
         closest.maxCoeff(&maxInd);
 
         o1 = dir_vol.row(maxInd);
+        max_odf(0) = ODF(exe_vol(maxInd));
 
-        if (n_of_dirs == 2)
+        if (n_of_dirs > 1)
         {
             for (unsigned int v = 0; v < exe_vol.rows(); ++v)
             {
@@ -143,6 +144,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
 
             closest.maxCoeff(&maxInd);
             o2 = dir_vol.row(maxInd);
+            max_odf(1) = ODF(exe_vol(maxInd));
         }
 
         if (n_of_dirs > 2)
@@ -155,6 +157,8 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
 
             closest.maxCoeff(&maxInd);
             o3 = dir_vol.row(maxInd);
+
+            max_odf(2) = ODF(exe_vol(maxInd));
         }
 
         // Average of direction from state and ridgelets for 1st tensor
@@ -173,8 +177,9 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
         X(16, i) = 0.5 * (m3(2) + o3(2));
 
         // Average weights
-        //X(21, i) = 0.5 * (X(21, i) + o3(0));
-        //X(22, i) = 0.5 * (X(22, i) + o3(1));
+        X(21, i) = 0.5 * (X(21, i) + max_odf(0));
+        X(22, i) = 0.5 * (X(22, i) + max_odf(1));
+        X(23, i) = 0.5 * (X(23, i) + max_odf(2));
     } //for X.cols()
 }
 

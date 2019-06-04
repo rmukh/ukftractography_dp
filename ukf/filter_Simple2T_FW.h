@@ -45,6 +45,11 @@ public:
     _d(4) = 0; // l12 >= 0
     _D(9, 5) = 1;
     _d(5) = 0; // l22 >= 0
+
+    _E.resize(11, 1);
+    _E.setConstant(ukfZero);
+    _e.resize(1);
+    _e.setConstant(ukfZero);
   }
 
   virtual ~Simple2T_FW()

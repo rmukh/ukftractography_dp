@@ -48,6 +48,9 @@
 #include "filter_Simple3T.h"
 #include "filter_ridg.h"
 
+#include "QuadProg++_Eigen.h"
+using namespace QuadProgPP;
+
 // TODO implement this switch
 //#include "config.h"
 
@@ -222,7 +225,7 @@ void Tractography::UpdateFilterModelType()
     }
     else if (_diffusion_propagator)
     {
-      std::cout << "Using Diffusion Propagator model (3 tensors, free water, bi-exponential)" << std::endl;
+      std::cout << "Using BiExponential model (3 tensors, free water, spherical ridgelets)" << std::endl;
       this->_filter_model_type = Tractography::_3T_BIEXP_RIDG;
     }
     else
@@ -849,8 +852,9 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       ukfPrecisionType w1_init = ODF_val_at_max(0);
       dir_init.row(0) = dir_vol.row(0);
 
-      ukfPrecisionType w2_init = 0;
-      ukfPrecisionType w3_init = 0;
+      ukfPrecisionType w_temp = (1.0 - w1_init) / 2.0;
+      ukfPrecisionType w2_init = w_temp;
+      ukfPrecisionType w3_init = w_temp;
 
       if (n_of_dirs == 1)
       {
@@ -1078,6 +1082,40 @@ bool Tractography::Run()
   assert(_signal_data); // The _signal_data is initialized in Tractography::LoadFiles(),
   // Thus Run() must be invoked after LoadFiles()
   // Initialize and prepare seeds.
+
+  ukfMatrixType G, CE, CI;
+  ukfVectorType g0, ce0, ci0, x;
+  int n, m, p;
+  double sum = 0.0;
+  char ch;
+
+  n = 2;
+  G.resize(n, n);
+  G << 4, -2,
+      -2, 4;
+
+  g0.resize(n);
+  g0 << 6.0, 0.0;
+
+  m = 1;
+  CE.resize(n, m);
+  CE << 1.0, 1.0;
+
+  ce0.resize(m);
+  ce0 << -3.0;
+
+  p = 3;
+  CI.resize(n, p);
+  CI << 1.0, 0.0, 1.0,
+      0.0, 1.0, 1.0;
+
+  ci0.resize(p);
+  ci0 << 0.0, 0.0, -2.0;
+
+  x.resize(n);
+
+  std::cout << "f: " << solve_quadprog(G, g0, CE, ce0, CI, ci0, x) << std::endl;
+  std::cout << "x: " << x << std::endl;
 
   std::vector<SeedPointInfo> primary_seed_infos;
   std::vector<SeedPointInfo> branch_seed_infos;                  // The info of branching seeds
@@ -1358,7 +1396,7 @@ void Tractography::PrintState(State &state)
   std::cout << "\t l21 .. l24: " << state[10] << " " << state[11] << " " << state[12] << " " << state[13] << std::endl;
   std::cout << "\t m3: " << state[14] << " " << state[15] << " " << state[16] << std::endl;
   std::cout << "\t l31 .. l34: " << state[17] << " " << state[18] << " " << state[19] << " " << state[20] << std::endl;
-  std::cout << "\t w1, w2: " << state[21] << " " << state[22] << "" << state[23] << std::endl;
+  std::cout << "\t w1, w2, w3: " << state[21] << " " << state[22] << "" << state[23] << std::endl;
   std::cout << "\t wiso: " << state[24] << std::endl;
   std::cout << " --- " << std::endl;
 }
@@ -1764,7 +1802,6 @@ void Tractography::UnpackTensor(const ukfVectorType &b, // b - bValues
 }
 
 void Tractography::Follow3T(const int thread_id,
-                            const size_t seed_index,
                             const SeedPointInfo &fiberStartSeed,
                             UKFFiber &fiber)
 {
@@ -2439,6 +2476,10 @@ void Tractography::LoopUKF(const int thread_id,
 {
 
   _ukf[thread_id]->Filter(state, covariance, signal, state_new, covariance_new, dNormMSE);
+  std::cout << "state new sum after " << state_new(21) + state_new(22) + state_new(23) << std::endl;
+  if (state_new(21) + state_new(22) + state_new(23))
+    std::cout << "state > 1 " << state_new << std::endl;
+
   state = state_new;
   covariance = covariance_new;
 
@@ -2765,10 +2806,17 @@ void Tractography::SwapState3T_BiExp(State &state,
   covariance.block(mshift, tshift, state_dim, 4) = tmp.block(0, tshift, state_dim, 4);
   covariance.block(0, tshift, state_dim, 4) = tmp.block(mshift, tshift, state_dim, 4);
 
-  // Swap the state.
+  // Swap the state
   const ukfVectorType tmp_vec = state;
   state.segment(i, state_dim) = tmp_vec.segment(0, state_dim);
   state.segment(0, state_dim) = tmp_vec.segment(i, state_dim);
+
+  const ukfPrecisionType tmp_weight = state(21);
+  int iw = 21 + ishift;
+  state(21) = state(iw);
+  state(iw) = tmp_weight;
+
+  std::cout << "remaining corner\n " << covariance.block(tshift, tshift, 4, 4) << std::endl;
 }
 
 void Tractography::SwapState2T(State &state,

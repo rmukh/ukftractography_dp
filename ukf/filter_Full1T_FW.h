@@ -43,6 +43,11 @@ public:
     _d(3) = 0; // l2 >= 0
     _D(5, 4) = 1;
     _d(4) = 0; // l3 >= 0
+
+    _E.resize(7, 1);
+    _E.setConstant(ukfZero);
+    _e.resize(1);
+    _e.setConstant(ukfZero);
   }
 
   virtual ~Full1T_FW()

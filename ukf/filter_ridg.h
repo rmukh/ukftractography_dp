@@ -43,7 +43,7 @@ public:
         // d is the contraint value
         // D'*x >= -d
 
-        const unsigned int N_constr = 32;
+        const unsigned int N_constr = 29;
 
         // N_constr constraints for the 25 dimensions of the state
         _D.resize(25, N_constr);
@@ -53,87 +53,90 @@ public:
 
         /* Setting the constraints according to D'*x >= -d */
 
-        // Free water
-        _D(24, 0) = -1;
-        _d(0) = 1; // wiso <= 1
-        _D(24, 1) = 1;
-        _d(1) = 0; // wiso >= 0
-
         // Tensor 1 (minimal values)
-        _D(3, 2) = 1;
-        _d(2) = _lambda_min_fast_diffusion; // l11 >= min
-        _D(4, 3) = 1;
-        _d(3) = _lambda_min_fast_diffusion; // l12 >= min
-        _D(5, 4) = 1;
-        _d(4) = _lambda_min_slow_diffusion; // l13 >= min
-        _D(6, 5) = 1;
-        _d(5) = _lambda_min_slow_diffusion; // l14 >= min
+        _D(3, 0) = 1;
+        _d(0) = _lambda_min_fast_diffusion; // l11 >= min
+        _D(4, 1) = 1;
+        _d(1) = _lambda_min_fast_diffusion; // l12 >= min
+        _D(5, 2) = 1;
+        _d(2) = _lambda_min_slow_diffusion; // l13 >= min
+        _D(6, 3) = 1;
+        _d(3) = _lambda_min_slow_diffusion; // l14 >= min
 
         // Tensor 2 (minimal values)
-        _D(10, 6) = 1;
-        _d(6) = _lambda_min_fast_diffusion; // l21 >= min
-        _D(11, 7) = 1;
-        _d(7) = _lambda_min_fast_diffusion; // l22 >= min
-        _D(12, 8) = 1;
-        _d(8) = _lambda_min_slow_diffusion; // l23 >= min
-        _D(13, 9) = 1;
-        _d(9) = _lambda_min_slow_diffusion; // l24 >= min
+        _D(10, 4) = 1;
+        _d(4) = _lambda_min_fast_diffusion; // l21 >= min
+        _D(11, 5) = 1;
+        _d(5) = _lambda_min_fast_diffusion; // l22 >= min
+        _D(12, 6) = 1;
+        _d(6) = _lambda_min_slow_diffusion; // l23 >= min
+        _D(13, 7) = 1;
+        _d(7) = _lambda_min_slow_diffusion; // l24 >= min
 
         // Tensor 3 (minimal values)
-        _D(17, 10) = 1;
-        _d(10) = _lambda_min_fast_diffusion; // l31 >= min
-        _D(18, 11) = 1;
-        _d(11) = _lambda_min_fast_diffusion; // l32 >= min
-        _D(19, 12) = 1;
-        _d(12) = _lambda_min_slow_diffusion; // l33 >= min
-        _D(20, 13) = 1;
-        _d(13) = _lambda_min_slow_diffusion; // l34 >= min
+        _D(17, 8) = 1;
+        _d(8) = _lambda_min_fast_diffusion; // l31 >= min
+        _D(18, 9) = 1;
+        _d(9) = _lambda_min_fast_diffusion; // l32 >= min
+        _D(19, 10) = 1;
+        _d(10) = _lambda_min_slow_diffusion; // l33 >= min
+        _D(20, 11) = 1;
+        _d(11) = _lambda_min_slow_diffusion; // l34 >= min
 
         // Tensor 1 (maximal values)
-        _D(3, 14) = -1; // l11 <= max
+        _D(3, 12) = -1; // l11 <= max
+        _d(12) = _lambda_max_diffusion;
+        _D(4, 13) = -1; // l12 <= max
+        _d(13) = _lambda_max_diffusion;
+        _D(5, 14) = -1; // l13 <= max
         _d(14) = _lambda_max_diffusion;
-        _D(4, 15) = -1; // l12 <= max
+        _D(6, 15) = -1; // l14 <= max
         _d(15) = _lambda_max_diffusion;
-        _D(5, 16) = -1; // l13 <= max
-        _d(16) = _lambda_max_diffusion;
-        _D(6, 17) = -1; // l14 <= max
-        _d(17) = _lambda_max_diffusion;
 
         // Tensor 2 (maximal values)
-        _D(10, 18) = -1; // l21 <= max
+        _D(10, 16) = -1; // l21 <= max
+        _d(16) = _lambda_max_diffusion;
+        _D(11, 17) = -1; // l22 <= max
+        _d(17) = _lambda_max_diffusion;
+        _D(12, 18) = -1; // l23 <= max
         _d(18) = _lambda_max_diffusion;
-        _D(11, 19) = -1; // l22 <= max
+        _D(13, 19) = -1; // l24 <= max
         _d(19) = _lambda_max_diffusion;
-        _D(12, 20) = -1; // l23 <= max
-        _d(20) = _lambda_max_diffusion;
-        _D(13, 21) = -1; // l24 <= max
-        _d(21) = _lambda_max_diffusion;
 
         // Tensor 3 (maximal values)
-        _D(17, 22) = -1;
-        _d(22) = _lambda_max_diffusion; // l31 <= max
-        _D(18, 23) = -1;
-        _d(23) = _lambda_max_diffusion; // l32 <= max
-        _D(19, 24) = -1;
-        _d(24) = _lambda_max_diffusion; // l33 <= max
-        _D(20, 25) = -1;
-        _d(25) = _lambda_max_diffusion; // l34 <= max
+        _D(17, 20) = -1;
+        _d(20) = _lambda_max_diffusion; // l31 <= max
+        _D(18, 21) = -1;
+        _d(21) = _lambda_max_diffusion; // l32 <= max
+        _D(19, 22) = -1;
+        _d(22) = _lambda_max_diffusion; // l33 <= max
+        _D(20, 23) = -1;
+        _d(23) = _lambda_max_diffusion; // l34 <= max
 
         // Weights
-        _D(21, 26) = -1;
-        _d(26) = 1; // w1 <= 1
-        _D(21, 27) = 1;
-        _d(27) = 0; // w1 >= 0
+        _D(21, 24) = 1;
+        _d(24) = 0; // w1 >= 0
 
-        _D(22, 28) = -1;
-        _d(28) = 1; // w2 <= 1
-        _D(22, 29) = 1;
-        _d(29) = 0; // w2 >= 0
+        _D(22, 25) = 1;
+        _d(25) = 0; // w2 >= 0
 
-        _D(23, 30) = -1;
-        _d(30) = 1; // w2 <= 1
-        _D(23, 31) = 1;
-        _d(31) = 0; // w2 >= 0
+        _D(23, 26) = 1;
+        _d(26) = 0; // w3 >= 0
+
+        // Free water
+        _D(24, 27) = -1;
+        _d(27) = 1; // wiso <= 1
+        _D(24, 28) = 1;
+        _d(28) = 0; // wiso >= 0
+
+        // experimental!!!
+        // Equality constrain (w1 + w2 + w3 = 1)
+        _E.resize(25, 1);
+        _E.setConstant(ukfZero);
+        _e.resize(1);
+
+        _E(21, 0) = _E(22, 0) = _E(23, 0) = 1.0;
+        _e(0) = -1;
     }
 
     virtual ~Ridg_BiExp_FW()
