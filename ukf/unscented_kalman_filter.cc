@@ -245,17 +245,11 @@ void UnscentedKalmanFilter::Filter(const State &x,
   p_new = (Yk + I).inverse();
   // std::cout <<"\n p_new:"<<p_new;
   ukfVectorType x_new_Eigen = p_new * (i + yhat);
-  ukfVectorType x_new_Eigen_temp = x_new_Eigen;
 
   if (localConstFilterModel->isConstrained())
   {
     Constrain(x_new_Eigen, Yk + I);
   }
 
-  if (x_new_Eigen(21) + x_new_Eigen(22) + x_new_Eigen(23) > 1.1)
-  {
-    std::cout << "x_new_Eigen new " << x_new_Eigen.transpose() << std::endl;
-    std::cout << "x_new_Eigen old " << x_new_Eigen_temp.transpose() << std::endl;
-  }
   x_new = x_new_Eigen;
 }
