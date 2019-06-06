@@ -440,7 +440,7 @@ public:
     _signal.resize(signal.size());
     for (unsigned int it = 0; it < signal.size(); ++it)
     {
-      _signal[it] = signal[it];
+      _signal(it) = signal[it];
     }
   }
 
@@ -448,6 +448,16 @@ public:
   void SetModel(FilterModel *model)
   {
     _model = model;
+  }
+
+  // Set fixed parameters
+  void SetFixed(ukfVectorType &fixed)
+  {
+    _fixed_params.resize(fixed.size());
+    for (unsigned int it = 0; it < fixed.size(); ++it)
+    {
+      _fixed_params(it) = fixed[it];
+    }
   }
 
   /** Compute the relative error between the signal estimate and the signal data */
@@ -482,6 +492,7 @@ private:
   unsigned int _NumberOfValues;
   ukfVectorType _signal;
   FilterModel *_model;
+  ukfVectorType _fixed_params;
 };
 } // end namespace itk
 

@@ -738,6 +738,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       tmp_info_inv_state[2] = (param[5] < ukfZero ? param[5] + UKF_PI : param[5] - UKF_PI);
       tmp_info_inv_state[5] = param[8]; // l3
     }
+    else if (_diffusion_propagator)
+    {
+      tmp_info_state.resize(25);
+      tmp_info_inv_state.resize(25);
+    }
     else // i.e. simple model
     {    // Starting direction.
       tmp_info_state.resize(5);
@@ -841,8 +846,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       }
 
       // STEP 1: Initialise the state based
-      tmp_info_state.resize(25);
-      tmp_info_inv_state.resize(25);
       mat33_t dir_init;
       dir_init.setZero();
 
@@ -852,7 +855,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       ukfPrecisionType w2_init = 0;
       ukfPrecisionType w3_init = 0;
 
-      std::cout << "n_of_dirs " << n_of_dirs << std::endl;
+      //std::cout << "n_of_dirs " << n_of_dirs << std::endl;
 
       if (n_of_dirs == 1)
       {
@@ -862,7 +865,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
         vec3_t orthogonal2;
         orthogonal2 << -orthogonal[1], orthogonal[0], orthogonal[2];
         dir_init.row(2) = orthogonal2;
-        
+
         w1_init = 1.0;
       }
       else if (n_of_dirs > 1)
@@ -918,7 +921,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       tmp_info_state[5] = tmp_info_state[12] = tmp_info_state[19] = 0.7 * param[6];
       tmp_info_state[6] = tmp_info_state[13] = tmp_info_state[20] = 0.7 * param[7];
 
-      std::cout << "w1_init " << w1_init << " w2_init " << w2_init << " w3_init " << w3_init << std::endl;
       tmp_info_state[21] = w1_init;
       tmp_info_state[22] = w2_init;
       tmp_info_state[23] = w3_init;
@@ -947,13 +949,13 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       // Input of the filter
       State state = ConvertVector<stdVecState, State>(tmp_info_state);
-      std::cout << "state before \n" << state.transpose() << std::endl;
+      std::cout << "w's before " << state(21) << " " << state(22) << " " << state(23) << std::endl;
       ukfMatrixType p(info.covariance);
 
       // Estimate the initial state
       // InitLoopUKF(state, p, signal_values[i], dNormMSE);
       NonLinearLeastSquareOptimization(state, signal_values[i], _model);
-    std::cout << "state after \n" << state.transpose() << std::endl;
+      std::cout << "w's after  " << state(21) << " " << state(22) << " " << state(23) << std::endl;
       // Output of the filter
       tmp_info_state = ConvertVector<State, stdVecState>(state);
 
@@ -1086,8 +1088,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
                                       // original direction
     }
 
-    if (seed_infos.size() > 1)
-      break;
+    //if (seed_infos.size() > 1)
+    //break;
   }
 
   cout << "Final seeds vector size " << seed_infos.size() << std::endl;
@@ -1112,7 +1114,6 @@ bool Tractography::Run()
   }
 
   const int num_of_threads = std::min(_num_threads, static_cast<int>(primary_seed_infos.size()));
-  // const int num_of_threads = 8;
 
   assert(num_of_threads > 0);
 
@@ -1387,31 +1388,37 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
 {
   MeasureType residual = 0.0;
 
-  assert(this->GetNumberOfParameters() == 25);
+  //assert(this->GetNumberOfParameters() == 16);
 
   // Convert the parameter to the ukfMtarixType
-  ukfMatrixType localState(this->GetNumberOfParameters(), 1);
-  for (unsigned int it = 0; it < this->GetNumberOfParameters(); ++it)
-  {
-    localState(it, 0) = parameters[it];
-  }
+  ukfMatrixType localState(this->GetNumberOfParameters() + 9, 1);
 
-  if (localState(21, 0) < 0.0) 
-  {
-    localState(21, 0) = 0.0;
-  }
-  if (localState(22, 0) < 0.0)
-  {
-    localState(22, 0) = 0.0;
-  }
-  if (localState(23, 0) < 0.0)
-  {
-    localState(23, 0) = 0.0;
-  }
-  if (localState(24, 0) < 0.0)
-  {
-    localState(24, 0) = 0.0;
-  }
+  localState(0, 0) = _fixed_params(0);
+  localState(1, 0) = _fixed_params(1);
+  localState(2, 0) = _fixed_params(2);
+  localState(7, 0) = _fixed_params(3);
+  localState(8, 0) = _fixed_params(4);
+  localState(9, 0) = _fixed_params(5);
+  localState(14, 0) = _fixed_params(6);
+  localState(15, 0) = _fixed_params(7);
+  localState(16, 0) = _fixed_params(8);
+
+  localState(3, 0) = parameters[0];
+  localState(4, 0) = parameters[1];
+  localState(5, 0) = parameters[2];
+  localState(6, 0) = parameters[3];
+  localState(10, 0) = parameters[4];
+  localState(11, 0) = parameters[5];
+  localState(12, 0) = parameters[6];
+  localState(13, 0) = parameters[7];
+  localState(17, 0) = parameters[8];
+  localState(18, 0) = parameters[9];
+  localState(19, 0) = parameters[10];
+  localState(20, 0) = parameters[11];
+  localState(21, 0) = parameters[12];
+  localState(22, 0) = parameters[13];
+  localState(23, 0) = parameters[14];
+  localState(24, 0) = parameters[15];
 
   // Estimate the signal
   ukfMatrixType estimatedSignal(this->GetNumberOfValues(), 1);
@@ -1422,6 +1429,8 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
   // Compute the error between the estimated signal and the acquired one
   ukfPrecisionType err = 0.0;
   this->computeError(estimatedSignal, _signal, err);
+
+  std::cout << err << " ";
 
   // Return the result
   residual = err;
@@ -1447,23 +1456,28 @@ void itk::DiffusionPropagatorCostFunction::GetDerivative(const ParametersType &p
     p_hh[it] = parameters[it];
   }
 
+  double h = std::sqrt(2.22e-16);
+
   // Calculate derivative for each parameter
   for (unsigned int it = 0; it < this->GetNumberOfParameters(); ++it)
   {
     // Optimal h is sqrt(epsilon machine) * x
-    double h = std::sqrt(2.3e-16) * std::max(std::abs(parameters[it]), 1.0);
+    //double h = std::sqrt(2.22e-16) * std::max(std::abs(parameters[it]), 1.0);
 
     // Volatile, otherwise compiler will optimize the value for dx
     volatile double xph = parameters[it] + h;
+    volatile double xphh = parameters[it] - h;
 
     // For taking into account the rounding error
-    double dx = xph - parameters[it];
+    //double dx = xph - parameters[it];
 
     // Compute the slope
     p_h[it] = xph;
+    p_hh[it] = xphh;
 
     //p_hh[it] = parameters[it] - h;
-    derivative[it] = (this->GetValue(p_h) - this->GetValue(p_hh)) / (dx);
+    //derivative[it] = (this->GetValue(p_h) - this->GetValue(p_hh)) / (dx);
+    derivative[it] = (this->GetValue(p_h) - this->GetValue(p_hh)) / (2 * h);
 
     // Set parameters back for next iteration
     p_h[it] = parameters[it];
@@ -1479,27 +1493,60 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   CostType::Pointer cost = CostType::New();
   OptimizerType::Pointer optimizer = OptimizerType::New();
 
-  cost->SetNumberOfParameters(state.size());
+  // Fill in array of parameters we are not intented to optimized
+  // We still need to pass this parameters to optimizer because we need to compute
+  // estimated signal during optimization and it requireds full state
+  ukfVectorType fixed;
+  fixed.resize(9);
+  fixed(0) = state(0);
+  fixed(1) = state(1);
+  fixed(2) = state(2);
+  fixed(3) = state(7);
+  fixed(4) = state(8);
+  fixed(5) = state(9);
+  fixed(6) = state(14);
+  fixed(7) = state(15);
+  fixed(8) = state(16);
+
+  ukfVectorType state_temp;
+  state_temp.resize(16);
+  state_temp(0) = state(3);
+  state_temp(1) = state(4);
+  state_temp(2) = state(5);
+  state_temp(3) = state(6);
+  state_temp(4) = state(10);
+  state_temp(5) = state(11);
+  state_temp(6) = state(12);
+  state_temp(7) = state(13);
+  state_temp(8) = state(17);
+  state_temp(9) = state(18);
+  state_temp(10) = state(19);
+  state_temp(11) = state(20);
+  state_temp(12) = state(21);
+  state_temp(13) = state(22);
+  state_temp(14) = state(23);
+  state_temp(15) = state(24);
+
+  cost->SetNumberOfParameters(state_temp.size());
   cost->SetNumberOfValues(signal.size());
   cost->SetSignalValues(signal);
   cost->SetModel(model);
+  cost->SetFixed(fixed);
 
   optimizer->SetCostFunction(cost);
 
   CostType::ParametersType p(cost->GetNumberOfParameters());
 
   // Fill p
-  for (int it = 0; it < state.size(); ++it)
-  {
-    p[it] = state[it];
-  }
+  for (int it = 0; it < state_temp.size(); ++it)
+    p[it] = state_temp[it];
 
   optimizer->SetInitialPosition(p);
   optimizer->SetProjectedGradientTolerance(1e-10);
-  optimizer->SetMaximumNumberOfIterations(500);
+  optimizer->SetMaximumNumberOfIterations(1000);
   optimizer->SetMaximumNumberOfEvaluations(500);
-  optimizer->SetMaximumNumberOfCorrections(6);      // The number of corrections to approximate the inverse hessian matrix
-  optimizer->SetCostFunctionConvergenceFactor(1e2); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
+  optimizer->SetMaximumNumberOfCorrections(10);     // The number of corrections to approximate the inverse hessian matrix
+  optimizer->SetCostFunctionConvergenceFactor(1e1); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
   optimizer->SetTrace(false);                       // Print debug info
 
   // Set bounds
@@ -1514,55 +1561,75 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
 
   // Lower bound
   // First bi-exponential parameters
-  lowerBound[0] = lowerBound[1] = lowerBound[2] = -1.0;
-  lowerBound[3] = lowerBound[4] = 1.0;
-  lowerBound[5] = lowerBound[6] = 0.1;
+  lowerBound[0] = lowerBound[1] = 1.0;
+  lowerBound[2] = lowerBound[3] = 0.1;
 
   // Second bi-exponential
-  lowerBound[7] = lowerBound[8] = lowerBound[9] = -1.0;
-  lowerBound[10] = lowerBound[11] = 1.0;
-  lowerBound[12] = lowerBound[13] = 0.1;
+  lowerBound[4] = lowerBound[5] = 1.0;
+  lowerBound[6] = lowerBound[7] = 0.1;
 
   // Third bi-exponential
-  lowerBound[14] = lowerBound[15] = lowerBound[16] = -1.0;
-  lowerBound[17] = lowerBound[18] = 1.0;
-  lowerBound[19] = lowerBound[20] = 0.1;
+  lowerBound[8] = lowerBound[9] = 1.0;
+  lowerBound[10] = lowerBound[11] = 0.1;
 
   // w1 & w2 & w3 in [0,1]
-  lowerBound[21] = lowerBound[22] = lowerBound[23] = 0.0;
+  lowerBound[12] = lowerBound[13] = lowerBound[14] = 0.0;
   // free water between 0 and 1
-  lowerBound[24] = 0.0;
+  lowerBound[15] = 0.0;
 
   // Upper bound
   // First bi-exponential
-  upperBound[0] = upperBound[1] = upperBound[2] = 1.0;
-  upperBound[3] = upperBound[4] = upperBound[5] = upperBound[6] = 3000.0;
+  upperBound[0] = upperBound[1] = upperBound[2] = upperBound[3] = 3000.0;
 
   // Second bi-exponential
-  upperBound[7] = upperBound[8] = upperBound[9] = 1.0;
-  upperBound[10] = upperBound[11] = upperBound[12] = upperBound[13] = 3000.0;
+  upperBound[4] = upperBound[5] = upperBound[6] = upperBound[7] = 3000.0;
 
   // Third bi-exponential
-  upperBound[14] = upperBound[15] = upperBound[16] = 1.0;
-  upperBound[17] = upperBound[18] = upperBound[19] = upperBound[20] = 3000.0;
+  upperBound[8] = upperBound[9] = upperBound[10] = upperBound[11] = 3000.0;
 
-  upperBound[21] = upperBound[22] = upperBound[23] = 1.0;
-  upperBound[24] = 1.0;
+  upperBound[12] = upperBound[13] = upperBound[14] = 1.0;
+  upperBound[15] = 1.0;
 
   optimizer->SetBoundSelection(boundSelect);
   optimizer->SetUpperBound(upperBound);
   optimizer->SetLowerBound(lowerBound);
-
+  std::cout << "err " << std::endl;
   optimizer->StartOptimization();
-
+  std::cout << std::endl;
   // std::cout<<"Current Iteration: "<<optimizer->GetCurrentIteration()<<std::endl;
   // std::cout<<"Value: "<<optimizer->GetValue()<<std::endl;
   p = optimizer->GetCurrentPosition();
   // Write back the state
-  for (int it = 0; it < state.size(); ++it)
-  {
-    state[it] = p[it];
-  }
+  for (int it = 0; it < state_temp.size(); ++it)
+    state_temp[it] = p[it];
+
+  // Fill back state tensor to return it the callee
+  state(0) = fixed(0);
+  state(1) = fixed(1);
+  state(2) = fixed(2);
+  state(7) = fixed(3);
+  state(8) = fixed(4);
+  state(9) = fixed(5);
+  state(14) = fixed(6);
+  state(15) = fixed(7);
+  state(16) = fixed(8);
+
+  state(3) = state_temp(0);
+  state(4) = state_temp(1);
+  state(5) = state_temp(2);
+  state(6) = state_temp(3);
+  state(10) = state_temp(4);
+  state(11) = state_temp(5);
+  state(12) = state_temp(6);
+  state(13) = state_temp(7);
+  state(17) = state_temp(8);
+  state(18) = state_temp(9);
+  state(19) = state_temp(10);
+  state(20) = state_temp(11);
+  state(21) = state_temp(12);
+  state(22) = state_temp(13);
+  state(23) = state_temp(14);
+  state(24) = state_temp(15);
 }
 
 void Tractography::InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted)
@@ -1802,7 +1869,7 @@ void Tractography::Follow3T(const int thread_id,
   ukfPrecisionType trace = fiberStartSeed.trace;
   ukfPrecisionType trace2 = fiberStartSeed.trace2;
 
-  std::cout << "state \n " << fiberStartSeed.state << std::endl;
+  std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
 
   //  Reserving fiber array memory so as to avoid resizing at every step
   FiberReserve(fiber, fiber_size);
@@ -1820,8 +1887,8 @@ void Tractography::Follow3T(const int thread_id,
   int stepnr = 0;
   while (true)
   {
+    std::cout << "step " << stepnr << std::endl;
     ++stepnr;
-
     Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, trace, trace2);
 
     // Check if we should abort following this fiber. We abort if we reach the
