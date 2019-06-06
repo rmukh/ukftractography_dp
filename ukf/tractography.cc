@@ -681,7 +681,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   {
     const ukfVectorType &param = starting_params[i];
 
-    assert(param.size() == 9);
+    //assert(param.size() == 9);
 
     // Filter out seeds whose FA is too low.
     ukfPrecisionType fa = l2fa(param[6], param[7], param[8]);
@@ -840,7 +840,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
         ODF_val_at_max(j) = ODF(exe_vol(j));
       }
 
-      // STEP 1: Initialise the state based on the single estimated tensor
+      // STEP 1: Initialise the state based
       tmp_info_state.resize(25);
       tmp_info_inv_state.resize(25);
       mat33_t dir_init;
@@ -849,16 +849,21 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       ukfPrecisionType w1_init = ODF_val_at_max(0);
       dir_init.row(0) = dir_vol.row(0);
 
-      ukfPrecisionType w_temp = (1.0 - w1_init) / 2.0;
-      ukfPrecisionType w2_init = w_temp;
-      ukfPrecisionType w3_init = w_temp;
+      ukfPrecisionType w2_init = 0;
+      ukfPrecisionType w3_init = 0;
+
+      std::cout << "n_of_dirs " << n_of_dirs << std::endl;
 
       if (n_of_dirs == 1)
       {
         vec3_t orthogonal;
         orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], dir_vol.row(0)[2];
         dir_init.row(1) = orthogonal;
-        dir_init.row(2) = orthogonal;
+        vec3_t orthogonal2;
+        orthogonal2 << -orthogonal[1], orthogonal[0], orthogonal[2];
+        dir_init.row(2) = orthogonal2;
+        
+        w1_init = 1.0;
       }
       else if (n_of_dirs > 1)
       {
@@ -869,15 +874,24 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
           vec3_t orthogonal = v1.cross(v2);
           dir_init.row(1) = dir_vol.row(2);
           dir_init.row(2) = orthogonal;
+
+          w2_init = ODF_val_at_max(2);
+          ukfPrecisionType denom = w1_init + w2_init;
+          w1_init = w1_init / denom;
+          w2_init = w2_init / denom;
         }
         if (n_of_dirs > 2)
         {
           dir_init.row(1) = dir_vol.row(2);
           dir_init.row(2) = dir_vol.row(4);
 
-          w3_init = ODF_val_at_max(2);
+          w2_init = ODF_val_at_max(2);
+          w3_init = ODF_val_at_max(4);
+          ukfPrecisionType denom = w1_init + w2_init + w3_init;
+          w1_init = w1_init / denom;
+          w2_init = w2_init / denom;
+          w3_init = w3_init / denom;
         }
-        w2_init = ODF_val_at_max(2);
       }
 
       // Diffusion directions, m1 = m2 = m3
@@ -904,6 +918,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       tmp_info_state[5] = tmp_info_state[12] = tmp_info_state[19] = 0.7 * param[6];
       tmp_info_state[6] = tmp_info_state[13] = tmp_info_state[20] = 0.7 * param[7];
 
+      std::cout << "w1_init " << w1_init << " w2_init " << w2_init << " w3_init " << w3_init << std::endl;
       tmp_info_state[21] = w1_init;
       tmp_info_state[22] = w2_init;
       tmp_info_state[23] = w3_init;
@@ -932,12 +947,13 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       // Input of the filter
       State state = ConvertVector<stdVecState, State>(tmp_info_state);
+      std::cout << "state before \n" << state.transpose() << std::endl;
       ukfMatrixType p(info.covariance);
 
       // Estimate the initial state
       // InitLoopUKF(state, p, signal_values[i], dNormMSE);
       NonLinearLeastSquareOptimization(state, signal_values[i], _model);
-
+    std::cout << "state after \n" << state.transpose() << std::endl;
       // Output of the filter
       tmp_info_state = ConvertVector<State, stdVecState>(state);
 
@@ -1069,6 +1085,9 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       seed_infos.push_back(info_inv); // NOTE that the seed in reverse direction is put directly after the seed in
                                       // original direction
     }
+
+    if (seed_infos.size() > 1)
+      break;
   }
 
   cout << "Final seeds vector size " << seed_infos.size() << std::endl;
@@ -1377,8 +1396,7 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
     localState(it, 0) = parameters[it];
   }
 
-  // w for freeWater
-  if (localState(21, 0) < 0.0)
+  if (localState(21, 0) < 0.0) 
   {
     localState(21, 0) = 0.0;
   }
@@ -1480,8 +1498,8 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   optimizer->SetProjectedGradientTolerance(1e-10);
   optimizer->SetMaximumNumberOfIterations(500);
   optimizer->SetMaximumNumberOfEvaluations(500);
-  optimizer->SetMaximumNumberOfCorrections(5);      // The number of corrections to approximate the inverse hessian matrix
-  optimizer->SetCostFunctionConvergenceFactor(1e2); // Precision of the solution 1e1 = very precise, 1e12 = coarse estimate
+  optimizer->SetMaximumNumberOfCorrections(6);      // The number of corrections to approximate the inverse hessian matrix
+  optimizer->SetCostFunctionConvergenceFactor(1e2); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
   optimizer->SetTrace(false);                       // Print debug info
 
   // Set bounds
@@ -1783,6 +1801,8 @@ void Tractography::Follow3T(const int thread_id,
   ukfPrecisionType dNormMSE = 0; // no error at the fiberStartSeed
   ukfPrecisionType trace = fiberStartSeed.trace;
   ukfPrecisionType trace2 = fiberStartSeed.trace2;
+
+  std::cout << "state \n " << fiberStartSeed.state << std::endl;
 
   //  Reserving fiber array memory so as to avoid resizing at every step
   FiberReserve(fiber, fiber_size);
@@ -2326,14 +2346,19 @@ void Tractography::Step3T(const int thread_id,
     SwapState3T_BiExp(state, covariance, 3);
   }
 
-  const vec3_t &voxel = _signal_data->voxel();
-
-  // CB: Bug corrected, dir[i] should be divided by voxel[i]
   vec3_t dx;
-  dx << m1[2] / voxel[0],
-      m1[1] / voxel[1],
-      m1[0] / voxel[2];
-  x = x + dx * _stepLength;
+  {
+    const vec3_t dir = m1; // The dir is a unit vector in ijk coordinate system indicating the direction of step
+    const vec3_t voxel = _signal_data->voxel();
+    dx << dir[2] / voxel[0], // By dividing by the voxel size, it's guaranteed that the step
+        // represented by dx is 1mm in RAS coordinate system, no matter whether
+        // the voxel is isotropic or not
+        dir[1] / voxel[1], // The value is scaled back during the ijk->RAS transformation when
+        // outputted
+        dir[0] / voxel[2];
+
+    x = x + dx * _stepLength; // The x here is in ijk coordinate system.
+  }
 }
 
 void Tractography::Step3T(const int thread_id,
@@ -2735,7 +2760,6 @@ void Tractography::SwapState3T_BiExp(State &state,
   int tshift = 3 * state_dim;
   int mshift = ishift * state_dim;
 
-  tmp.setConstant(ukfZero);
   tmp = covariance;
   covariance.block(i, i, state_dim, state_dim) = tmp.block(0, 0, state_dim, state_dim);
   covariance.block(0, 0, state_dim, state_dim) = tmp.block(i, i, state_dim, state_dim);
@@ -2788,7 +2812,7 @@ void Tractography::SwapState3T_BiExp(State &state,
 
     int threeshift = tshift + 3;
     // Horizontal bottom
-    covariance(threeshift, twoshift) = covariance(threeshift, tshift);
+    covariance(threeshift, twoshift) = tmp(threeshift, tshift);
     covariance(threeshift, tshift) = tmp(threeshift, twoshift);
     // Vertical right
     covariance(twoshift, threeshift) = tmp(tshift, threeshift);

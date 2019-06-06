@@ -136,7 +136,7 @@ public:
         _d(31) = 1; // wiso <= 1
 
         // experimental!!!
-        // Equality constrain (w1 + w2 + w3 = 1)
+        // Equality constraint (w1 + w2 + w3 = 1)
         _E.resize(25, 1);
         _E.setConstant(ukfZero);
         _e.resize(1);

@@ -116,7 +116,7 @@ bool UnscentedKalmanFilter::violatesContraints(ukfVectorType &x)
     }
   }
 
-  const ukfVectorType e_test = (-ukfOne) * (m_FilterModel->E().transpose()) * x; // -D'*x
+  const ukfVectorType e_test = (-ukfOne) * (m_FilterModel->E().transpose()) * x; // -E'*x
   for (unsigned int i = 0; i < e_test.size(); ++i)                               // if any(-E'*x != e) constraint is
                                                                                  // broken
   {
