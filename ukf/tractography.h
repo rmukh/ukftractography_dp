@@ -465,16 +465,29 @@ public:
   {
     assert(signal_estimate.rows() == signal.size());
 
-    err = 0.0;
+    ukfPrecisionType sum = 0.0;
     ukfPrecisionType norm_sq_signal = 0.0;
+    unsigned int N = signal.size() / 2;
 
-    for (unsigned int i = 0; i < signal.size() / 2; ++i)
+    for (unsigned int i = 0; i < N; ++i)
     {
-      err += (signal_estimate(i, 0) - signal[i]) * (signal_estimate(i, 0) - signal[i]);
+      ukfPrecisionType diff = signal[i] - signal_estimate(i, 0);
+      sum += diff * diff;
       norm_sq_signal += signal[i] * signal[i];
     }
 
-    err = err / norm_sq_signal;
+    err = sum / (N * norm_sq_signal);
+
+    // MSE
+    // err = 0.0;
+
+    // for (unsigned int i = 0; i < signal.size() / 2; ++i)
+    // {
+    //   ukfPrecisionType diff = signal_estimate(i, 0) - signal[i];
+    //   err += diff * diff;
+    // }
+    // ukfPrecisionType mse = err / (signal.size() / 2);
+    // err = mse;
   }
 
   MeasureType GetValue(const ParametersType &parameters) const;

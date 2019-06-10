@@ -20,10 +20,6 @@ seeds_path="/home/rinat/Desktop/ukftests/Segmentation-label.nrrd"
 # OUTPUT FIBER
 output_path='/home/rinat/Desktop/ukftests/seeds_tc.vtk'
 
-if [ -f $logFile ]; then
-	rm $logFile
-fi
-
 eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
@@ -31,8 +27,9 @@ eval $BINARY \
  --tracts $output_path \
  --seedsFile $seeds_path \
  --minRTOP 20 \
- --seedsPerVoxel 5 \
- --numTensor 3 | tee -a $logFile
+ --seedingThreshold 0.14 \
+ --seedsPerVoxel 1 \
+ --numTensor 3 | tee $logFile
  end=`date +%s`
 
 runtime=$((end - start))
