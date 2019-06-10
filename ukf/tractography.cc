@@ -1456,13 +1456,13 @@ void itk::DiffusionPropagatorCostFunction::GetDerivative(const ParametersType &p
     p_hh[it] = parameters[it];
   }
 
-  double h = std::sqrt(2.22e-16);
+  //double h = std::sqrt(2.22e-16);
 
   // Calculate derivative for each parameter
   for (unsigned int it = 0; it < this->GetNumberOfParameters(); ++it)
   {
     // Optimal h is sqrt(epsilon machine) * x
-    //double h = std::sqrt(2.22e-16) * std::max(std::abs(parameters[it]), 1.0);
+    double h = std::sqrt(2.22e-16) * std::max(std::abs(parameters[it]), 1.0);
 
     // Volatile, otherwise compiler will optimize the value for dx
     volatile double xph = parameters[it] + h;
@@ -1544,9 +1544,9 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   optimizer->SetInitialPosition(p);
   optimizer->SetProjectedGradientTolerance(1e-10);
   optimizer->SetMaximumNumberOfIterations(1000);
-  optimizer->SetMaximumNumberOfEvaluations(500);
-  optimizer->SetMaximumNumberOfCorrections(10);     // The number of corrections to approximate the inverse hessian matrix
-  optimizer->SetCostFunctionConvergenceFactor(1e1); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
+  optimizer->SetMaximumNumberOfEvaluations(1000);
+  optimizer->SetMaximumNumberOfCorrections(5);     // The number of corrections to approximate the inverse hessian matrix
+  optimizer->SetCostFunctionConvergenceFactor(1e2); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
   optimizer->SetTrace(false);                       // Print debug info
 
   // Set bounds
