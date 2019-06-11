@@ -1389,7 +1389,7 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
   //assert(this->GetNumberOfParameters() == 16);
 
   // Convert the parameter to the ukfMtarixType
-  ukfMatrixType localState(this->GetNumberOfParameters() + 13, 1);
+  ukfMatrixType localState(this->GetNumberOfParameters() + this->GetNumberOfFixed(), 1);
 
   localState(0, 0) = _fixed_params(0);
   localState(1, 0) = _fixed_params(1);
@@ -1404,8 +1404,7 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
   localState(21, 0) = _fixed_params(9);
   localState(22, 0) = _fixed_params(10);
   localState(23, 0) = _fixed_params(11);
-  localState(24, 0) = _fixed_params(12);
-
+  
   localState(3, 0) = parameters[0];
   localState(4, 0) = parameters[1];
   localState(5, 0) = parameters[2];
@@ -1418,6 +1417,7 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
   localState(18, 0) = parameters[9];
   localState(19, 0) = parameters[10];
   localState(20, 0) = parameters[11];
+  localState(24, 0) = parameters[12];
 
   // Estimate the signal
   ukfMatrixType estimatedSignal(this->GetNumberOfValues(), 1);
@@ -1453,28 +1453,23 @@ void itk::DiffusionPropagatorCostFunction::GetDerivative(const ParametersType &p
     p_hh[it] = parameters[it];
   }
 
-  volatile double h = std::sqrt(2.22e-16);
-
-  // Calculate derivative for each parameter
+  // Calculate derivative for each parameter (reference to the wikipedia page: Numerical Differentiation)
   for (unsigned int it = 0; it < this->GetNumberOfParameters(); ++it)
   {
     // Optimal h is sqrt(epsilon machine) * x
-    //double h = std::sqrt(2.22e-16) * std::max(std::abs(parameters[it]), 1.0);
+    double h = std::sqrt(2.22e-16) * std::abs(parameters[it]);
 
     // Volatile, otherwise compiler will optimize the value for dx
     volatile double xph = parameters[it] + h;
-    volatile double xphh = parameters[it] - h;
 
     // For taking into account the rounding error
-    //volatile double dx = xph - parameters[it];
+    double dx = xph - parameters[it];
 
     // Compute the slope
     p_h[it] = xph;
-    p_hh[it] = xphh;
 
     //p_hh[it] = parameters[it] - h;
-    //derivative[it] = (this->GetValue(p_h) - this->GetValue(p_hh)) / (dx);
-    derivative[it] = (this->GetValue(p_h) - this->GetValue(p_hh)) / (2 * h);
+    derivative[it] = (this->GetValue(p_h) - this->GetValue(p_hh)) / dx;
 
     // Set parameters back for next iteration
     p_h[it] = parameters[it];
@@ -1494,7 +1489,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   // We still need to pass this parameters to optimizer because we need to compute
   // estimated signal during optimization and it requireds full state
   ukfVectorType fixed;
-  fixed.resize(13);
+  fixed.resize(12);
   fixed(0) = state(0);
   fixed(1) = state(1);
   fixed(2) = state(2);
@@ -1508,12 +1503,11 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   fixed(9) = state(21);
   fixed(10) = state(22);
   fixed(11) = state(23);
-  fixed(12) = state(24);
-
+  
   std::cout << "state before\n " << state << std::endl;
 
   ukfVectorType state_temp;
-  state_temp.resize(12);
+  state_temp.resize(13);
   state_temp(0) = state(3);
   state_temp(1) = state(4);
   state_temp(2) = state(5);
@@ -1526,8 +1520,10 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   state_temp(9) = state(18);
   state_temp(10) = state(19);
   state_temp(11) = state(20);
+  state_temp(12) = state(24);
 
   cost->SetNumberOfParameters(state_temp.size());
+  cost->SetNumberOfFixed(fixed.size());
   cost->SetNumberOfValues(signal.size());
   cost->SetSignalValues(signal);
   cost->SetModel(model);
@@ -1575,7 +1571,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   //lowerBound[12] = lowerBound[13] = lowerBound[14] = 0.0;
   // free water between 0 and 1
   //lowerBound[15] = 0.0;
-  //lowerBound[12] = 0.0;
+  lowerBound[12] = 0.0;
 
   // Upper bound
   // First bi-exponential
@@ -1589,7 +1585,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
 
   //upperBound[12] = upperBound[13] = upperBound[14] = 1.0;
   //upperBound[15] = 1.0;
-  //upperBound[12] = 1.0;
+  upperBound[12] = 1.0;
 
   optimizer->SetBoundSelection(boundSelect);
   optimizer->SetUpperBound(upperBound);
@@ -1615,8 +1611,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   state(21) = fixed(9);
   state(22) = fixed(10);
   state(23) = fixed(11);
-  state(24) = fixed(12);
-
+  
   state(3) = state_temp(0);
   state(4) = state_temp(1);
   state(5) = state_temp(2);
@@ -1629,9 +1624,9 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   state(18) = state_temp(9);
   state(19) = state_temp(10);
   state(20) = state_temp(11);
+  state(24) = state_temp(12);
 
-  std::cout << "state after \n"
-            << state << std::endl;
+  std::cout << "state after \n" << state << std::endl;
 }
 
 void Tractography::InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted)
@@ -2020,7 +2015,6 @@ void Tractography::Follow3T_Other(const int thread_id,
       const bool is_one = (l1[0] > l1[1]) && (l1[0] > l1[2]) && (fa_1 > _fa_min);
       if (is_one)
       {
-
         bool add_m2 = false;
         bool add_m3 = false;
 
@@ -2365,6 +2359,7 @@ void Tractography::Step3T(const int thread_id,
   State state_new(_model->state_dim());
 
   ukfMatrixType covariance_new(_model->state_dim(), _model->state_dim());
+  covariance_new.setConstant(ukfZero);
 
   // Use the Unscented Kalman Filter to get the next estimate.
   ukfVectorType signal(_signal_data->GetSignalDimension() * 2);
@@ -2410,8 +2405,12 @@ void Tractography::Step3T(const int thread_id,
     m3 = tmp;
 
     // Swap state.
-
+    std::cout << "swap 3 triggered" << std::endl;
+    std::cout << "state before\n " << state << std::endl;
+    std::cout << "covariance before\n " << covariance << std::endl;
     SwapState3T_BiExp(state, covariance, 3);
+    std::cout << "state after\n " << state << std::endl;
+    std::cout << "covariance after\n " << covariance << std::endl;
   }
 
   vec3_t dx;

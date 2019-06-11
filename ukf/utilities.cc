@@ -20,7 +20,7 @@ ukfPrecisionType l2fa(ukfPrecisionType l1, ukfPrecisionType l2, ukfPrecisionType
     {
     return sqrt(ukfHalf * ( (l1 - l2) * (l1 - l2)
                         + (l2 - l3) * (l2 - l3)
-                        + (l3 - l1) * (l3 - l1) )
+                        + (l1 - l3) * (l3 - l1) )
                 / (l1 * l1 + l2 * l2 + l3 * l3) );
     }
 }

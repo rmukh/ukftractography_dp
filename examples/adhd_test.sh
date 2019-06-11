@@ -9,10 +9,10 @@ logFile="log.txt"
 BINARY='../build/UKFTractography-build/UKFTractography/bin/UKFTractography'
 
 # VOLUME
-dwi_path="/home/rinat/Desktop/ukftests/data.nrrd"
+dwi_path="/home/rinat/Desktop/ukftests/dwi-Aligned-Ed-Bet-Merged-unring-Epi.nhdr"
 
 # MASK
-mask_path="/home/rinat/Desktop/ukftests/diff_mask.nrrd"
+mask_path="/home/rinat/Desktop/ukftests/epi_corrected_tensormask.nrrd"
 
 # SEEDS
 seeds_path="/home/rinat/Desktop/ukftests/Segmentation-label.nrrd"
@@ -27,7 +27,6 @@ eval $BINARY \
  --tracts $output_path \
  --seedsFile $seeds_path \
  --minRTOP 20 \
- --seedingThreshold 0.14 \
  --seedsPerVoxel 1 \
  --numTensor 3 | tee $logFile
  end=`date +%s`

@@ -430,6 +430,10 @@ public:
   unsigned int GetNumberOfParameters() const { return _NumberOfParameters; }
   void SetNumberOfParameters(unsigned int NumberOfParameters) { _NumberOfParameters = NumberOfParameters; }
 
+  // Number of fixed (not for optimization) parameters
+  unsigned int GetNumberOfFixed() const { return _NumberOfFixed; }
+  void SetNumberOfFixed(unsigned int NumberOfFixed) { _NumberOfFixed = NumberOfFixed; }
+
   // The number of gradient directions in which the signal is estimated
   unsigned int GetNumberOfValues() const { return _NumberOfValues; }
   void SetNumberOfValues(unsigned int NumberOfValues) { _NumberOfValues = NumberOfValues; }
@@ -502,6 +506,7 @@ private:
   void operator=(const Self &);                  //purposely not implemented
 
   unsigned int _NumberOfParameters;
+  unsigned int _NumberOfFixed;
   unsigned int _NumberOfValues;
   ukfVectorType _signal;
   FilterModel *_model;
