@@ -567,8 +567,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
   // Create random offsets from the seed voxel.
   stdVec_t rand_dirs;
-  std::cout << "seeds size: " << seeds.size() << std::endl;
-  if (seeds.size() == 1 && _seeds_per_voxel == 1) // if there is only one seed don't use offset so fibers can be
+
+  if (seeds.size() == 1 || _seeds_per_voxel == 1) // if there is only one seed don't use offset so fibers can be
                                                   // compared
   {
     rand_dirs.push_back(vec3_t(0, 0, 0) /* make_vec(0, 0, 0) */); // in the test cases.
@@ -861,9 +861,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       {
         vec3_t orthogonal;
         orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], dir_vol.row(0)[2];
+        orthogonal = orthogonal / orthogonal.norm();
         dir_init.row(1) = orthogonal;
         vec3_t orthogonal2;
         orthogonal2 << -orthogonal[1], orthogonal[0], orthogonal[2];
+        orthogonal2 = orthogonal2 / orthogonal2.norm();
         dir_init.row(2) = orthogonal2;
 
         w1_init = 1.0;
@@ -875,6 +877,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
           vec3_t v1 = dir_vol.row(0);
           vec3_t v2 = dir_vol.row(2);
           vec3_t orthogonal = v1.cross(v2);
+          orthogonal = orthogonal / orthogonal.norm();
+
           dir_init.row(1) = dir_vol.row(2);
           dir_init.row(2) = orthogonal;
 
@@ -1520,6 +1524,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   state_temp(9) = state(18);
   state_temp(10) = state(19);
   state_temp(11) = state(20);
+
   state_temp(12) = state(24);
 
   cost->SetNumberOfParameters(state_temp.size());
@@ -1624,6 +1629,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   state(18) = state_temp(9);
   state(19) = state_temp(10);
   state(20) = state_temp(11);
+  
   state(24) = state_temp(12);
 
   std::cout << "state after \n" << state << std::endl;
@@ -2405,12 +2411,12 @@ void Tractography::Step3T(const int thread_id,
     m3 = tmp;
 
     // Swap state.
-    std::cout << "swap 3 triggered" << std::endl;
-    std::cout << "state before\n " << state << std::endl;
-    std::cout << "covariance before\n " << covariance << std::endl;
+    //std::cout << "swap 3 triggered" << std::endl;
+    //std::cout << "state before\n " << state << std::endl;
+    //std::cout << "covariance before\n " << covariance << std::endl;
     SwapState3T_BiExp(state, covariance, 3);
-    std::cout << "state after\n " << state << std::endl;
-    std::cout << "covariance after\n " << covariance << std::endl;
+    //std::cout << "state after\n " << state << std::endl;
+   // std::cout << "covariance after\n " << covariance << std::endl;
   }
 
   vec3_t dx;
