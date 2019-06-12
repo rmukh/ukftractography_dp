@@ -405,15 +405,17 @@ void Tractography::UpdateFilterModelType()
     }
   }
 
-  std::cout << "signal mask " << signal_mask.size() << std::endl;
-  std::cout << signal_mask << std::endl;
+  //Take only highest b-value gradient directions
+  ukfMatrixType HighBGradDirss(signal_mask.size(), 3);
+  for (int indx = 0; indx < signal_mask.size(); ++indx)
+    HighBGradDirss.row(indx) = GradientDirections.row(signal_mask(indx));
 
   // Compute A basis
   // Spherical Ridgelets helper functions
   UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
   SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
 
-  ridg.RBasis(ARidg, GradientDirections);
+  ridg.RBasis(ARidg, HighBGradDirss);
   ridg.normBasis(ARidg);
 
   // Compute Q basis
@@ -422,6 +424,10 @@ void Tractography::UpdateFilterModelType()
 
   // Compute connectivity
   m.FindConnectivity(conn, fcs, nu.rows());
+
+  cout << "size check " << endl;
+  cout << ARidg.rows() << " " << ARidg.cols() << endl;
+  cout << QRidg.rows() << " " << QRidg.cols() << endl;
 
   // TODO refactor this NODDI switch
   if (this->_filter_model_type == _1T_FW && this->_noddi && this->_num_tensors == 1)
@@ -838,10 +844,15 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // Compute number of branches at the seed point using spherical ridgelets
       UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
 
+      ukfVectorType HighBSignalValues;
+      HighBSignalValues.resize(signal_mask.size());
+      for (int indx = 0; indx < signal_mask.size(); ++indx)
+        HighBSignalValues(indx) = signal_values[i](signal_mask(indx));
+
       // We can compute ridegelets coefficients
       ukfVectorType C;
       {
-        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(ARidg, signal_values[i], fista_lambda);
+        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(ARidg, HighBSignalValues, fista_lambda);
         slv.FISTA(C);
       }
 
