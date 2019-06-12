@@ -391,6 +391,23 @@ void Tractography::UpdateFilterModelType()
     GradientDirections.row(j) = u;
   }
 
+  // Get indicies of voxels in a range
+  const ukfVectorType b_vals = _signal_data->GetBValues();
+
+  int vx = 0;
+  for (int i = 0; i < b_vals.size() / 2; ++i)
+  {
+    if (b_vals(i) > 2400)
+    {
+      signal_mask.conservativeResize(signal_mask.size() + 1);
+      signal_mask(vx) = i;
+      vx++;
+    }
+  }
+
+  std::cout << "signal mask " << signal_mask.size() << std::endl;
+  std::cout << signal_mask << std::endl;
+
   // Compute A basis
   // Spherical Ridgelets helper functions
   UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
@@ -568,8 +585,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   // Create random offsets from the seed voxel.
   stdVec_t rand_dirs;
 
-  if (seeds.size() == 1 || _seeds_per_voxel == 1) // if there is only one seed don't use offset so fibers can be
-                                                  // compared
+  if ((seeds.size() == 1 && _seeds_per_voxel == 1) || _seeds_per_voxel == 1) // if there is only one seed don't use offset so fibers can be
+                                                                             // compared
   {
     rand_dirs.push_back(vec3_t(0, 0, 0) /* make_vec(0, 0, 0) */); // in the test cases.
   }
@@ -1408,7 +1425,7 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
   localState(21, 0) = _fixed_params(9);
   localState(22, 0) = _fixed_params(10);
   localState(23, 0) = _fixed_params(11);
-  
+
   localState(3, 0) = parameters[0];
   localState(4, 0) = parameters[1];
   localState(5, 0) = parameters[2];
@@ -1507,7 +1524,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   fixed(9) = state(21);
   fixed(10) = state(22);
   fixed(11) = state(23);
-  
+
   std::cout << "state before\n " << state << std::endl;
 
   ukfVectorType state_temp;
@@ -1616,7 +1633,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   state(21) = fixed(9);
   state(22) = fixed(10);
   state(23) = fixed(11);
-  
+
   state(3) = state_temp(0);
   state(4) = state_temp(1);
   state(5) = state_temp(2);
@@ -1629,10 +1646,11 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   state(18) = state_temp(9);
   state(19) = state_temp(10);
   state(20) = state_temp(11);
-  
+
   state(24) = state_temp(12);
 
-  std::cout << "state after \n" << state << std::endl;
+  std::cout << "state after \n"
+            << state << std::endl;
 }
 
 void Tractography::InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted)
@@ -2416,7 +2434,7 @@ void Tractography::Step3T(const int thread_id,
     //std::cout << "covariance before\n " << covariance << std::endl;
     SwapState3T_BiExp(state, covariance, 3);
     //std::cout << "state after\n " << state << std::endl;
-   // std::cout << "covariance after\n " << covariance << std::endl;
+    // std::cout << "covariance after\n " << covariance << std::endl;
   }
 
   vec3_t dx;
