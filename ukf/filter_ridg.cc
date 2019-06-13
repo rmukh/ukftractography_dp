@@ -11,9 +11,14 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
 
     UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
 
+    ukfVectorType HighBSignalValues;
+    HighBSignalValues.resize(signal_mask.size());
+    for (int indx = 0; indx < signal_mask.size(); ++indx)
+        HighBSignalValues(indx) = s(signal_mask(indx));
+
     ukfVectorType C;
     {
-        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, s, fista_lambda);
+        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, HighBSignalValues, fista_lambda);
         slv.FISTA(C);
     }
 
@@ -132,6 +137,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
         closest.maxCoeff(&maxInd);
 
         o1 = dir_vol.row(maxInd);
+
         max_odf(0) = ODF(exe_vol(maxInd));
 
         if (n_of_dirs > 1)
@@ -391,17 +397,17 @@ void Ridg_BiExp_FW::State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &
     initNormalized(m1, x[0], x[1], x[2]);
     initNormalized(m2, x[7], x[8], x[9]);
     initNormalized(m3, x[14], x[15], x[16]);
-
+    
     // Flip orientations if necessary.
-    if (m1[0] * old_m[0] + m1[1] * old_m[1] + m1[2] * old_m[2] < 0)
+    if (m1.dot(old_m) < 0)
     {
         m1 = -m1;
     }
-    if (m2[0] * old_m[0] + m2[1] * old_m[1] + m2[2] * old_m[2] < 0)
+    if (m2.dot(old_m) < 0)
     {
         m2 = -m2;
     }
-    if (m3[0] * old_m[0] + m3[1] * old_m[1] + m3[2] * old_m[2] < 0)
+    if (m3.dot(old_m) < 0)
     {
         m3 = -m3;
     }

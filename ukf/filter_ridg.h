@@ -19,11 +19,11 @@ public:
     Ridg_BiExp_FW(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType qt, ukfPrecisionType qw, ukfPrecisionType qwiso,
                   ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, const ukfPrecisionType diff_fw,
                   ukfMatrixType &Aridg, ukfMatrixType &Qridg, ukfMatrixType &fcsridg, ukfMatrixType &nuridg,
-                  vector<vector<unsigned>> &connridg, ukfPrecisionType fl, ukfPrecisionType mot)
+                  vector<vector<unsigned>> &connridg, signalMaskType &sm, ukfPrecisionType fl, ukfPrecisionType mot)
         : FilterModel(25, rs, weights_on_tensors, constrained, true),
           _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000),
           _w_fast_diffusion(0.7), m_D_iso(SetIdentityScaled(diff_fw)), A(Aridg), Q(Qridg), fcs(fcsridg), nu(nuridg), conn(connridg),
-          fista_lambda(fl), max_odf_thresh(mot)
+          signal_mask(sm), fista_lambda(fl), max_odf_thresh(mot)
     {
         // size(X, 'column') == 25
         // X = [x10, x11, x12, l11, l12, l13, l14, x20, x21, x22, l21, l22, l23, l24, x30, x31, x32, l31, l32, l33, l34, w1, w2, w3, wiso]'
@@ -174,6 +174,8 @@ public:
     ukfMatrixType &fcs;
     ukfMatrixType &nu;
     vector<vector<unsigned>> &conn;
+
+    signalMaskType &signal_mask;
 
     const ukfPrecisionType fista_lambda;
     const ukfPrecisionType max_odf_thresh;
