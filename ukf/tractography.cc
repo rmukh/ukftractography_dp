@@ -2416,53 +2416,55 @@ void Tractography::Step3T(const int thread_id,
   ukfPrecisionType dot3 = m3.dot(old_dir);
 
   // NEED TO FIX
-  if (dot1 < dot2 && dot3 < dot2)
-  {
-    std::cout << "swap 2 triggered" << std::endl;
-    std::cout << "angle m2 m1 " << RadToDeg(std::acos(m2.dot(m1))) << std::endl;
-    std::cout << "angle dot1 " << RadToDeg(std::acos(dot1)) << std::endl;
-    std::cout << "angle dot2 " << RadToDeg(std::acos(dot2)) << std::endl;
-    std::cout << "angle dot3 " << RadToDeg(std::acos(dot3)) << std::endl;
-    std::cout << "old dir " << old_dir << std::endl;
-    std::cout << "m1 " << m1 << std::endl;
-    std::cout << "m2 " << m2 << std::endl;
-    std::cout << "dot1 " << dot1 << std::endl;
-    std::cout << "dot2 " << dot2 << std::endl;
-    std::cout << "dot3 " << dot3 << std::endl;
+  // if (dot1 < dot2 && dot3 < dot2)
+  // {
+  //   std::cout << "swap 2 triggered" << std::endl;
+  //   std::cout << "angle m2 m1 " << RadToDeg(std::acos(m2.dot(m1))) << std::endl;
+  //   std::cout << "angle dot1 " << RadToDeg(std::acos(dot1)) << std::endl;
+  //   std::cout << "angle dot2 " << RadToDeg(std::acos(dot2)) << std::endl;
+  //   std::cout << "angle dot3 " << RadToDeg(std::acos(dot3)) << std::endl;
+  //   std::cout << "old dir " << old_dir << std::endl;
+  //   std::cout << "m1 " << m1 << std::endl;
+  //   std::cout << "m2 " << m2 << std::endl;
+  //   std::cout << "dot1 " << dot1 << std::endl;
+  //   std::cout << "dot2 " << dot2 << std::endl;
+  //   std::cout << "dot3 " << dot3 << std::endl;
 
-    // Switch dirs and lambdas.
-    vec3_t tmp = m1;
-    m1 = m2;
-    m2 = tmp;
-    std::cout << "cv before\n " << covariance.determinant() << " " << (covariance * covariance.transpose()).trace() << std::endl;
-    // Swap state.
-    SwapState3T_BiExp(state, covariance, 2);
-    std::cout << "cv after\n " << covariance.determinant()  << " " << (covariance * covariance.transpose()).trace() << std::endl;
+  //   std::cout << "w1 " << state(21) << " w2 " << state(22) << std::endl;
 
-    //w11 w12 w13 w14
-    //w21 w22 w23 w24
-    //w31 w32 w33 w43
-    //w41 w42 w43 w44
-  }
+  //   // Switch dirs and lambdas.
+  //   vec3_t tmp = m1;
+  //   m1 = m2;
+  //   m2 = tmp;
+  //   std::cout << "cov before det = " << covariance.determinant() << " diff norm " << (covariance - covariance.transpose()).norm() << std::endl;
+  //   // Swap state.
+  //   SwapState3T_BiExp(state, covariance, 2);
+  //   std::cout << "cov after det =  " << covariance.determinant()  << " diff norm " << (covariance - covariance.transpose()).norm() << std::endl;
+
+  //   //w11 w12 w13 w14
+  //   //w21 w22 w23 w24
+  //   //w31 w32 w33 w43
+  //   //w41 w42 w43 w44
+  // }
 
   // NEED TO FIX
-  else if (dot1 < dot3)
-  {
-    // Switch dirs and lambdas.
-    vec3_t tmp = m1;
-    m1 = m3;
-    m3 = tmp;
+  // else if (dot1 < dot3)
+  // {
+  //   // Switch dirs and lambdas.
+  //   vec3_t tmp = m1;
+  //   m1 = m3;
+  //   m3 = tmp;
 
-    // Swap state.
-    std::cout << "swap 3 triggered" << std::endl;
-    std::cout << "normed? " << m1.norm() << " " << m3.norm() << std::endl;
-    std::cout << "angle " << std::acos(m3.dot(m1)) << std::endl;
-    //std::cout << "state before\n " << state << std::endl;
-    //std::cout << "covariance before\n " << covariance << std::endl;
-    SwapState3T_BiExp(state, covariance, 3);
-    //std::cout << "state after\n " << state << std::endl;
-    // std::cout << "covariance after\n " << covariance << std::endl;
-  }
+  //   // Swap state.
+  //   std::cout << "swap 3 triggered" << std::endl;
+  //   std::cout << "normed? " << m1.norm() << " " << m3.norm() << std::endl;
+  //   std::cout << "angle " << std::acos(m3.dot(m1)) << std::endl;
+  //   //std::cout << "state before\n " << state << std::endl;
+  //   //std::cout << "covariance before\n " << covariance << std::endl;
+  //   SwapState3T_BiExp(state, covariance, 3);
+  //   //std::cout << "state after\n " << state << std::endl;
+  //   // std::cout << "covariance after\n " << covariance << std::endl;
+  // }
 
   vec3_t dx;
   {
@@ -2901,47 +2903,47 @@ void Tractography::SwapState3T_BiExp(State &state,
 
   // Lower right 4x4 matrix
   // !!!Need to check this!!!!
-  // int corn_shift = tshift + ishift;
-  // covariance(corn_shift, corn_shift) = tmp(tshift, tshift);
-  // covariance(tshift, tshift) = tmp(corn_shift, corn_shift);
+  int corn_shift = tshift + ishift;
+  covariance(corn_shift, corn_shift) = tmp(tshift, tshift);
+  covariance(tshift, tshift) = tmp(corn_shift, corn_shift);
 
-  // covariance(tshift, corn_shift) = tmp(corn_shift, tshift);
-  // covariance(corn_shift, tshift) = tmp(tshift, corn_shift);
+  covariance(tshift, corn_shift) = tmp(corn_shift, tshift);
+  covariance(corn_shift, tshift) = tmp(tshift, corn_shift);
 
-  //int oneshift = tshift + 1;
-  //int twoshift = tshift + 2;
+  int oneshift = tshift + 1;
+  int twoshift = tshift + 2;
 
-  // if (ishift == 1)
-  // {
-  //   covariance.block(twoshift, tshift, 2, 1) = tmp.block(twoshift, oneshift, 2, 1);
-  //   covariance.block(twoshift, oneshift, 2, 1) = tmp.block(twoshift, tshift, 2, 1);
+  if (ishift == 1)
+  {
+    covariance.block(twoshift, tshift, 2, 1) = tmp.block(twoshift, oneshift, 2, 1);
+    covariance.block(twoshift, oneshift, 2, 1) = tmp.block(twoshift, tshift, 2, 1);
 
-  //   covariance.block(tshift, twoshift, 1, 2) = tmp.block(oneshift, twoshift, 1, 2);
-  //   covariance.block(oneshift, twoshift, 1, 2) = tmp.block(tshift, twoshift, 1, 2);
-  // }
-  // else if (ishift == 2)
-  // {
-  //   // Horizontal mid
-  //   covariance(oneshift, tshift) = tmp(oneshift, twoshift);
-  //   covariance(oneshift, twoshift) = tmp(oneshift, tshift);
+    covariance.block(tshift, twoshift, 1, 2) = tmp.block(oneshift, twoshift, 1, 2);
+    covariance.block(oneshift, twoshift, 1, 2) = tmp.block(tshift, twoshift, 1, 2);
+  }
+  else if (ishift == 2)
+  {
+    // Horizontal mid
+    covariance(oneshift, tshift) = tmp(oneshift, twoshift);
+    covariance(oneshift, twoshift) = tmp(oneshift, tshift);
 
-  //   // Vertical mid
-  //   covariance(twoshift, oneshift) = tmp(tshift, oneshift);
-  //   covariance(tshift, oneshift) = tmp(twoshift, oneshift);
+    // Vertical mid
+    covariance(twoshift, oneshift) = tmp(tshift, oneshift);
+    covariance(tshift, oneshift) = tmp(twoshift, oneshift);
 
-  //   int threeshift = tshift + 3;
-  //   // Horizontal bottom
-  //   covariance(threeshift, twoshift) = tmp(threeshift, tshift);
-  //   covariance(threeshift, tshift) = tmp(threeshift, twoshift);
-  //   // Vertical right
-  //   covariance(twoshift, threeshift) = tmp(tshift, threeshift);
-  //   covariance(tshift, threeshift) = tmp(twoshift, threeshift);
-  // }
-  // else
-  // {
-  //   std::cout << "Error: BiExp swap state function works only for 3 Tensors.\n";
-  //   throw;
-  // }
+    int threeshift = tshift + 3;
+    // Horizontal bottom
+    covariance(threeshift, twoshift) = tmp(threeshift, tshift);
+    covariance(threeshift, tshift) = tmp(threeshift, twoshift);
+    // Vertical right
+    covariance(twoshift, threeshift) = tmp(tshift, threeshift);
+    covariance(tshift, threeshift) = tmp(twoshift, threeshift);
+  }
+  else
+  {
+    std::cout << "Error: BiExp swap state function works only for 3 Tensors.\n";
+    throw;
+  }
 
   // Swap the state
   const ukfVectorType tmp_vec = state;
