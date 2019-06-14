@@ -304,7 +304,8 @@ void Tractography::UpdateFilterModelType()
     std::cout << "maxNMSE parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
     throw;
   }
-  if (_maxUKFIterations != 0 && !_diffusion_propagator)
+
+  if (_maxUKFIterations > 0 && !_diffusion_propagator)
   {
     std::cout << "maxUKFIterations parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
     throw;
@@ -699,6 +700,9 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   for (size_t i = 0; i < starting_points.size(); ++i)
   {
     const ukfVectorType &param = starting_params[i];
+    cout << "i " << i << endl;
+  cout << "start dir " << param[0] << " " << param[1] << " " << param[2] << endl;
+  cout << "start dir inv" << -param[0] << " " << -param[1] << " " << -param[2] << endl;
 
     //assert(param.size() == 9);
 
@@ -1916,6 +1920,7 @@ void Tractography::Follow3T(const int thread_id,
   {
     std::cout << "step " << stepnr << std::endl;
     ++stepnr;
+
     Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, trace, trace2);
 
     // Check if we should abort following this fiber. We abort if we reach the
@@ -1940,7 +1945,8 @@ void Tractography::Follow3T(const int thread_id,
 
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
-    if (!is_brain || in_csf || stepnr > _max_length // Stop if the fiber is too long
+    //stepnr > _max_length // Stop if the fiber is too long - Do we need this???
+    if (!is_brain || in_csf
         || is_curving || dNormMSE_too_high || negative_free_water)
     {
       break;
@@ -2397,10 +2403,15 @@ void Tractography::Step3T(const int thread_id,
   _signal_data->Interp3Signal(x, signal);
 
   LoopUKF(thread_id, state, covariance, signal, state_new, covariance_new, dNormMSE);
+  // cout << "ukf loop end" << endl;
+  // cout << "m1 state " << state(0) << " " << state(1) << " " << state(2) << endl;
+  // cout << "m1 " << m1.transpose() << endl;
 
   vec3_t old_dir = m1;
 
   _model->State2Tensor3T(state, old_dir, m1, m2, m3);
+  // cout << "m1 state " << state(0) << " " << state(1) << " " << state(2) << endl;
+  // cout << "m1 " << m1.transpose() << endl;
 
   ukfPrecisionType rtop1, rtop2, rtop3, rtopModel, rtopSignal;
   stdVecState local_state = ConvertVector<State, stdVecState>(state);
@@ -2411,9 +2422,9 @@ void Tractography::Step3T(const int thread_id,
   trace = rtopModel;
   trace2 = rtopSignal;
 
-  ukfPrecisionType dot1 = m1.dot(old_dir);
-  ukfPrecisionType dot2 = m2.dot(old_dir);
-  ukfPrecisionType dot3 = m3.dot(old_dir);
+  // ukfPrecisionType dot1 = m1.dot(old_dir);
+  // ukfPrecisionType dot2 = m2.dot(old_dir);
+  // ukfPrecisionType dot3 = m3.dot(old_dir);
 
   // NEED TO FIX
   // if (dot1 < dot2 && dot3 < dot2)

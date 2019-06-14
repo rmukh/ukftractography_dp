@@ -27,9 +27,7 @@ eval $BINARY \
  --tracts $output_path \
  --seedsFile $seeds_path \
  --seedsPerVoxel 1 \
- --diffusionPropagator \
- --minRTOP 20 \
- --numTensor 3 | tee $logFile
+ --numTensor 2 | tee $logFile
  end=`date +%s`
 
 runtime=$((end - start))

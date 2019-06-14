@@ -481,7 +481,7 @@ public:
       norm_sq_signal += signal[i] * signal[i];
     }
 
-    err = sum / (N * norm_sq_signal);
+    err = sum / (norm_sq_signal);
 
     // MSE
     // err = 0.0;

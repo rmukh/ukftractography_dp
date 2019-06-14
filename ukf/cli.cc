@@ -442,6 +442,7 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.record_Vic = recordVic;
     s.record_kappa = recordKappa;
     s.record_Viso = recordViso;
+    s.record_rtop = recordRTOP;
     s.transform_position = true; // TODO hard-coded :/
     s.store_glyphs = storeGlyphs;
     s.branches_only = false; // TODO hard-coded :/

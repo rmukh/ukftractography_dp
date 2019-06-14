@@ -37,16 +37,11 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
     vec3_t o2;
     vec3_t m3;
     vec3_t o3;
-    vec3_t max_odf;
+    //vec3_t max_odf;
 
-    std::cout << "n_of_dirs " << n_of_dirs << std::endl;
-    std::cout << "exe_vol\n"
-              << exe_vol << std::endl;
-
-    int done = 0;
     for (unsigned int i = 0; i < X.cols(); ++i)
     {
-        max_odf.setZero();
+        // max_odf.setZero();
         o2.setZero();
         o3.setZero();
         // Normalize the direction vectors.
@@ -136,15 +131,13 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
         {
             o1 = dir_vol.row(v);
             closest(v) = cosine_similarity(m1, o1);
-            std::cout << "v " << v << " "
         }
 
         ukfVectorType::Index maxInd;
         closest.maxCoeff(&maxInd);
-
         o1 = dir_vol.row(maxInd);
 
-        max_odf(0) = ODF(exe_vol(maxInd));
+        //max_odf(0) = ODF(exe_vol(maxInd));
 
         if (n_of_dirs > 1)
         {
@@ -156,7 +149,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
 
             closest.maxCoeff(&maxInd);
             o2 = dir_vol.row(maxInd);
-            max_odf(1) = ODF(exe_vol(maxInd));
+            //max_odf(1) = ODF(exe_vol(maxInd));
         }
 
         if (n_of_dirs > 2)
@@ -165,35 +158,28 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
             {
                 o3 = dir_vol.row(v);
                 closest(v) = cosine_similarity(m3, o3);
-                std::cout << RadToDeg(m1.dot(o3)) << std::endl;
             }
 
             closest.maxCoeff(&maxInd);
             o3 = dir_vol.row(maxInd);
 
-            max_odf(2) = ODF(exe_vol(maxInd));
+            //max_odf(2) = ODF(exe_vol(maxInd));
         }
 
         // Normalize max odf weights
-        if (n_of_dirs == 2)
-        {
-            ukfPrecisionType denom = max_odf(0) + max_odf(1);
-            max_odf(0) = max_odf(0) / denom;
-            max_odf(1) = max_odf(1) / denom;
-        }
-        else if (n_of_dirs > 2)
-        {
-            ukfPrecisionType denom = max_odf(0) + max_odf(1) + max_odf(2);
-            max_odf(0) = max_odf(0) / denom;
-            max_odf(1) = max_odf(1) / denom;
-            max_odf(2) = max_odf(2) / denom;
-        }
-
-        if (!done)
-        {
-            std::cout << "w sphd ridg " << max_odf << std::endl;
-            done = 1;
-        }
+        // if (n_of_dirs == 2)
+        // {
+        //     ukfPrecisionType denom = max_odf(0) + max_odf(1);
+        //     max_odf(0) = max_odf(0) / denom;
+        //     max_odf(1) = max_odf(1) / denom;
+        // }
+        // else if (n_of_dirs > 2)
+        // {
+        //     ukfPrecisionType denom = max_odf(0) + max_odf(1) + max_odf(2);
+        //     max_odf(0) = max_odf(0) / denom;
+        //     max_odf(1) = max_odf(1) / denom;
+        //     max_odf(2) = max_odf(2) / denom;
+        // }
 
         // Average of direction from state and ridgelets for 1st tensor
         X(0, i) = 0.5 * (m1(0) + o1(0));
@@ -211,13 +197,9 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
         X(16, i) = 0.5 * (m3(2) + o3(2));
 
         // Average weights
-        X(21, i) = 0.5 * (X(21, i) + max_odf(0));
-        X(22, i) = 0.5 * (X(22, i) + max_odf(1));
-        X(23, i) = 0.5 * (X(23, i) + max_odf(2));
-        if (i == 0)
-        {
-            exit();
-        }
+        //X(21, i) = 0.5 * (X(21, i) + max_odf(0));
+        //X(22, i) = 0.5 * (X(22, i) + max_odf(1));
+        //X(23, i) = 0.5 * (X(23, i) + max_odf(2));
     } //for X.cols()
 }
 
@@ -298,18 +280,18 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X,
         l34 = std::min(l34, _lambda_max_diffusion);
 
         // Flip if necessary.
-        if (m1[0] < 0)
-        {
-            m1 = -m1;
-        }
-        if (m2[0] < 0)
-        {
-            m2 = -m2;
-        }
-        if (m3[0] < 0)
-        {
-            m3 = -m3;
-        }
+        // if (m1[0] < 0)
+        // {
+        //     m1 = -m1;
+        // }
+        // if (m2[0] < 0)
+        // {
+        //     m2 = -m2;
+        // }
+        // if (m3[0] < 0)
+        // {
+        //     m3 = -m3;
+        // }
 
         // Get compartments weights
         const ukfPrecisionType w1 = CheckZero(X(21, i));

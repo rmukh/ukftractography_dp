@@ -17,8 +17,8 @@ Using the 3T Biexponential Spherical Ridgelets model with free water estimation.
 - Qwiso: 0.002
 * stoppingThreshold: 0.1
 - seedsPerVoxel: 1
-Found 1 cores on your system.
-Running tractography with 1 thread(s).
+Found 8 cores on your system.
+Running tractography with 8 thread(s).
 Number of non-zero gradients: 60
 Number of zero gradients: 4
 Permuting the axis order to: 3 0 1 2
@@ -35,378 +35,127 @@ Start computing icosahedron...
 Start computing Q basis...
 Using constrained filter
 Using Spherical Ridgelets
-Processing 8 starting points
+Processing 1 starting points
+i 0
+start dir -0.985904 0.112887 -0.123491
+start dir inv0.985904 -0.112887 0.123491
 state before
- -0.937548
- 0.342848
-0.0588153
-  644.617
-  381.511
-  451.232
-  267.057
--0.878617
--0.110385
- 0.464594
-  644.617
-  381.511
-  451.232
-  267.057
- 0.284866
- 0.659684
- 0.695462
-  644.617
-  381.511
-  451.232
-  267.057
- 0.504893
- 0.495107
-        0
-     0.05
-At X0         0 variables are exactly at the bounds
-At iterate     0    f=   0.00092905    |proj g|=    0.0053936
-At iterate     1    f=   0.00090045    |proj g|=     0.005211
-At iterate     2    f=   0.00049938    |proj g|=   5.9116e-07
-At iterate     3    f=   0.00049937    |proj g|=   1.1053e-05
-At iterate     4    f=   0.00049934    |proj g|=   2.9062e-05
-At iterate     5    f=   0.00049922    |proj g|=   7.5995e-05
-At iterate     6    f=   0.00049894    |proj g|=   0.00014084
-At iterate     7    f=   0.00049818    |proj g|=   0.00025217
-At iterate     8    f=   0.00049624    |proj g|=    0.0004264
-At iterate     9    f=   0.00049125    |proj g|=   0.00070357
-At iterate    10    f=   0.00047909    |proj g|=    0.0011193
-At iterate    11    f=   0.00045204    |proj g|=    0.0016657
-At iterate    12    f=   0.00040243    |proj g|=    0.0020912
-At iterate    13    f=   0.00033905    |proj g|=    0.0015844
-At iterate    14    f=   0.00031397    |proj g|=   0.00017144
-At iterate    15    f=    0.0003128    |proj g|=   3.0467e-05
-At iterate    16    f=   0.00031277    |proj g|=   4.6762e-07
-At iterate    17    f=   0.00031277    |proj g|=   2.9973e-08
-At iterate    18    f=   0.00031277    |proj g|=   9.3561e-08
-At iterate    19    f=   0.00031277    |proj g|=   5.3547e-07
-At iterate    20    f=   0.00031277    |proj g|=   1.2262e-06
-At iterate    21    f=   0.00031277    |proj g|=   2.3606e-06
-At iterate    22    f=   0.00031277    |proj g|=   4.1847e-06
-At iterate    23    f=   0.00031277    |proj g|=   7.1433e-06
-At iterate    24    f=   0.00031277    |proj g|=   1.1925e-05
-At iterate    25    f=   0.00031276    |proj g|=   1.9657e-05
-At iterate    26    f=   0.00031276    |proj g|=   3.2134e-05
-At iterate    27    f=   0.00031274    |proj g|=   5.2226e-05
-At iterate    28    f=   0.00031269    |proj g|=   8.4248e-05
-At iterate    29    f=   0.00031257    |proj g|=   0.00013397
-At iterate    30    f=   0.00031228    |proj g|=   0.00020587
-At iterate    31    f=   0.00031164    |proj g|=   0.00028951
-At iterate    32    f=   0.00031057    |proj g|=   0.00032246
-At iterate    33    f=   0.00030962    |proj g|=   0.00021171
-At iterate    34    f=   0.00030922    |proj g|=   5.7308e-05
-At iterate    35    f=   0.00030916    |proj g|=   4.7299e-06
-At iterate    36    f=   0.00030916    |proj g|=   6.5205e-06
-At iterate    37    f=   0.00030916    |proj g|=   6.4806e-06
-At iterate    38    f=   0.00030916    |proj g|=   4.8489e-06
-At iterate    39    f=   0.00030915    |proj g|=   4.0728e-06
-At iterate    40    f=   0.00030915    |proj g|=    3.831e-06
-At iterate    41    f=   0.00030915    |proj g|=   3.5232e-06
-At iterate    42    f=   0.00030915    |proj g|=   2.1245e-06
-At iterate    43    f=   0.00030719    |proj g|=   0.00021959
-At iterate    44    f=   0.00029349    |proj g|=   0.00033874
-At iterate    45    f=   0.00029345    |proj g|=   0.00060593
-At iterate    46    f=   0.00024475    |proj g|=    0.0011541
-At iterate    47    f=   0.00020737    |proj g|=   0.00064477
-At iterate    48    f=   0.00018973    |proj g|=   0.00017137
-At iterate    49    f=   0.00018662    |proj g|=   0.00019456
-At iterate    50    f=   0.00018502    |proj g|=   0.00015586
-At iterate    51    f=    0.0001826    |proj g|=   6.5856e-05
-At iterate    52    f=   0.00017956    |proj g|=   0.00012506
-At iterate    53    f=   0.00017463    |proj g|=   7.4546e-05
-At iterate    54    f=    0.0001707    |proj g|=    2.289e-05
-At iterate    55    f=   0.00017023    |proj g|=   9.1881e-05
-At iterate    56    f=   0.00016994    |proj g|=   7.3286e-07
-At iterate    57    f=   0.00016992    |proj g|=    7.508e-06
-At iterate    58    f=   0.00016988    |proj g|=   1.1574e-05
-At iterate    59    f=   0.00016969    |proj g|=     4.63e-06
-At iterate    60    f=   0.00016911    |proj g|=   5.7478e-05
-At iterate    61    f=   0.00016809    |proj g|=   1.6346e-05
-At iterate    62    f=   0.00016516    |proj g|=    0.0001106
-At iterate    63    f=    0.0001648    |proj g|=   0.00018545
-At iterate    64    f=   0.00016278    |proj g|=   5.1976e-05
-At iterate    65    f=   0.00016261    |proj g|=   6.5308e-05
-At iterate    66    f=    0.0001625    |proj g|=   1.5836e-05
-At iterate    67    f=   0.00016247    |proj g|=   7.4523e-06
-At iterate    68    f=   0.00016243    |proj g|=   3.7287e-06
-At iterate    69    f=   0.00016243    |proj g|=   8.7923e-07
-At iterate    70    f=   0.00016243    |proj g|=   1.6412e-06
-At iterate    71    f=   0.00016243    |proj g|=    2.287e-06
-At iterate    72    f=   0.00016243    |proj g|=   5.7117e-06
-At iterate    73    f=   0.00016243    |proj g|=   6.2981e-06
-At iterate    74    f=   0.00016242    |proj g|=   8.8932e-06
-At iterate    75    f=   0.00016242    |proj g|=   1.8857e-06
-At iterate    76    f=   0.00016241    |proj g|=   5.6761e-07
-At iterate    77    f=   0.00016237    |proj g|=    1.024e-05
-At iterate    78    f=   0.00016236    |proj g|=   3.9783e-05
-At iterate    79    f=   0.00016233    |proj g|=   2.6894e-05
-At iterate    80    f=   0.00016225    |proj g|=   5.0416e-06
-At iterate    81    f=   0.00016211    |proj g|=   1.4921e-05
-At iterate    82    f=     0.000162    |proj g|=   1.9049e-05
-At iterate    83    f=   0.00016199    |proj g|=   1.6341e-05
-At iterate    84    f=   0.00016194    |proj g|=   1.5427e-05
-At iterate    85    f=   0.00016194    |proj g|=   1.9867e-05
-At iterate    86    f=   0.00016193    |proj g|=   1.0386e-05
-At iterate    87    f=   0.00016192    |proj g|=   1.0798e-06
-At iterate    88    f=   0.00016192    |proj g|=   2.6123e-07
-At iterate    89    f=   0.00016192    |proj g|=   9.2908e-09
-At iterate    90    f=   0.00016192    |proj g|=   5.3523e-08
-At iterate    91    f=   0.00016192    |proj g|=   4.4904e-08
-At iterate    92    f=   0.00016192    |proj g|=   3.9723e-09
-At iterate    93    f=   0.00016192    |proj g|=   6.2945e-09
-At iterate    94    f=   0.00016192    |proj g|=   8.9835e-09
-At iterate    95    f=   0.00016192    |proj g|=   1.4993e-08
-At iterate    96    f=   0.00016192    |proj g|=   8.7597e-09
-At iterate    97    f=   0.00016192    |proj g|=   3.5244e-09
-At iterate    98    f=   0.00016192    |proj g|=   1.3853e-08
-At iterate    99    f=   0.00016192    |proj g|=   6.6414e-09
-At iterate   100    f=   0.00016192    |proj g|=   3.4757e-08
-At iterate   101    f=   0.00016192    |proj g|=   7.0413e-08
-At iterate   102    f=   0.00016192    |proj g|=   1.5594e-07
-At iterate   103    f=   0.00016192    |proj g|=   2.2451e-07
-At iterate   104    f=   0.00016192    |proj g|=    7.112e-07
-At iterate   105    f=   0.00016192    |proj g|=   5.1488e-07
-At iterate   106    f=   0.00016192    |proj g|=   2.5741e-09
-At iterate   107    f=   0.00016192    |proj g|=   2.6031e-07
-At iterate   108    f=   0.00016192    |proj g|=   2.9735e-07
-At iterate   109    f=   0.00016192    |proj g|=   2.3536e-07
-At iterate   110    f=   0.00016192    |proj g|=   1.3196e-07
-At iterate   111    f=   0.00016192    |proj g|=   3.2478e-08
-At iterate   112    f=   0.00016192    |proj g|=   2.5003e-07
-At iterate   113    f=   0.00016192    |proj g|=    4.247e-07
-At iterate   114    f=   0.00016192    |proj g|=   3.8316e-07
-At iterate   115    f=   0.00016192    |proj g|=   2.9049e-07
-At iterate   116    f=   0.00016192    |proj g|=   1.2854e-07
-At iterate   117    f=   0.00016192    |proj g|=   4.3089e-07
-At iterate   118    f=   0.00016192    |proj g|=   1.8774e-07
-At iterate   119    f=   0.00016192    |proj g|=    6.549e-08
-At iterate   120    f=   0.00016192    |proj g|=   2.8194e-07
-At iterate   121    f=   0.00016192    |proj g|=   4.5364e-07
-At iterate   122    f=   0.00016192    |proj g|=   5.0222e-07
-At iterate   123    f=   0.00016192    |proj g|=    5.314e-07
-At iterate   124    f=   0.00016192    |proj g|=   2.5287e-07
-At iterate   125    f=   0.00016192    |proj g|=   9.0058e-08
-At iterate   126    f=   0.00016192    |proj g|=   1.9976e-08
-At iterate   127    f=   0.00016192    |proj g|=   3.3845e-08
-At iterate   128    f=   0.00016192    |proj g|=   5.5269e-08
-At iterate   129    f=   0.00016192    |proj g|=   9.9084e-08
-At iterate   130    f=   0.00016192    |proj g|=   8.2383e-08
-At iterate   131    f=   0.00016192    |proj g|=   1.1428e-08
-At iterate   132    f=   0.00016192    |proj g|=   8.6927e-08
-At iterate   133    f=   0.00016192    |proj g|=   2.5489e-07
-At iterate   134    f=   0.00016192    |proj g|=   3.7523e-07
-At iterate   135    f=   0.00016192    |proj g|=   3.5754e-07
-At iterate   136    f=   0.00016192    |proj g|=   2.9866e-07
-At iterate   137    f=   0.00016192    |proj g|=   1.7124e-07
-At iterate   138    f=   0.00016192    |proj g|=   2.3359e-08
-At iterate   139    f=   0.00016192    |proj g|=    4.413e-09
-At iterate   140    f=   0.00016192    |proj g|=   5.7472e-09
-At iterate   141    f=   0.00016192    |proj g|=    9.811e-09
-At iterate   142    f=   0.00016192    |proj g|=   1.1268e-08
-At iterate   143    f=   0.00016192    |proj g|=   1.3669e-07
-At iterate   144    f=   0.00016192    |proj g|=   6.5324e-08
-At iterate   145    f=   0.00016192    |proj g|=   1.8369e-08
-At iterate   146    f=   0.00016192    |proj g|=   1.7235e-07
-At iterate   147    f=   0.00016192    |proj g|=   4.1688e-07
-At iterate   148    f=   0.00016192    |proj g|=   8.2375e-07
-At iterate   149    f=   0.00016192    |proj g|=   1.4889e-06
-At iterate   150    f=   0.00016192    |proj g|=    2.485e-06
-At iterate   151    f=   0.00016192    |proj g|=   3.7685e-06
-At iterate   152    f=   0.00016192    |proj g|=   4.7211e-06
-At iterate   153    f=   0.00016192    |proj g|=   6.1514e-06
-At iterate   154    f=   0.00016192    |proj g|=   2.8431e-06
-At iterate   155    f=   0.00016192    |proj g|=   1.9554e-06
-At iterate   156    f=   0.00016192    |proj g|=    5.062e-07
-At iterate   157    f=   0.00016192    |proj g|=   1.4876e-07
-At iterate   158    f=   0.00016192    |proj g|=   4.9287e-07
-At iterate   159    f=   0.00016192    |proj g|=   1.2565e-06
-At iterate   160    f=   0.00016192    |proj g|=    2.497e-06
-At iterate   161    f=   0.00016192    |proj g|=   4.0152e-06
-At iterate   162    f=   0.00016192    |proj g|=   5.1557e-06
-At iterate   163    f=   0.00016191    |proj g|=   4.4966e-06
-At iterate   164    f=   0.00016191    |proj g|=   3.3138e-06
-At iterate   165    f=   0.00016191    |proj g|=   9.3022e-07
-At iterate   166    f=   0.00016191    |proj g|=   7.8593e-07
-At iterate   167    f=   0.00016191    |proj g|=     7.51e-07
-At iterate   168    f=   0.00016191    |proj g|=   5.7377e-07
-At iterate   169    f=   0.00016191    |proj g|=   3.2901e-07
-At iterate   170    f=   0.00016191    |proj g|=   5.8354e-08
-At iterate   171    f=   0.00016191    |proj g|=   1.9157e-08
-At iterate   172    f=   0.00016191    |proj g|=    1.661e-08
-At iterate   173    f=   0.00016191    |proj g|=   4.5072e-09
-At iterate   174    f=   0.00016191    |proj g|=   1.5544e-09
-At iterate   175    f=   0.00016191    |proj g|=   1.5712e-08
-At iterate   176    f=   0.00016191    |proj g|=   4.3217e-08
-At iterate   177    f=   0.00016191    |proj g|=   4.4027e-09
-At iterate   178    f=   0.00016191    |proj g|=   3.5882e-08
-At iterate   179    f=   0.00016191    |proj g|=   4.7349e-08
-At iterate   180    f=   0.00016191    |proj g|=   3.7083e-08
-At iterate   181    f=   0.00016191    |proj g|=   1.0344e-08
-At iterate   182    f=   0.00016191    |proj g|=   2.6443e-08
-At iterate   183    f=   0.00016191    |proj g|=   6.9426e-08
-At iterate   184    f=   0.00016191    |proj g|=   1.3656e-07
-At iterate   185    f=   0.00016191    |proj g|=     2.38e-07
-At iterate   186    f=   0.00016191    |proj g|=   2.9704e-07
-At iterate   187    f=   0.00016191    |proj g|=   1.7179e-09
-At iterate   188    f=   0.00016191    |proj g|=   1.5321e-07
-At iterate   189    f=   0.00016191    |proj g|=    6.523e-08
-At iterate   190    f=   0.00016191    |proj g|=   1.2544e-07
-At iterate   191    f=   0.00016191    |proj g|=   3.0466e-08
-At iterate   192    f=   0.00016191    |proj g|=   5.9065e-08
-At iterate   193    f=   0.00016191    |proj g|=   2.4352e-07
-At iterate   194    f=   0.00016191    |proj g|=   2.4522e-07
-At iterate   195    f=   0.00016191    |proj g|=   3.1712e-07
-At iterate   196    f=   0.00016191    |proj g|=    3.123e-07
-At iterate   197    f=   0.00016191    |proj g|=    2.281e-08
-At iterate   198    f=   0.00016191    |proj g|=    1.579e-07
-At iterate   199    f=   0.00016191    |proj g|=   1.0735e-08
-At iterate   200    f=   0.00016191    |proj g|=   5.9409e-09
-At iterate   201    f=   0.00016191    |proj g|=   3.0742e-09
-At iterate   202    f=   0.00016191    |proj g|=   1.9759e-09
-At iterate   203    f=   0.00016191    |proj g|=   4.4665e-09
-At iterate   204    f=   0.00016191    |proj g|=     3.75e-08
-At iterate   205    f=   0.00016191    |proj g|=   4.1224e-08
-At iterate   206    f=   0.00016191    |proj g|=   2.5344e-08
-At iterate   207    f=   0.00016191    |proj g|=   6.2119e-08
-At iterate   208    f=   0.00016191    |proj g|=   3.9328e-08
-At iterate   209    f=   0.00016191    |proj g|=    2.286e-06
-At iterate   210    f=   0.00016191    |proj g|=   1.1172e-06
-At iterate   211    f=   0.00016191    |proj g|=   1.7867e-07
-At iterate   212    f=   0.00016191    |proj g|=   6.9757e-07
-At iterate   213    f=   0.00016191    |proj g|=   1.0694e-06
-At iterate   214    f=   0.00016191    |proj g|=    3.318e-07
-At iterate   215    f=   0.00016191    |proj g|=   1.0451e-07
-At iterate   216    f=   0.00016191    |proj g|=   4.1131e-08
-At iterate   217    f=   0.00016191    |proj g|=   3.6832e-09
-At iterate   218    f=   0.00016191    |proj g|=   4.2581e-11
-At iterate   219    f=   0.00016191    |proj g|=   3.8111e-09
-At iterate   220    f=   0.00016191    |proj g|=   7.8352e-09
-At iterate   221    f=   0.00016191    |proj g|=    1.682e-08
-At iterate   222    f=   0.00016191    |proj g|=   1.9249e-08
-At iterate   223    f=   0.00016191    |proj g|=   3.1534e-08
-At iterate   224    f=   0.00016191    |proj g|=   2.6702e-08
-At iterate   225    f=   0.00016191    |proj g|=   1.3415e-09
-At iterate   226    f=   0.00016191    |proj g|=    5.962e-10
-At iterate   227    f=   0.00016191    |proj g|=   9.3687e-10
-           * * *
-
-Tit   = total number of iterations
-Tnf   = total number of function evaluations
-Tnint = total number of segments explored during Cauchy searches
-Skip  = number of BFGS updates skipped
-Nact  = number of active bounds at final generalized Cauchy point
-Projg = norm of the final projected gradient
-F     = final function value
-
-           * * *
-   N   Tit  Tnf  Tnint  Skip  Nact     Projg        F
-   13  227  277    227    0     2    9.37e-10    0.000162
-F = 0.000161905
-             CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH
- Cauchy                time          0 seconds.
- Subspace minimization time          0 seconds.
- Line search           time          0 seconds.
- Total User time          0 seconds.
-state after 
--0.937548
- 0.342848
-0.0588153
-  82.3931
-  85.9447
-     3000
-  109.495
--0.878617
--0.110385
- 0.464594
-     3000
-  1059.04
-  2629.84
-  298.996
- 0.284866
- 0.659684
- 0.695462
-  644.617
-  381.511
-  451.232
-  267.057
- 0.504893
- 0.495107
-        0
- 0.085437
-state before
- -0.958968
- 0.274694
-0.0701759
-  583.984
-   329.73
-  408.789
-  230.811
--0.274694
--0.958968
-0.0701759
-  583.984
-   329.73
-  408.789
-  230.811
- 0.958968
--0.274694
-0.0701759
-  583.984
-   329.73
-  408.789
-  230.811
+  0.964121
+-0.199331
+ 0.175321
+   642.05
+  369.327
+  449.435
+  258.529
+ 0.199331
+ 0.964121
+ 0.175321
+   642.05
+  369.327
+  449.435
+  258.529
+-0.964121
+ 0.199331
+ 0.175321
+   642.05
+  369.327
+  449.435
+  258.529
         1
         0
         0
      0.05
 At X0         0 variables are exactly at the bounds
-At iterate     0    f=   0.00062135    |proj g|=    0.0037911
-At iterate     1    f=   0.00060721    |proj g|=    0.0036675
-At iterate     2    f=   0.00040094    |proj g|=   9.5163e-07
-At iterate     3    f=   0.00040089    |proj g|=   2.0382e-05
-At iterate     4    f=   0.00040062    |proj g|=   8.3429e-05
-At iterate     5    f=   0.00039985    |proj g|=   0.00019299
-At iterate     6    f=   0.00039793    |proj g|=   0.00036154
-At iterate     7    f=    0.0003931    |proj g|=   0.00062178
-At iterate     8    f=   0.00038202    |proj g|=   0.00097685
-At iterate     9    f=   0.00036038    |proj g|=    0.0013218
-At iterate    10    f=   0.00032956    |proj g|=    0.0012688
-At iterate    11    f=     0.000308    |proj g|=   0.00047889
-At iterate    12    f=   0.00030524    |proj g|=   4.2973e-05
-At iterate    13    f=   0.00030514    |proj g|=   1.6468e-06
-At iterate    14    f=   0.00030514    |proj g|=    8.788e-08
-At iterate    15    f=   0.00030514    |proj g|=   4.3103e-07
-At iterate    16    f=   0.00030514    |proj g|=   1.7873e-06
-At iterate    17    f=   0.00030514    |proj g|=   4.1193e-06
-At iterate    18    f=   0.00030513    |proj g|=   7.7614e-06
-At iterate    19    f=   0.00030512    |proj g|=   1.3629e-05
-At iterate    20    f=    0.0003051    |proj g|=   2.2946e-05
-At iterate    21    f=   0.00030503    |proj g|=   3.7743e-05
-At iterate    22    f=   0.00030487    |proj g|=   6.0397e-05
-At iterate    23    f=   0.00030447    |proj g|=    8.754e-05
-At iterate    24    f=   0.00030375    |proj g|=    0.0002063
-At iterate    25    f=   0.00030267    |proj g|=   0.00011815
-At iterate    26    f=   0.00030148    |proj g|=   0.00017489
-At iterate    27    f=   0.00030107    |proj g|=   9.8439e-05
-At iterate    28    f=   0.00030089    |proj g|=   3.7502e-07
-At iterate    29    f=   0.00030089    |proj g|=   7.1026e-08
-At iterate    30    f=   0.00030089    |proj g|=   3.5454e-08
-At iterate    31    f=   0.00030089    |proj g|=   5.0839e-07
-At iterate    32    f=   0.00030089    |proj g|=   1.0268e-06
-At iterate    33    f=   0.00030089    |proj g|=   2.0524e-06
-At iterate    34    f=   0.00030089    |proj g|=   3.5809e-06
-At iterate    35    f=   0.00030089    |proj g|=   6.0346e-06
-At iterate    36    f=   0.00030087    |proj g|=   1.0158e-05
-At iterate    37    f=   0.00030085    |proj g|=   1.7101e-05
-At iterate    38    f=   0.00030077    |proj g|=   2.6813e-05
-At iterate    39    f=   0.00030058    |proj g|=   9.8462e-05
-At iterate    40    f=   0.00030013    |proj g|=   0.00011509
-At iterate    41    f=   0.00029861    |proj g|=    0.0011691
-At iterate    42    f=   0.00028508    |proj g|=    0.0017478
-At iterate    43    f=   0.00028508    |proj g|=    0.0017478
+At iterate     0    f=     0.048223    |proj g|=       0.3071
+At iterate     1    f=     0.025131    |proj g|=   6.6393e-05
+At iterate     2    f=     0.021402    |proj g|=    0.0096466
+At iterate     3    f=     0.017074    |proj g|=     0.011017
+At iterate     4    f=     0.016761    |proj g|=    0.0051613
+At iterate     5    f=     0.016751    |proj g|=   0.00071768
+At iterate     6    f=      0.01675    |proj g|=   0.00016764
+At iterate     7    f=      0.01675    |proj g|=   3.2769e-05
+At iterate     8    f=      0.01675    |proj g|=   1.1847e-05
+At iterate     9    f=      0.01675    |proj g|=   0.00018282
+At iterate    10    f=      0.01675    |proj g|=   0.00039834
+At iterate    11    f=      0.01675    |proj g|=    0.0007908
+At iterate    12    f=     0.016749    |proj g|=    0.0013951
+At iterate    13    f=     0.016748    |proj g|=    0.0023868
+At iterate    14    f=     0.016743    |proj g|=    0.0039662
+At iterate    15    f=     0.016732    |proj g|=    0.0064865
+At iterate    16    f=     0.016702    |proj g|=     0.010449
+At iterate    17    f=     0.016631    |proj g|=     0.016159
+At iterate    18    f=     0.016473    |proj g|=     0.023106
+At iterate    19    f=      0.01619    |proj g|=     0.027707
+At iterate    20    f=     0.015849    |proj g|=     0.022056
+At iterate    21    f=     0.015667    |proj g|=     0.010234
+At iterate    22    f=     0.015663    |proj g|=    0.0089916
+At iterate    23    f=     0.015643    |proj g|=   8.9739e-05
+At iterate    24    f=     0.015643    |proj g|=   0.00011811
+At iterate    25    f=     0.015643    |proj g|=   0.00011232
+At iterate    26    f=     0.015643    |proj g|=   1.2182e-06
+At iterate    27    f=     0.015643    |proj g|=    1.218e-06
+At iterate    28    f=     0.015643    |proj g|=   2.2404e-06
+At iterate    29    f=     0.015643    |proj g|=   1.2608e-05
+At iterate    30    f=     0.015643    |proj g|=   2.6537e-05
+At iterate    31    f=     0.015643    |proj g|=   5.0901e-05
+At iterate    32    f=     0.015643    |proj g|=   9.0105e-05
+At iterate    33    f=     0.015643    |proj g|=   0.00015493
+At iterate    34    f=     0.015643    |proj g|=   0.00025921
+At iterate    35    f=     0.015643    |proj g|=   0.00043235
+At iterate    36    f=     0.015642    |proj g|=   0.00068851
+At iterate    37    f=     0.015642    |proj g|=    0.0013855
+At iterate    38    f=      0.01564    |proj g|=    0.0015827
+At iterate    39    f=     0.015639    |proj g|=    0.0036359
+At iterate    40    f=     0.015634    |proj g|=    0.0038821
+At iterate    41    f=     0.015608    |proj g|=    0.0047693
+At iterate    42    f=     0.015552    |proj g|=     0.005418
+At iterate    43    f=     0.015476    |proj g|=    0.0035396
+At iterate    44    f=     0.015261    |proj g|=   0.00085985
+At iterate    45    f=     0.014728    |proj g|=     0.005355
+At iterate    46    f=     0.014695    |proj g|=    0.0014603
+At iterate    47    f=     0.014693    |proj g|=   0.00027584
+At iterate    48    f=     0.014692    |proj g|=   6.8246e-05
+At iterate    49    f=     0.014692    |proj g|=   0.00010707
+At iterate    50    f=     0.014692    |proj g|=   0.00034141
+At iterate    51    f=     0.014692    |proj g|=   0.00080066
+At iterate    52    f=     0.014691    |proj g|=    0.0013781
+At iterate    53    f=     0.014689    |proj g|=    0.0027479
+At iterate    54    f=     0.014683    |proj g|=    0.0042753
+At iterate    55    f=     0.014668    |proj g|=    0.0078117
+At iterate    56    f=     0.014624    |proj g|=      0.01219
+At iterate    57    f=     0.014459    |proj g|=     0.031775
+At iterate    58    f=     0.014264    |proj g|=     0.027088
+At iterate    59    f=     0.013982    |proj g|=    0.0061347
+At iterate    60    f=     0.013946    |proj g|=    0.0019316
+At iterate    61    f=     0.013885    |proj g|=      0.00311
+At iterate    62    f=     0.013843    |proj g|=    0.0041937
+At iterate    63    f=     0.013826    |proj g|=     0.001977
+At iterate    64    f=     0.013825    |proj g|=   0.00058054
+At iterate    65    f=     0.013825    |proj g|=   0.00030071
+At iterate    66    f=     0.013825    |proj g|=   5.9514e-05
+At iterate    67    f=     0.013824    |proj g|=   0.00057156
+At iterate    68    f=     0.013823    |proj g|=     0.001575
+At iterate    69    f=     0.013821    |proj g|=    0.0030485
+At iterate    70    f=     0.013816    |proj g|=     0.005448
+At iterate    71    f=     0.013802    |proj g|=    0.0093672
+At iterate    72    f=     0.013762    |proj g|=     0.015837
+At iterate    73    f=     0.012837    |proj g|=     0.023919
+  ys= -0.000192  -gs=  0.000674 BFGS update SKIPPED
+At iterate    74    f=     0.012597    |proj g|=     0.011651
+At iterate    75    f=     0.012403    |proj g|=    0.0084597
+At iterate    76    f=     0.012385    |proj g|=     0.011114
+At iterate    77    f=     0.012358    |proj g|=     0.012447
+At iterate    78    f=     0.012324    |proj g|=     0.013161
+At iterate    79    f=     0.012306    |proj g|=     0.010516
+At iterate    80    f=     0.012281    |proj g|=    0.0066232
+At iterate    81    f=     0.012267    |proj g|=   0.00044628
+At iterate    82    f=     0.012266    |proj g|=   1.6145e-06
+At iterate    83    f=     0.012266    |proj g|=   1.5356e-05
+At iterate    84    f=     0.012266    |proj g|=   8.0655e-06
+At iterate    85    f=     0.012266    |proj g|=   3.5438e-07
+At iterate    86    f=     0.012266    |proj g|=   2.3824e-08
+At iterate    87    f=     0.012266    |proj g|=    7.445e-10
+At iterate    88    f=     0.012266    |proj g|=   3.7225e-09
            * * *
 
 Tit   = total number of iterations
@@ -419,1984 +168,294 @@ F     = final function value
 
            * * *
    N   Tit  Tnf  Tnint  Skip  Nact     Projg        F
-   13   43   52     43    0     0     0.00175    0.000285
-F = 0.000285083
+   13   88  108     88    1     2    3.72e-09      0.0123
+F = 0.0122663
              CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH
  Cauchy                time          0 seconds.
  Subspace minimization time          0 seconds.
  Line search           time          0 seconds.
  Total User time          0 seconds.
 state after 
--0.958968
- 0.274694
-0.0701759
-  999.819
-  201.219
-  47.6779
-  133.414
--0.274694
--0.958968
-0.0701759
-  583.984
-   329.73
-  408.789
-  230.811
- 0.958968
--0.274694
-0.0701759
-  583.984
-   329.73
-  408.789
-  230.811
-        1
-        0
-        0
- 0.202566
-state before
- -0.976656
--0.041302
- 0.210801
-  603.387
-  326.479
-  422.371
-  228.535
- 0.574779
--0.519258
- 0.632456
-  603.387
-  326.479
-  422.371
-  228.535
-0.0912192
- 0.808721
- 0.581076
-  603.387
-  326.479
-  422.371
-  228.535
- 0.516543
- 0.483457
-        0
-     0.05
-At X0         0 variables are exactly at the bounds
-At iterate     0    f=   0.00081299    |proj g|=    0.0038693
-At iterate     1    f=   0.00079826    |proj g|=    0.0037441
-At iterate     2    f=   0.00058163    |proj g|=   7.0186e-07
-At iterate     3    f=   0.00058159    |proj g|=   1.4411e-05
-At iterate     4    f=   0.00058119    |proj g|=   9.7086e-05
-At iterate     5    f=    0.0005803    |proj g|=   0.00021073
-At iterate     6    f=   0.00057785    |proj g|=   0.00040516
-At iterate     7    f=   0.00057176    |proj g|=   0.00070488
-At iterate     8    f=   0.00055679    |proj g|=     0.001162
-At iterate     9    f=   0.00052421    |proj g|=    0.0017608
-At iterate    10    f=   0.00046636    |proj g|=    0.0022135
-At iterate    11    f=   0.00039521    |proj g|=    0.0015992
-At iterate    12    f=    0.0003693    |proj g|=   7.8338e-05
-At iterate    13    f=   0.00036846    |proj g|=   2.1239e-05
-At iterate    14    f=   0.00036845    |proj g|=    3.574e-07
-At iterate    15    f=   0.00036845    |proj g|=   9.7259e-08
-At iterate    16    f=   0.00036845    |proj g|=   3.3541e-07
-At iterate    17    f=   0.00036845    |proj g|=   1.0791e-06
-At iterate    18    f=   0.00036845    |proj g|=    2.645e-06
-At iterate    19    f=   0.00036845    |proj g|=   4.9568e-06
-At iterate    20    f=   0.00036845    |proj g|=    8.827e-06
-At iterate    21    f=   0.00036844    |proj g|=   1.5005e-05
-At iterate    22    f=   0.00036842    |proj g|=   2.5006e-05
-At iterate    23    f=   0.00036836    |proj g|=   4.1057e-05
-At iterate    24    f=   0.00036822    |proj g|=   6.6637e-05
-At iterate    25    f=   0.00036785    |proj g|=   0.00010687
-At iterate    26    f=   0.00036694    |proj g|=   0.00015848
-At iterate    27    f=   0.00036491    |proj g|=   0.00031873
-At iterate    28    f=   0.00036124    |proj g|=   0.00024787
-At iterate    29    f=   0.00035967    |proj g|=   0.00052407
-At iterate    30    f=   0.00035518    |proj g|=   0.00037001
-At iterate    31    f=   0.00035069    |proj g|=   6.3934e-05
-At iterate    32    f=    0.0003504    |proj g|=   6.4781e-06
-At iterate    33    f=   0.00035039    |proj g|=   2.3809e-06
-At iterate    34    f=   0.00035039    |proj g|=   3.2948e-07
-At iterate    35    f=   0.00035039    |proj g|=   1.2163e-07
-At iterate    36    f=   0.00035039    |proj g|=   4.5171e-07
-At iterate    37    f=   0.00035039    |proj g|=   9.4994e-07
-At iterate    38    f=   0.00035039    |proj g|=   1.8048e-06
-At iterate    39    f=   0.00035039    |proj g|=    3.157e-06
-At iterate    40    f=   0.00035039    |proj g|=   5.3819e-06
-At iterate    41    f=   0.00035039    |proj g|=   8.9098e-06
-At iterate    42    f=   0.00035039    |proj g|=   1.4535e-05
-At iterate    43    f=   0.00035038    |proj g|=   2.3487e-05
-At iterate    44    f=   0.00035036    |proj g|=   3.7794e-05
-At iterate    45    f=   0.00035031    |proj g|=   6.0177e-05
-At iterate    46    f=   0.00035018    |proj g|=   9.4585e-05
-At iterate    47    f=   0.00034987    |proj g|=   0.00014259
-At iterate    48    f=   0.00034919    |proj g|=   0.00019449
-At iterate    49    f=   0.00034804    |proj g|=   0.00021615
-At iterate    50    f=   0.00034756    |proj g|=   1.7496e-05
-At iterate    51    f=   0.00034667    |proj g|=   6.8998e-05
-At iterate    52    f=    0.0003463    |proj g|=   5.7768e-05
-At iterate    53    f=   0.00034629    |proj g|=     5.17e-05
-At iterate    54    f=   0.00034624    |proj g|=   2.9111e-06
-At iterate    55    f=   0.00034623    |proj g|=   6.4918e-06
-At iterate    56    f=   0.00034621    |proj g|=   2.6135e-05
-At iterate    57    f=   0.00034616    |proj g|=   5.1398e-05
-At iterate    58    f=   0.00034602    |proj g|=   9.3911e-05
-At iterate    59    f=   0.00034571    |proj g|=   0.00015095
-At iterate    60    f=   0.00034506    |proj g|=   0.00020888
-At iterate    61    f=    0.0003441    |proj g|=   0.00021616
-At iterate    62    f=   0.00034405    |proj g|=   0.00023733
-At iterate    63    f=   0.00034333    |proj g|=   0.00013363
-At iterate    64    f=   0.00034309    |proj g|=   3.1838e-05
-At iterate    65    f=   0.00034307    |proj g|=   1.5282e-06
-At iterate    66    f=   0.00034307    |proj g|=    2.189e-06
-At iterate    67    f=   0.00034307    |proj g|=   2.1497e-06
-At iterate    68    f=   0.00034307    |proj g|=   4.0362e-07
-At iterate    69    f=   0.00034307    |proj g|=   5.2165e-07
-At iterate    70    f=   0.00034307    |proj g|=   1.0592e-06
-At iterate    71    f=   0.00034307    |proj g|=   1.7171e-06
-At iterate    72    f=   0.00034306    |proj g|=   2.9274e-06
-At iterate    73    f=   0.00034306    |proj g|=   4.8354e-06
-At iterate    74    f=   0.00034306    |proj g|=   7.9541e-06
-At iterate    75    f=   0.00034305    |proj g|=   1.2653e-05
-At iterate    76    f=   0.00034304    |proj g|=   1.9568e-05
-At iterate    77    f=   0.00034299    |proj g|=   3.0213e-05
-At iterate    78    f=   0.00034287    |proj g|=   4.7674e-05
-At iterate    79    f=   0.00034255    |proj g|=   8.9497e-05
-At iterate    80    f=   0.00034171    |proj g|=   7.9517e-05
-At iterate    81    f=   0.00034171    |proj g|=   8.5728e-05
-At iterate    82    f=    0.0003398    |proj g|=   6.4057e-05
-At iterate    83    f=   0.00033931    |proj g|=   0.00027121
-At iterate    84    f=   0.00033906    |proj g|=   0.00034873
-At iterate    85    f=   0.00033906    |proj g|=   0.00035733
- Positive dir derivative in projection  Using the backtracking step At iterate    86    f=   0.00033643    |proj g|=   6.9398e-05
-At iterate    87    f=   0.00033245    |proj g|=   7.9711e-06
-At iterate    88    f=   0.00032151    |proj g|=    0.0001337
-At iterate    89    f=   0.00031851    |proj g|=   0.00014012
-At iterate    90    f=   0.00031823    |proj g|=   5.7866e-05
-At iterate    91    f=   0.00031737    |proj g|=    5.261e-06
-At iterate    92    f=   0.00031703    |proj g|=   1.1963e-05
-At iterate    93    f=   0.00031649    |proj g|=   1.9517e-06
-At iterate    94    f=   0.00031575    |proj g|=   2.2255e-05
-At iterate    95    f=    0.0003153    |proj g|=   1.7871e-05
-At iterate    96    f=   0.00031515    |proj g|=   7.7558e-06
-At iterate    97    f=   0.00031501    |proj g|=   1.8498e-05
-At iterate    98    f=   0.00031473    |proj g|=    8.574e-05
-At iterate    99    f=   0.00031454    |proj g|=   0.00015936
-At iterate   100    f=   0.00031379    |proj g|=   0.00012771
-At iterate   101    f=   0.00030751    |proj g|=   3.6239e-05
-At iterate   102    f=   0.00030566    |proj g|=   0.00063187
- Positive dir derivative in projection  Using the backtracking step At iterate   103    f=   0.00030267    |proj g|=   0.00052164
-At iterate   104    f=   0.00028938    |proj g|=   4.8625e-05
-At iterate   105    f=   0.00027864    |proj g|=   0.00035957
-At iterate   106    f=   0.00027194    |proj g|=   0.00022119
-At iterate   107    f=   0.00026608    |proj g|=   0.00019641
-At iterate   108    f=   0.00026515    |proj g|=   6.8199e-05
-At iterate   109    f=   0.00026494    |proj g|=   1.5339e-05
-At iterate   110    f=    0.0002649    |proj g|=   2.0184e-05
-At iterate   111    f=   0.00026456    |proj g|=   2.9111e-05
-At iterate   112    f=   0.00026408    |proj g|=   1.8074e-05
-At iterate   113    f=   0.00026371    |proj g|=   8.8649e-08
-At iterate   114    f=   0.00026332    |proj g|=   1.8655e-06
-At iterate   115    f=   0.00026295    |proj g|=   0.00011603
-At iterate   116    f=   0.00026271    |proj g|=   4.3692e-05
-At iterate   117    f=   0.00026252    |proj g|=   4.2118e-05
-At iterate   118    f=   0.00026219    |proj g|=   7.3162e-05
-At iterate   119    f=   0.00026198    |proj g|=   8.2853e-05
-At iterate   120    f=   0.00026183    |proj g|=   1.1493e-05
-At iterate   121    f=   0.00026154    |proj g|=   3.5605e-05
-At iterate   122    f=    0.0002611    |proj g|=   1.9102e-05
-At iterate   123    f=   0.00026095    |proj g|=   5.3471e-05
-At iterate   124    f=   0.00026073    |proj g|=   2.3551e-05
-At iterate   125    f=   0.00026069    |proj g|=   1.9439e-05
-At iterate   126    f=   0.00026069    |proj g|=   3.2985e-06
-At iterate   127    f=   0.00026069    |proj g|=   1.5415e-06
-At iterate   128    f=   0.00026069    |proj g|=   2.9935e-07
-At iterate   129    f=   0.00026069    |proj g|=   3.6642e-07
-At iterate   130    f=   0.00026069    |proj g|=   9.6439e-07
-At iterate   131    f=   0.00026068    |proj g|=   1.9629e-06
-At iterate   132    f=   0.00026068    |proj g|=   8.7768e-07
-At iterate   133    f=   0.00026067    |proj g|=    3.233e-06
-At iterate   134    f=   0.00026064    |proj g|=   6.3375e-06
-At iterate   135    f=   0.00026059    |proj g|=   2.1698e-05
-At iterate   136    f=   0.00026052    |proj g|=   1.7264e-05
-At iterate   137    f=    0.0002605    |proj g|=   3.7509e-05
-At iterate   138    f=   0.00026039    |proj g|=   9.6059e-06
-At iterate   139    f=   0.00026037    |proj g|=   2.6634e-06
-At iterate   140    f=   0.00026036    |proj g|=   5.4473e-06
-At iterate   141    f=   0.00026036    |proj g|=   2.5635e-06
-At iterate   142    f=   0.00026036    |proj g|=     7.97e-07
-At iterate   143    f=   0.00026036    |proj g|=    4.959e-07
-At iterate   144    f=   0.00026036    |proj g|=   7.5465e-07
-At iterate   145    f=   0.00026036    |proj g|=   1.6227e-07
-At iterate   146    f=   0.00026036    |proj g|=    9.658e-08
-At iterate   147    f=   0.00026036    |proj g|=   2.9632e-07
-At iterate   148    f=   0.00026036    |proj g|=   3.2946e-07
-At iterate   149    f=   0.00026036    |proj g|=   7.1031e-07
-At iterate   150    f=   0.00026036    |proj g|=   4.9533e-07
-At iterate   151    f=   0.00026036    |proj g|=   1.7677e-07
-At iterate   152    f=   0.00026036    |proj g|=   9.6494e-08
-At iterate   153    f=   0.00026036    |proj g|=   1.1023e-07
-At iterate   154    f=   0.00026036    |proj g|=   2.7913e-07
-At iterate   155    f=   0.00026036    |proj g|=   5.9009e-07
-At iterate   156    f=   0.00026036    |proj g|=   1.2272e-06
-At iterate   157    f=   0.00026035    |proj g|=   1.1744e-06
-At iterate   158    f=   0.00026035    |proj g|=   2.8028e-06
-At iterate   159    f=   0.00026035    |proj g|=   1.8527e-06
-At iterate   160    f=   0.00026035    |proj g|=   4.9252e-06
-At iterate   161    f=   0.00026035    |proj g|=   4.9844e-07
-At iterate   162    f=   0.00026035    |proj g|=   6.7694e-07
-At iterate   163    f=   0.00026035    |proj g|=   9.7175e-08
-At iterate   164    f=   0.00026035    |proj g|=   9.7019e-08
-At iterate   165    f=   0.00026035    |proj g|=   1.4522e-06
-At iterate   166    f=   0.00026033    |proj g|=   3.6172e-06
-At iterate   167    f=   0.00026032    |proj g|=   4.4019e-06
-At iterate   168    f=    0.0002603    |proj g|=   2.2997e-07
-At iterate   169    f=   0.00026028    |proj g|=   6.7303e-06
-At iterate   170    f=   0.00026026    |proj g|=   8.2019e-06
-At iterate   171    f=   0.00026025    |proj g|=   1.6664e-05
-At iterate   172    f=   0.00026022    |proj g|=   2.6991e-06
-At iterate   173    f=   0.00026012    |proj g|=   1.0108e-05
-At iterate   174    f=   0.00026007    |proj g|=   2.5757e-05
-At iterate   175    f=   0.00025988    |proj g|=   2.0847e-05
-At iterate   176    f=   0.00025913    |proj g|=   1.3335e-05
-At iterate   177    f=   0.00025869    |proj g|=   8.7059e-06
-At iterate   178    f=   0.00025843    |proj g|=   1.0372e-06
-At iterate   179    f=   0.00025841    |proj g|=   2.2224e-05
-At iterate   180    f=   0.00025838    |proj g|=   1.0998e-05
-At iterate   181    f=   0.00025835    |proj g|=   4.7896e-06
-At iterate   182    f=   0.00025835    |proj g|=   5.4262e-06
-At iterate   183    f=   0.00025835    |proj g|=   4.2723e-06
-At iterate   184    f=   0.00025835    |proj g|=   8.3732e-07
-At iterate   185    f=   0.00025835    |proj g|=   1.0396e-06
-At iterate   186    f=   0.00025835    |proj g|=   4.6566e-07
-At iterate   187    f=   0.00025835    |proj g|=   5.5643e-07
-At iterate   188    f=   0.00025835    |proj g|=   6.5245e-07
-At iterate   189    f=   0.00025835    |proj g|=   6.4049e-07
-At iterate   190    f=   0.00025833    |proj g|=   3.4456e-05
-At iterate   191    f=   0.00025831    |proj g|=   2.3089e-05
-At iterate   192    f=   0.00025821    |proj g|=   9.9287e-06
-At iterate   193    f=   0.00025813    |proj g|=   2.2195e-05
-At iterate   194    f=   0.00025805    |proj g|=   1.6916e-05
-At iterate   195    f=   0.00025796    |proj g|=   2.5605e-05
-At iterate   196    f=   0.00025791    |proj g|=   1.9335e-05
-At iterate   197    f=    0.0002577    |proj g|=   4.9331e-06
-At iterate   198    f=   0.00025757    |proj g|=   6.3474e-05
-At iterate   199    f=   0.00025711    |proj g|=   1.3889e-05
-At iterate   200    f=   0.00025647    |proj g|=   2.1183e-05
-At iterate   201    f=   0.00025595    |proj g|=   7.7174e-05
-At iterate   202    f=   0.00025506    |proj g|=   1.7909e-06
-At iterate   203    f=   0.00025389    |proj g|=   0.00015768
-At iterate   204    f=   0.00025243    |proj g|=   0.00011186
-At iterate   205    f=   0.00025067    |proj g|=   7.4295e-05
-At iterate   206    f=   0.00025054    |proj g|=   0.00010007
-At iterate   207    f=   0.00025011    |proj g|=   8.7362e-05
-At iterate   208    f=   0.00025001    |proj g|=   3.3163e-05
-At iterate   209    f=    0.0002499    |proj g|=   1.2518e-05
-At iterate   210    f=   0.00024987    |proj g|=   6.2063e-06
-At iterate   211    f=   0.00024984    |proj g|=   2.2474e-06
-At iterate   212    f=   0.00024982    |proj g|=   1.1564e-05
-At iterate   213    f=    0.0002498    |proj g|=   1.1177e-05
- Positive dir derivative in projection  Using the backtracking step At iterate   214    f=    0.0002498    |proj g|=   1.4567e-05
-At iterate   215    f=   0.00024978    |proj g|=   8.7728e-06
-At iterate   216    f=   0.00024978    |proj g|=   1.7521e-06
-At iterate   217    f=   0.00024977    |proj g|=   5.8089e-07
-At iterate   218    f=   0.00024977    |proj g|=   3.2584e-07
-At iterate   219    f=   0.00024977    |proj g|=   1.2819e-07
-At iterate   220    f=   0.00024977    |proj g|=   9.2821e-08
-At iterate   221    f=   0.00024977    |proj g|=   1.1147e-06
-At iterate   222    f=   0.00024977    |proj g|=   1.5334e-06
-At iterate   223    f=   0.00024977    |proj g|=   1.4637e-06
-At iterate   224    f=    0.0002496    |proj g|=   1.6287e-05
-At iterate   225    f=   0.00024957    |proj g|=   1.0323e-05
-At iterate   226    f=   0.00024941    |proj g|=   5.9316e-06
-At iterate   227    f=   0.00024901    |proj g|=   3.4752e-05
-At iterate   228    f=   0.00024862    |proj g|=   3.5821e-05
-At iterate   229    f=   0.00024812    |proj g|=   3.3678e-05
-At iterate   230    f=   0.00024812    |proj g|=   3.3678e-05
-           * * *
-
-Tit   = total number of iterations
-Tnf   = total number of function evaluations
-Tnint = total number of segments explored during Cauchy searches
-Skip  = number of BFGS updates skipped
-Nact  = number of active bounds at final generalized Cauchy point
-Projg = norm of the final projected gradient
-F     = final function value
-
-           * * *
-   N   Tit  Tnf  Tnint  Skip  Nact     Projg        F
-   13  230  290    230    0     1    3.37e-05    0.000248
-F = 0.000248115
-             CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH
- Cauchy                time          0 seconds.
- Subspace minimization time          0 seconds.
- Line search           time          0 seconds.
- Total User time          0 seconds.
-state after 
--0.976656
--0.041302
- 0.210801
-  2553.06
-  300.385
-  2709.92
-  1213.21
- 0.574779
--0.519258
- 0.632456
-  157.469
-    3.848
-     3000
-  304.498
-0.0912192
- 0.808721
- 0.581076
-  603.387
-  326.479
-  422.371
-  228.535
- 0.516543
- 0.483457
-        0
-0.0444474
-state before
-  0.902656
--0.213023
- 0.373943
-  764.012
-  409.332
-  534.809
-  286.532
- 0.213023
- 0.902656
- 0.373943
-  764.012
-  409.332
-  534.809
-  286.532
--0.902656
- 0.213023
- 0.373943
-  764.012
-  409.332
-  534.809
-  286.532
-        1
-        0
-        0
-     0.05
-At X0         0 variables are exactly at the bounds
-At iterate     0    f=    0.0014129    |proj g|=    0.0074031
-At iterate     1    f=    0.0013591    |proj g|=    0.0071386
-At iterate     2    f=    0.0006457    |proj g|=   1.3608e-06
-At iterate     3    f=   0.00064567    |proj g|=   1.1701e-05
-At iterate     4    f=   0.00064544    |proj g|=   7.7591e-05
-At iterate     5    f=   0.00064492    |proj g|=   0.00016883
-At iterate     6    f=   0.00064349    |proj g|=   0.00032513
-At iterate     7    f=   0.00063989    |proj g|=   0.00056897
-At iterate     8    f=   0.00063073    |proj g|=   0.00095283
-At iterate     9    f=   0.00060911    |proj g|=    0.0015108
-At iterate    10    f=    0.0005642    |proj g|=    0.0021712
-At iterate    11    f=   0.00048974    |proj g|=    0.0024326
-At iterate    12    f=   0.00041467    |proj g|=     0.001162
-At iterate    13    f=   0.00040302    |proj g|=   1.5098e-05
-At iterate    14    f=   0.00040266    |proj g|=   1.0595e-05
-At iterate    15    f=   0.00040266    |proj g|=   1.1822e-07
-At iterate    16    f=   0.00040266    |proj g|=   1.5444e-06
-At iterate    17    f=   0.00040266    |proj g|=   3.0024e-06
-At iterate    18    f=   0.00040266    |proj g|=   6.1117e-06
-At iterate    19    f=   0.00040266    |proj g|=   1.0676e-05
-At iterate    20    f=   0.00040265    |proj g|=   1.8335e-05
-At iterate    21    f=   0.00040264    |proj g|=   3.0518e-05
-At iterate    22    f=   0.00040261    |proj g|=   5.0222e-05
-At iterate    23    f=   0.00040252    |proj g|=   8.1615e-05
-At iterate    24    f=    0.0004023    |proj g|=    0.0001297
-At iterate    25    f=   0.00040174    |proj g|=   0.00020201
-At iterate    26    f=   0.00040042    |proj g|=   0.00029483
-At iterate    27    f=   0.00039785    |proj g|=   0.00038059
-At iterate    28    f=   0.00039441    |proj g|=   0.00032721
-At iterate    29    f=   0.00039419    |proj g|=   0.00043759
-At iterate    30    f=   0.00039158    |proj g|=   0.00021519
-At iterate    31    f=   0.00039067    |proj g|=   2.0673e-05
-At iterate    32    f=   0.00039063    |proj g|=   9.3556e-07
-At iterate    33    f=   0.00039063    |proj g|=   9.4842e-08
-At iterate    34    f=   0.00039063    |proj g|=   5.9914e-08
-At iterate    35    f=   0.00039063    |proj g|=   3.9717e-07
-At iterate    36    f=   0.00039063    |proj g|=   8.0213e-07
-At iterate    37    f=   0.00039063    |proj g|=     1.58e-06
-At iterate    38    f=   0.00039063    |proj g|=     2.75e-06
-At iterate    39    f=   0.00039063    |proj g|=   4.7199e-06
-At iterate    40    f=   0.00039062    |proj g|=   8.2751e-06
-At iterate    41    f=   0.00039062    |proj g|=   1.0988e-05
-At iterate    42    f=   0.00039061    |proj g|=   2.6501e-05
-At iterate    43    f=   0.00039059    |proj g|=   2.7538e-05
-At iterate    44    f=   0.00039054    |proj g|=   3.3766e-05
-At iterate    45    f=   0.00039041    |proj g|=   3.4877e-05
-At iterate    46    f=   0.00039033    |proj g|=    4.895e-05
-At iterate    47    f=   0.00038983    |proj g|=   5.1288e-05
-At iterate    48    f=   0.00038645    |proj g|=   5.7554e-05
-At iterate    49    f=   0.00032855    |proj g|=   0.00057622
- Positive dir derivative in projection  Using the backtracking step At iterate    50    f=   0.00032586    |proj g|=    0.0007274
-At iterate    51    f=    0.0003099    |proj g|=   0.00036585
-At iterate    52    f=   0.00027486    |proj g|=   0.00019736
-At iterate    53    f=   0.00022605    |proj g|=   6.4338e-05
-At iterate    54    f=   0.00022561    |proj g|=   2.2092e-06
-At iterate    55    f=   0.00022508    |proj g|=   6.9223e-05
-At iterate    56    f=    0.0002244    |proj g|=    0.0001177
-At iterate    57    f=   0.00022234    |proj g|=    0.0001868
-At iterate    58    f=    0.0002147    |proj g|=   2.1626e-05
-  ys= -3.16e-06  -gs=  8.54e-06 BFGS update SKIPPED
-At iterate    59    f=    0.0002127    |proj g|=    0.0001886
-At iterate    60    f=   0.00020973    |proj g|=   0.00031699
-At iterate    61    f=   0.00020597    |proj g|=   0.00031741
-At iterate    62    f=     0.000201    |proj g|=   0.00017033
-At iterate    63    f=   0.00019388    |proj g|=   0.00012064
-At iterate    64    f=   0.00018897    |proj g|=   0.00039951
-At iterate    65    f=   0.00018456    |proj g|=   0.00048031
-At iterate    66    f=   0.00017826    |proj g|=   0.00022319
-At iterate    67    f=   0.00017767    |proj g|=   9.7267e-05
-At iterate    68    f=   0.00017735    |proj g|=   3.8618e-05
-At iterate    69    f=   0.00017701    |proj g|=   1.2476e-05
-At iterate    70    f=   0.00017664    |proj g|=   2.8515e-05
-At iterate    71    f=   0.00017613    |proj g|=   2.7957e-05
-At iterate    72    f=   0.00017564    |proj g|=   7.3065e-06
-At iterate    73    f=   0.00017533    |proj g|=   9.7815e-06
-At iterate    74    f=   0.00017528    |proj g|=   9.4514e-07
-At iterate    75    f=   0.00017527    |proj g|=   6.5655e-07
-At iterate    76    f=   0.00017527    |proj g|=   1.5551e-07
-At iterate    77    f=   0.00017527    |proj g|=   3.8197e-09
-At iterate    78    f=   0.00017527    |proj g|=   1.8172e-09
-At iterate    79    f=   0.00017527    |proj g|=   2.3557e-10
-           * * *
-
-Tit   = total number of iterations
-Tnf   = total number of function evaluations
-Tnint = total number of segments explored during Cauchy searches
-Skip  = number of BFGS updates skipped
-Nact  = number of active bounds at final generalized Cauchy point
-Projg = norm of the final projected gradient
-F     = final function value
-
-           * * *
-   N   Tit  Tnf  Tnint  Skip  Nact     Projg        F
-   13   79   89     79    1     2    2.36e-10    0.000175
-F = 0.000175275
-             CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH
- Cauchy                time          0 seconds.
- Subspace minimization time          0 seconds.
- Line search           time          0 seconds.
- Total User time          0 seconds.
-state after 
- 0.902656
--0.213023
- 0.373943
-     3000
-  712.831
-  103.747
-      0.1
- 0.213023
- 0.902656
- 0.373943
-  764.012
-  409.332
-  534.809
-  286.532
--0.902656
- 0.213023
- 0.373943
-  764.012
-  409.332
-  534.809
-  286.532
-        1
-        0
-        0
- 0.108115
-state before
-    -0.959967
- 1.40646e-16
-    0.280114
-     631.908
-     293.729
-     442.336
-      205.61
--1.40646e-16
-   -0.959967
-    0.280114
-     631.908
-     293.729
-     442.336
-      205.61
-    0.959967
--1.40646e-16
-    0.280114
-     631.908
-     293.729
-     442.336
-      205.61
-           1
-           0
-           0
-        0.05
-At X0         0 variables are exactly at the bounds
-At iterate     0    f=    0.0010619    |proj g|=    0.0044786
-At iterate     1    f=    0.0010422    |proj g|=    0.0043254
-At iterate     2    f=   0.00076856    |proj g|=   1.7315e-06
-At iterate     3    f=   0.00076799    |proj g|=   7.2872e-05
-At iterate     4    f=   0.00076461    |proj g|=   0.00029997
-At iterate     5    f=   0.00075547    |proj g|=   0.00068484
-At iterate     6    f=   0.00073425    |proj g|=    0.0012414
-At iterate     7    f=   0.00068915    |proj g|=    0.0019506
-At iterate     8    f=   0.00061365    |proj g|=     0.002392
-At iterate     9    f=   0.00052784    |proj g|=    0.0015051
-At iterate    10    f=    0.0005062    |proj g|=   2.9319e-05
-At iterate    11    f=   0.00050562    |proj g|=   1.9591e-05
-At iterate    12    f=   0.00050561    |proj g|=   9.1424e-08
-At iterate    13    f=   0.00050561    |proj g|=   1.2387e-07
-At iterate    14    f=   0.00050561    |proj g|=   1.6897e-07
-At iterate    15    f=   0.00050561    |proj g|=   5.3572e-07
-At iterate    16    f=   0.00050561    |proj g|=   9.4654e-07
-At iterate    17    f=   0.00050561    |proj g|=   1.7226e-06
-At iterate    18    f=   0.00050561    |proj g|=   2.9059e-06
-At iterate    19    f=   0.00050561    |proj g|=   4.8592e-06
-At iterate    20    f=    0.0005056    |proj g|=   7.9967e-06
-At iterate    21    f=   0.00050559    |proj g|=   1.2565e-05
-At iterate    22    f=   0.00050557    |proj g|=   2.6519e-05
-At iterate    23    f=   0.00050551    |proj g|=   9.6544e-06
-At iterate    24    f=   0.00050544    |proj g|=   8.7588e-05
-At iterate    25    f=   0.00050472    |proj g|=   3.5988e-05
-At iterate    26    f=   0.00050278    |proj g|=   4.0854e-05
-At iterate    27    f=   0.00050075    |proj g|=   7.5539e-05
-At iterate    28    f=   0.00050009    |proj g|=   2.7169e-05
-At iterate    29    f=   0.00050002    |proj g|=   1.2847e-06
-At iterate    30    f=   0.00050002    |proj g|=   1.0563e-07
-At iterate    31    f=   0.00050002    |proj g|=   7.9875e-08
-At iterate    32    f=   0.00050002    |proj g|=   1.5752e-07
-At iterate    33    f=   0.00050002    |proj g|=   3.5521e-07
-At iterate    34    f=   0.00050002    |proj g|=   7.0811e-07
-At iterate    35    f=   0.00050002    |proj g|=    1.985e-07
-At iterate    36    f=   0.00050002    |proj g|=   3.0333e-06
-At iterate    37    f=   0.00050002    |proj g|=   2.3876e-06
-At iterate    38    f=   0.00050002    |proj g|=   7.7537e-08
-At iterate    39    f=   0.00050002    |proj g|=   3.0617e-06
-At iterate    40    f=       0.0005    |proj g|=   8.3428e-06
-At iterate    41    f=   0.00049997    |proj g|=   1.6651e-05
-At iterate    42    f=   0.00049988    |proj g|=    3.064e-05
-At iterate    43    f=   0.00049964    |proj g|=   5.4266e-05
-At iterate    44    f=   0.00049896    |proj g|=   9.7759e-05
-At iterate    45    f=   0.00049668    |proj g|=   0.00019872
-At iterate    46    f=   0.00043448    |proj g|=    0.0020002
-At iterate    47    f=   0.00041874    |proj g|=    0.0016457
-At iterate    48    f=    0.0003853    |proj g|=   1.5725e-05
-At iterate    49    f=   0.00038529    |proj g|=   4.0169e-06
-At iterate    50    f=   0.00038527    |proj g|=   2.5786e-05
-At iterate    51    f=   0.00038522    |proj g|=    5.374e-05
-At iterate    52    f=   0.00038511    |proj g|=   9.8992e-05
-At iterate    53    f=   0.00038484    |proj g|=   0.00016038
-At iterate    54    f=   0.00038421    |proj g|=   0.00023563
-At iterate    55    f=     0.000383    |proj g|=   0.00028822
-At iterate    56    f=   0.00038143    |proj g|=   0.00023791
-At iterate    57    f=   0.00038041    |proj g|=   0.00010131
-At iterate    58    f=   0.00037998    |proj g|=   3.3297e-05
-At iterate    59    f=   0.00037984    |proj g|=   8.6615e-05
-At iterate    60    f=   0.00037973    |proj g|=   0.00011402
-At iterate    61    f=   0.00037947    |proj g|=   0.00013563
-At iterate    62    f=   0.00037871    |proj g|=   0.00012622
-At iterate    63    f=   0.00037866    |proj g|=   0.00011634
-At iterate    64    f=   0.00037852    |proj g|=   5.4585e-05
-At iterate    65    f=   0.00037844    |proj g|=   2.2619e-06
-At iterate    66    f=   0.00037844    |proj g|=   2.3339e-07
-At iterate    67    f=   0.00037844    |proj g|=   2.3359e-07
-At iterate    68    f=   0.00037844    |proj g|=   3.2411e-07
-At iterate    69    f=   0.00037844    |proj g|=   9.6144e-07
-At iterate    70    f=   0.00037844    |proj g|=   1.7772e-06
-At iterate    71    f=   0.00037844    |proj g|=   3.2549e-06
-At iterate    72    f=   0.00037844    |proj g|=   5.5563e-06
-At iterate    73    f=   0.00037844    |proj g|=   9.3317e-06
-At iterate    74    f=   0.00037844    |proj g|=   1.5401e-05
-At iterate    75    f=   0.00037843    |proj g|=   2.5229e-05
-At iterate    76    f=   0.00037841    |proj g|=   4.0988e-05
-At iterate    77    f=   0.00037835    |proj g|=   6.6197e-05
-At iterate    78    f=    0.0003782    |proj g|=   0.00010618
-At iterate    79    f=    0.0003778    |proj g|=   0.00016954
-At iterate    80    f=   0.00037672    |proj g|=   0.00026986
-At iterate    81    f=   0.00037357    |proj g|=   0.00043073
-At iterate    82    f=   0.00029875    |proj g|=   0.00022745
-  ys= -4.72e-05  -gs=  4.49e-05 BFGS update SKIPPED
-At iterate    83    f=    0.0002956    |proj g|=   2.9829e-05
-At iterate    84    f=   0.00029518    |proj g|=   0.00012693
-At iterate    85    f=   0.00029504    |proj g|=   0.00013374
-At iterate    86    f=   0.00029437    |proj g|=   0.00010743
- Bad direction in the line search;
-   refresh the lbfgs memory and restart the iteration.
-At iterate    87    f=   0.00029432    |proj g|=   9.4474e-05
-At iterate    88    f=   0.00029413    |proj g|=   1.2617e-07
-At iterate    89    f=   0.00029413    |proj g|=   1.2613e-07
-At iterate    90    f=   0.00029413    |proj g|=   2.1581e-07
-At iterate    91    f=   0.00029413    |proj g|=   4.9121e-07
-At iterate    92    f=   0.00029413    |proj g|=   1.0151e-06
-At iterate    93    f=   0.00029413    |proj g|=   1.7938e-06
-At iterate    94    f=   0.00029413    |proj g|=   3.1277e-06
-At iterate    95    f=   0.00029413    |proj g|=   5.1941e-06
-At iterate    96    f=   0.00029413    |proj g|=   8.6336e-06
-At iterate    97    f=   0.00029413    |proj g|=   1.4096e-05
-At iterate    98    f=   0.00029412    |proj g|=   2.3016e-05
-At iterate    99    f=    0.0002941    |proj g|=   3.7281e-05
-At iterate   100    f=   0.00029406    |proj g|=   6.0094e-05
-At iterate   101    f=   0.00029394    |proj g|=   9.5521e-05
-At iterate   102    f=   0.00029364    |proj g|=   0.00014708
-At iterate   103    f=     0.000293    |proj g|=   0.00020867
-At iterate   104    f=    0.0002919    |proj g|=   0.00024282
-At iterate   105    f=   0.00029069    |proj g|=   0.00018325
-At iterate   106    f=   0.00029007    |proj g|=   5.5257e-05
-At iterate   107    f=      0.00029    |proj g|=    3.106e-06
-At iterate   108    f=      0.00029    |proj g|=   1.0749e-07
-At iterate   109    f=      0.00029    |proj g|=   1.1172e-08
-At iterate   110    f=      0.00029    |proj g|=   4.4756e-08
-At iterate   111    f=      0.00029    |proj g|=   3.0086e-07
-At iterate   112    f=      0.00029    |proj g|=   6.4649e-07
-At iterate   113    f=      0.00029    |proj g|=   1.2511e-06
-At iterate   114    f=      0.00029    |proj g|=   2.2012e-06
-At iterate   115    f=      0.00029    |proj g|=   3.7495e-06
-At iterate   116    f=      0.00029    |proj g|=   6.2635e-06
-At iterate   117    f=      0.00029    |proj g|=   1.0353e-05
-At iterate   118    f=   0.00028999    |proj g|=   1.6871e-05
-At iterate   119    f=   0.00028998    |proj g|=   2.7312e-05
-At iterate   120    f=   0.00028995    |proj g|=   4.3562e-05
-At iterate   121    f=   0.00028986    |proj g|=    6.761e-05
-At iterate   122    f=   0.00028966    |proj g|=   9.8765e-05
- Positive dir derivative in projection  Using the backtracking step At iterate   123    f=   0.00028944    |proj g|=   8.5215e-05
-At iterate   124    f=    0.0002892    |proj g|=   1.3639e-05
-At iterate   125    f=   0.00028919    |proj g|=   1.0413e-06
-At iterate   126    f=   0.00028919    |proj g|=   3.2766e-09
-At iterate   127    f=   0.00028919    |proj g|=   1.4043e-09
-           * * *
-
-Tit   = total number of iterations
-Tnf   = total number of function evaluations
-Tnint = total number of segments explored during Cauchy searches
-Skip  = number of BFGS updates skipped
-Nact  = number of active bounds at final generalized Cauchy point
-Projg = norm of the final projected gradient
-F     = final function value
-
-           * * *
-   N   Tit  Tnf  Tnint  Skip  Nact     Projg        F
-   13  127  162    129    1     3     1.4e-09    0.000289
-F = 0.00028919
-             CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH
- Cauchy                time          0 seconds.
- Subspace minimization time          0 seconds.
- Line search           time          0 seconds.
- Total User time          0 seconds.
-state after 
-   -0.959967
- 1.40646e-16
-    0.280114
-        3000
-     430.563
-         0.1
-         0.1
--1.40646e-16
-   -0.959967
-    0.280114
-     631.908
-     293.729
-     442.336
-      205.61
-    0.959967
--1.40646e-16
-    0.280114
-     631.908
-     293.729
-     442.336
-      205.61
-           1
-           0
-           0
-   0.0233184
-state before
-  0.907442
--0.414273
-0.0701974
-  601.711
-  276.562
-  421.198
-  193.593
- 0.414273
- 0.907442
-0.0701974
-  601.711
-  276.562
-  421.198
-  193.593
--0.907442
- 0.414273
-0.0701974
-  601.711
-  276.562
-  421.198
-  193.593
-        1
-        0
-        0
-     0.05
-At X0         0 variables are exactly at the bounds
-At iterate     0    f=   0.00089559    |proj g|=    0.0041049
-At iterate     1    f=   0.00087902    |proj g|=    0.0039663
-At iterate     2    f=   0.00064612    |proj g|=   1.1787e-06
-At iterate     3    f=   0.00064505    |proj g|=   0.00010445
-At iterate     4    f=   0.00063925    |proj g|=   0.00039202
-At iterate     5    f=   0.00062394    |proj g|=   0.00087096
-At iterate     6    f=   0.00059414    |proj g|=    0.0014037
-At iterate     7    f=   0.00054653    |proj g|=    0.0016152
-At iterate     8    f=   0.00050986    |proj g|=   0.00074707
-At iterate     9    f=    0.0005042    |proj g|=   8.5712e-05
-At iterate    10    f=   0.00050389    |proj g|=   6.1101e-06
-At iterate    11    f=   0.00050389    |proj g|=   2.9427e-07
-At iterate    12    f=   0.00050389    |proj g|=   2.9421e-07
-At iterate    13    f=   0.00050389    |proj g|=   5.0772e-07
-At iterate    14    f=   0.00050389    |proj g|=   1.7793e-06
-At iterate    15    f=   0.00050389    |proj g|=   3.3116e-06
-At iterate    16    f=   0.00050389    |proj g|=   6.1452e-06
-At iterate    17    f=   0.00050388    |proj g|=   1.0568e-05
-At iterate    18    f=   0.00050386    |proj g|=   1.7848e-05
-At iterate    19    f=   0.00050382    |proj g|=   2.9349e-05
-At iterate    20    f=   0.00050369    |proj g|=    4.972e-05
-At iterate    21    f=   0.00050338    |proj g|=   8.0365e-05
-At iterate    22    f=   0.00050258    |proj g|=   0.00012399
-At iterate    23    f=   0.00050067    |proj g|=   0.00025581
-At iterate    24    f=   0.00049677    |proj g|=   0.00016668
-At iterate    25    f=   0.00049437    |proj g|=   0.00056167
-At iterate    26    f=    0.0004876    |proj g|=   0.00045497
-At iterate    27    f=   0.00047341    |proj g|=   5.0434e-05
-At iterate    28    f=   0.00047268    |proj g|=   1.9241e-05
-At iterate    29    f=   0.00047264    |proj g|=   2.3504e-06
-At iterate    30    f=   0.00047264    |proj g|=   3.2165e-07
-At iterate    31    f=   0.00047264    |proj g|=   1.3438e-08
-At iterate    32    f=   0.00047264    |proj g|=    1.344e-08
-At iterate    33    f=   0.00047264    |proj g|=   1.1992e-07
-At iterate    34    f=   0.00047263    |proj g|=   6.0299e-07
-At iterate    35    f=   0.00047262    |proj g|=   1.4677e-06
-At iterate    36    f=   0.00047259    |proj g|=    1.703e-05
-At iterate    37    f=   0.00047251    |proj g|=   1.1922e-05
-At iterate    38    f=   0.00047174    |proj g|=   3.8238e-06
-At iterate    39    f=   0.00047173    |proj g|=    3.479e-05
- Positive dir derivative in projection  Using the backtracking step At iterate    40    f=   0.00046976    |proj g|=   4.8531e-05
- Positive dir derivative in projection  Using the backtracking step At iterate    41    f=   0.00046915    |proj g|=   0.00012857
-At iterate    42    f=   0.00046515    |proj g|=   1.0503e-05
-At iterate    43    f=   0.00045514    |proj g|=    5.771e-05
-At iterate    44    f=   0.00045508    |proj g|=    2.877e-05
-At iterate    45    f=   0.00045503    |proj g|=   1.4137e-05
-At iterate    46    f=   0.00045501    |proj g|=   5.0722e-07
-At iterate    47    f=   0.00045497    |proj g|=   2.2615e-05
-At iterate    48    f=   0.00045488    |proj g|=   5.1608e-05
-At iterate    49    f=   0.00045466    |proj g|=   0.00010396
-At iterate    50    f=   0.00045414    |proj g|=     0.000183
-At iterate    51    f=   0.00045324    |proj g|=   0.00034287
-At iterate    52    f=   0.00045203    |proj g|=   0.00032794
-At iterate    53    f=     0.000451    |proj g|=   0.00011052
-At iterate    54    f=   0.00045042    |proj g|=   7.5085e-05
- Positive dir derivative in projection  Using the backtracking step At iterate    55    f=   0.00045016    |proj g|=   6.9935e-06
-At iterate    56    f=   0.00045014    |proj g|=   3.8643e-07
-At iterate    57    f=   0.00045011    |proj g|=   5.1424e-07
-At iterate    58    f=   0.00045011    |proj g|=   4.0278e-08
-At iterate    59    f=   0.00045011    |proj g|=   7.9054e-08
-At iterate    60    f=   0.00045011    |proj g|=   1.1782e-08
-At iterate    61    f=   0.00045011    |proj g|=   1.9257e-09
-           * * *
-
-Tit   = total number of iterations
-Tnf   = total number of function evaluations
-Tnint = total number of segments explored during Cauchy searches
-Skip  = number of BFGS updates skipped
-Nact  = number of active bounds at final generalized Cauchy point
-Projg = norm of the final projected gradient
-F     = final function value
-
-           * * *
-   N   Tit  Tnf  Tnint  Skip  Nact     Projg        F
-   13   61   82     61    0     2    1.93e-09     0.00045
-F = 0.000450114
-             CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH
- Cauchy                time          0 seconds.
- Subspace minimization time          0 seconds.
- Line search           time          0 seconds.
- Total User time          0 seconds.
-state after 
- 0.907442
--0.414273
-0.0701974
-  857.639
-  176.338
+ 0.964121
+-0.199331
+ 0.175321
+  1765.45
+  531.911
       0.1
       0.1
- 0.414273
- 0.907442
-0.0701974
-  601.711
-  276.562
-  421.198
-  193.593
--0.907442
- 0.414273
-0.0701974
-  601.711
-  276.562
-  421.198
-  193.593
+ 0.199331
+ 0.964121
+ 0.175321
+   642.05
+  369.327
+  449.435
+  258.529
+-0.964121
+ 0.199331
+ 0.175321
+   642.05
+  369.327
+  449.435
+  258.529
         1
         0
         0
- 0.304186
-state before
-  0.825776
--0.448259
- 0.342282
-  634.031
-  249.901
-  443.822
-  174.931
- 0.448259
- 0.825776
- 0.342282
-  634.031
-  249.901
-  443.822
-  174.931
--0.825776
- 0.448259
- 0.342282
-  634.031
-  249.901
-  443.822
-  174.931
-        1
-        0
-        0
-     0.05
-At X0         0 variables are exactly at the bounds
-At iterate     0    f=   0.00091865    |proj g|=    0.0041828
-At iterate     1    f=   0.00090146    |proj g|=    0.0040411
-At iterate     2    f=   0.00066045    |proj g|=   1.2102e-06
-At iterate     3    f=   0.00066043    |proj g|=   1.1351e-05
-At iterate     4    f=   0.00066029    |proj g|=   5.9474e-05
-At iterate     5    f=   0.00065995    |proj g|=   0.00013285
-At iterate     6    f=   0.00065904    |proj g|=   0.00025353
-At iterate     7    f=   0.00065671    |proj g|=   0.00044395
-At iterate     8    f=   0.00065085    |proj g|=   0.00073928
-At iterate     9    f=   0.00063704    |proj g|=    0.0011594
-At iterate    10    f=   0.00060861    |proj g|=    0.0016229
-At iterate    11    f=   0.00056338    |proj g|=    0.0017064
-At iterate    12    f=   0.00052578    |proj g|=   0.00073083
-At iterate    13    f=   0.00052036    |proj g|=   7.0871e-05
-At iterate    14    f=   0.00052008    |proj g|=   5.5402e-06
-At iterate    15    f=   0.00052008    |proj g|=   2.8688e-07
-At iterate    16    f=   0.00052008    |proj g|=   4.5472e-07
-At iterate    17    f=   0.00052008    |proj g|=   1.7832e-06
-At iterate    18    f=   0.00052008    |proj g|=   4.1418e-06
-At iterate    19    f=   0.00052008    |proj g|=   7.8241e-06
-At iterate    20    f=   0.00052007    |proj g|=   1.3852e-05
-At iterate    21    f=   0.00052006    |proj g|=   2.3531e-05
-At iterate    22    f=   0.00052003    |proj g|=   3.9187e-05
-At iterate    23    f=   0.00051995    |proj g|=   6.4406e-05
-At iterate    24    f=   0.00051975    |proj g|=   0.00010406
-At iterate    25    f=   0.00051922    |proj g|=   0.00016839
-At iterate    26    f=   0.00051789    |proj g|=   0.00025747
-At iterate    27    f=   0.00051474    |proj g|=   0.00040185
-At iterate    28    f=   0.00050834    |proj g|=   0.00045365
- Positive dir derivative in projection  Using the backtracking step At iterate    29    f=   0.00050754    |proj g|=   0.00066916
-At iterate    30    f=   0.00049853    |proj g|=   0.00056864
-At iterate    31    f=    0.0004899    |proj g|=   0.00026875
-At iterate    32    f=   0.00048653    |proj g|=   3.7759e-05
-At iterate    33    f=    0.0004863    |proj g|=   2.4678e-06
-At iterate    34    f=    0.0004863    |proj g|=    1.357e-07
-At iterate    35    f=    0.0004863    |proj g|=    1.824e-08
-At iterate    36    f=    0.0004863    |proj g|=   4.1498e-08
-At iterate    37    f=    0.0004863    |proj g|=   3.4671e-07
-At iterate    38    f=    0.0004863    |proj g|=   7.3758e-07
-At iterate    39    f=    0.0004863    |proj g|=   1.4444e-06
-At iterate    40    f=    0.0004863    |proj g|=   2.2726e-06
-At iterate    41    f=    0.0004863    |proj g|=   6.0917e-06
-At iterate    42    f=    0.0004863    |proj g|=   7.6842e-06
-At iterate    43    f=   0.00048629    |proj g|=   1.9602e-05
-At iterate    44    f=   0.00048629    |proj g|=   2.5041e-05
-At iterate    45    f=   0.00048625    |proj g|=   5.0642e-05
-At iterate    46    f=   0.00048616    |proj g|=   7.5696e-05
-At iterate    47    f=   0.00048589    |proj g|=   0.00013021
-At iterate    48    f=   0.00048319    |proj g|=   0.00037921
- Positive dir derivative in projection  Using the backtracking step At iterate    49    f=   0.00048247    |proj g|=   0.00036156
-At iterate    50    f=   0.00048196    |proj g|=   5.6714e-05
-At iterate    51    f=   0.00047743    |proj g|=   3.0397e-05
-At iterate    52    f=   0.00047163    |proj g|=    0.0010313
-At iterate    53    f=   0.00046084    |proj g|=   0.00034825
-At iterate    54    f=   0.00045868    |proj g|=   3.1796e-05
-At iterate    55    f=   0.00045866    |proj g|=   5.6037e-06
-At iterate    56    f=   0.00045866    |proj g|=   5.0188e-06
-At iterate    57    f=   0.00045866    |proj g|=   2.6158e-06
-At iterate    58    f=   0.00045865    |proj g|=   2.0575e-06
-At iterate    59    f=   0.00045861    |proj g|=   9.9336e-06
-At iterate    60    f=    0.0004585    |proj g|=   1.9125e-05
-At iterate    61    f=   0.00045827    |proj g|=   1.0072e-05
-At iterate    62    f=   0.00045783    |proj g|=   3.3854e-05
-At iterate    63    f=   0.00045707    |proj g|=    0.0001247
-At iterate    64    f=    0.0004551    |proj g|=    5.141e-05
-At iterate    65    f=   0.00045446    |proj g|=    0.0001589
-At iterate    66    f=   0.00045323    |proj g|=   9.1813e-07
-At iterate    67    f=     0.000453    |proj g|=   4.4506e-05
-At iterate    68    f=   0.00045285    |proj g|=   5.5249e-05
-At iterate    69    f=   0.00045266    |proj g|=   4.4412e-05
-At iterate    70    f=   0.00045259    |proj g|=   1.8042e-05
-At iterate    71    f=   0.00045258    |proj g|=   2.4012e-06
-At iterate    72    f=   0.00045258    |proj g|=   1.9982e-07
-At iterate    73    f=   0.00045258    |proj g|=    6.765e-08
-At iterate    74    f=   0.00045258    |proj g|=   3.8688e-09
-At iterate    75    f=   0.00045258    |proj g|=   1.6873e-10
-           * * *
-
-Tit   = total number of iterations
-Tnf   = total number of function evaluations
-Tnint = total number of segments explored during Cauchy searches
-Skip  = number of BFGS updates skipped
-Nact  = number of active bounds at final generalized Cauchy point
-Projg = norm of the final projected gradient
-F     = final function value
-
-           * * *
-   N   Tit  Tnf  Tnint  Skip  Nact     Projg        F
-   13   75   87     75    0     2    1.69e-10    0.000453
-F = 0.000452576
-             CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH
- Cauchy                time          0 seconds.
- Subspace minimization time          0 seconds.
- Line search           time          0 seconds.
- Total User time          0 seconds.
-state after 
- 0.825776
--0.448259
- 0.342282
-  936.807
-  143.412
-      0.1
-      0.1
- 0.448259
- 0.825776
- 0.342282
-  634.031
-  249.901
-  443.822
-  174.931
--0.825776
- 0.448259
- 0.342282
-  634.031
-  249.901
-  443.822
-  174.931
-        1
-        0
-        0
- 0.301875
-state before
-  0.879084
--0.280319
- 0.385529
-  689.151
-  287.702
-  482.406
-  201.391
- 0.280319
- 0.879084
- 0.385529
-  689.151
-  287.702
-  482.406
-  201.391
--0.879084
- 0.280319
- 0.385529
-  689.151
-  287.702
-  482.406
-  201.391
-        1
-        0
-        0
-     0.05
-At X0         0 variables are exactly at the bounds
-At iterate     0    f=   0.00078651    |proj g|=    0.0040016
-At iterate     1    f=   0.00077076    |proj g|=    0.0038693
-At iterate     2    f=   0.00054433    |proj g|=   1.3049e-06
-At iterate     3    f=   0.00054305    |proj g|=   0.00012726
-At iterate     4    f=   0.00053737    |proj g|=   0.00038994
-At iterate     5    f=   0.00051999    |proj g|=   0.00090484
-At iterate     6    f=   0.00048936    |proj g|=    0.0014227
-At iterate     7    f=   0.00044125    |proj g|=    0.0016207
-At iterate     8    f=   0.00040013    |proj g|=   0.00081029
-At iterate     9    f=   0.00039312    |proj g|=   3.9842e-05
-At iterate    10    f=   0.00039296    |proj g|=   5.4349e-06
-At iterate    11    f=   0.00039296    |proj g|=   5.1124e-08
-At iterate    12    f=   0.00039296    |proj g|=   5.1125e-08
-At iterate    13    f=   0.00039296    |proj g|=   1.1453e-07
-At iterate    14    f=   0.00039296    |proj g|=   2.5849e-07
-At iterate    15    f=   0.00039296    |proj g|=   5.1208e-07
-At iterate    16    f=   0.00039296    |proj g|=   9.1081e-07
-At iterate    17    f=   0.00039296    |proj g|=   1.5627e-06
-At iterate    18    f=   0.00039296    |proj g|=    2.613e-06
-At iterate    19    f=   0.00039296    |proj g|=   4.3156e-06
-At iterate    20    f=   0.00039296    |proj g|=    7.011e-06
-At iterate    21    f=   0.00039295    |proj g|=   1.1742e-05
-At iterate    22    f=   0.00039294    |proj g|=   1.7545e-05
-At iterate    23    f=   0.00039292    |proj g|=   4.2372e-05
-At iterate    24    f=   0.00039287    |proj g|=   5.6326e-05
-At iterate    25    f=   0.00039264    |proj g|=   0.00010729
-At iterate    26    f=   0.00039208    |proj g|=   0.00017381
-At iterate    27    f=   0.00039003    |proj g|=   0.00034597
-At iterate    28    f=   0.00038607    |proj g|=   0.00055274
- Positive dir derivative in projection  Using the backtracking step At iterate    29    f=     0.000382    |proj g|=   0.00066844
-At iterate    30    f=   0.00037935    |proj g|=   0.00087602
-At iterate    31    f=   0.00037014    |proj g|=   0.00095518
-At iterate    32    f=    0.0003255    |proj g|=    0.0010318
-At iterate    33    f=   0.00030362    |proj g|=   0.00037161
-At iterate    34    f=   0.00029629    |proj g|=   0.00083787
-At iterate    35    f=   0.00027622    |proj g|=   0.00023786
-At iterate    36    f=   0.00026058    |proj g|=   6.2309e-05
-At iterate    37    f=   0.00025347    |proj g|=   0.00013728
-At iterate    38    f=   0.00025209    |proj g|=   8.4062e-05
-At iterate    39    f=   0.00025187    |proj g|=   2.5192e-05
-At iterate    40    f=   0.00025186    |proj g|=   2.5905e-06
-At iterate    41    f=   0.00025186    |proj g|=   1.8351e-07
-At iterate    42    f=   0.00025186    |proj g|=   1.8345e-07
-At iterate    43    f=   0.00025186    |proj g|=   2.6039e-07
-At iterate    44    f=   0.00025186    |proj g|=   4.4884e-06
-At iterate    45    f=   0.00025185    |proj g|=   1.4978e-06
-At iterate    46    f=   0.00025183    |proj g|=   5.1811e-06
-At iterate    47    f=   0.00025178    |proj g|=   1.4756e-05
-At iterate    48    f=   0.00025164    |proj g|=   3.1842e-05
-At iterate    49    f=   0.00025128    |proj g|=   5.8461e-05
-At iterate    50    f=   0.00025032    |proj g|=   0.00010083
-At iterate    51    f=   0.00024772    |proj g|=   0.00016165
-At iterate    52    f=   0.00024035    |proj g|=   0.00021186
-At iterate    53    f=   0.00023109    |proj g|=   0.00021741
-At iterate    54    f=     0.000226    |proj g|=   0.00036317
-At iterate    55    f=   0.00021799    |proj g|=     0.000281
-At iterate    56    f=   0.00019071    |proj g|=   0.00012657
-At iterate    57    f=   0.00018695    |proj g|=   0.00011448
-At iterate    58    f=   0.00018572    |proj g|=   3.3521e-05
-At iterate    59    f=   0.00018567    |proj g|=   6.9797e-06
-At iterate    60    f=   0.00018567    |proj g|=   1.0868e-06
-At iterate    61    f=   0.00018567    |proj g|=   2.9194e-08
-At iterate    62    f=   0.00018567    |proj g|=   1.6813e-08
-At iterate    63    f=   0.00018567    |proj g|=   2.3623e-09
-At iterate    64    f=   0.00018567    |proj g|=   3.7697e-10
-           * * *
-
-Tit   = total number of iterations
-Tnf   = total number of function evaluations
-Tnint = total number of segments explored during Cauchy searches
-Skip  = number of BFGS updates skipped
-Nact  = number of active bounds at final generalized Cauchy point
-Projg = norm of the final projected gradient
-F     = final function value
-
-           * * *
-   N   Tit  Tnf  Tnint  Skip  Nact     Projg        F
-   13   64   79     64    0     2    3.77e-10    0.000186
-F = 0.00018567
-             CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH
- Cauchy                time          0 seconds.
- Subspace minimization time          0 seconds.
- Line search           time          0 seconds.
- Total User time          0 seconds.
-state after 
- 0.879084
--0.280319
- 0.385529
-  2810.86
-  349.211
-      0.1
-      0.1
- 0.280319
- 0.879084
- 0.385529
-  689.151
-  287.702
-  482.406
-  201.391
--0.879084
- 0.280319
- 0.385529
-  689.151
-  287.702
-  482.406
-  201.391
-        1
-        0
-        0
-0.0723869
-Final seeds vector size 20
+ 0.156383
+Final seeds vector size 2
 For seed point 
- -0.937548
- 0.342848
-0.0588153
-  82.3931
-  85.9447
-     3000
-  109.495
--0.878617
--0.110385
- 0.464594
-     3000
-  1059.04
-  2629.84
-  298.996
- 0.284866
- 0.659684
- 0.695462
-  644.617
-  381.511
-  451.232
-  267.057
- 0.504893
- 0.495107
+ For seed point 
+  0.964121
+-0.199331
+ 0.175321
+  1765.45
+  531.911
+      0.1
+      0.1
+ 0.199331
+ 0.964121
+ 0.175321
+   642.05
+  369.327
+  449.435
+  258.529
+-0.964121
+ 0.199331
+ 0.175321
+   642.05
+  369.327
+  449.435
+  258.529
+        1
         0
- 0.085437
+        0
+ 0.156383
 step 0
-n_of_dirs 2
-w sphd ridg 0.504893
-0.495107
-       0
-n_of_dirs 2
-w sphd ridg 0.504893
-0.495107
-       0
-w1 0.500119 w2 0.495078 w3 0.00480276 wiso 0.0825995
-step 1
-n_of_dirs 2
-w sphd ridg 0.464895
-0.535105
-       0
-n_of_dirs 2
-w sphd ridg 0.464895
-0.535105
-       0
-w1 0.483667 w2 0.516333 w3 0 wiso 0.100149
-step 2
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.807841 w2 0.192159 w3 0 wiso 0.417783
-step 3
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.97207 w2 0.0279303 w3 0 wiso 0.48945
-step 4
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.987532 w2 0.012468 w3 0 wiso 0.507612
-step 5
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.919226 w2 0.0576829 w3 0.0230913 wiso 0.490396
-step 6
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.901134 w2 0.0655904 w3 0.0332759 wiso 0.5106
-step 7
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.995807 w2 0.00419343 w3 0 wiso 0.542031
-step 8
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 0 w3 1.53089e-16 wiso 0.552285
-step 9
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 1.1189e-16 w3 0 wiso 0.53058
-step 10
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 -2.498e-16 w3 0 wiso 0.512496
-step 11
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.984953 w2 0.0150469 w3 0 wiso 0.49045
-step 12
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.983875 w2 0.015159 w3 0.000965675 wiso 0.482876
-step 13
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.989033 w2 0.0109672 w3 0 wiso 0.465171
-step 14
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.989493 w2 0.0105074 w3 0 wiso 0.459936
-step 15
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 -4.88094e-21 w3 2.54998e-16 wiso 0.484831
-step 16
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 4.32983e-19 w3 0 wiso 0.484764
-step 17
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 0 w3 3.1225e-17 wiso 0.484324
-step 18
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.987698 w2 0.0119739 w3 0.000328151 wiso 0.454852
-step 19
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.98545 w2 0.0145496 w3 0 wiso 0.44931
-step 20
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.974053 w2 0.0169121 w3 0.00903508 wiso 0.454514
-step 21
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.976743 w2 0.0143047 w3 0.00895278 wiso 0.455262
-step 22
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.975298 w2 0.0137374 w3 0.0109643 wiso 0.459597
-step 23
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.980033 w2 0.0199672 w3 0 wiso 0.482386
-For seed point 
-   0.937548
- -0.342848
--0.0588153
-   82.3931
-   85.9447
-      3000
-   109.495
- -0.878617
- -0.110385
-  0.464594
-      3000
-   1059.04
-   2629.84
-   298.996
-  0.284866
-  0.659684
-  0.695462
-   644.617
-   381.511
-   451.232
-   267.057
-  0.504893
-  0.495107
-         0
-  0.085437
+-0.964121
+ 0.199331
+-0.175321
+  1765.45
+  531.911
+      0.1
+      0.1
+ 0.199331
+ 0.964121
+ 0.175321
+   642.05
+  369.327
+  449.435
+  258.529
+-0.964121
+ 0.199331
+ 0.175321
+   642.05
+  369.327
+  449.435
+  258.529
+        1
+        0
+        0
+ 0.156383
 step 0
-n_of_dirs 2
-w sphd ridg 0.504893
-0.495107
-       0
-n_of_dirs 2
-w sphd ridg 0.504893
-0.495107
-       0
-w1 0.500119 w2 0.495078 w3 0.00480276 wiso 0.0825995
 step 1
-n_of_dirs 2
-w sphd ridg 0.520936
-0.479064
-       0
-n_of_dirs 2
-w sphd ridg 0.520936
-0.479064
-       0
-w1 0.500085 w2 0.478266 w3 0.0216491 wiso 0.0636499
+step 1
 step 2
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.885836 w2 0.114164 w3 0 wiso 0.334231
+step 2
 step 3
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.942634 w2 0.0573663 w3 0 wiso 0.333309
+step 3
 step 4
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.986109 w2 0.0138912 w3 0 wiso 0.327618
+step 4
 step 5
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.994652 w2 0.00534797 w3 0 wiso 0.322866
+step 5
 step 6
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.997978 w2 0.0020216 w3 0 wiso 0.310492
+step 6
 step 7
-n_of_dirs 2
-w sphd ridg 0.5
-0.5
-  0
-n_of_dirs 2
-w sphd ridg 0.5
-0.5
-  0
-n_of_dirs 2
-w sphd ridg 0.5
-0.5
-  0
-n_of_dirs 2
-w sphd ridg 0.5
-0.5
-  0
-n_of_dirs 2
-w sphd ridg 0.542458
-0.457542
-       0
-n_of_dirs 2
-w sphd ridg 0.542458
-0.457542
-       0
-w1 0.554112 w2 0.445888 w3 1.74821e-19 wiso 0
+step 7
 step 8
-n_of_dirs 2
-w sphd ridg 0.498513
-0.501487
-       0
-n_of_dirs 2
-w sphd ridg 0.498513
-0.501487
-       0
-n_of_dirs 2
-w sphd ridg 0.498513
-0.501487
-       0
-w1 0.542349 w2 0.457651 w3 -3.1823e-19 wiso 0
+step 8
 step 9
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.947764 w2 0.0522361 w3 0 wiso 0.309228
+step 9
 step 10
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.975218 w2 0.0247818 w3 0 wiso 0.307506
+step 10
 step 11
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.999462 w2 0.000537593 w3 1.38778e-17 wiso 0.321679
+step 11
 step 12
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.996754 w2 0 w3 0.00324558 wiso 0.311162
 step 13
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.995203 w2 0.00479729 w3 0 wiso 0.268477
+step 12
 step 14
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.994576 w2 0.0054239 w3 0 wiso 0.26982
+step 13
 step 15
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 9.1744e-18 w3 2.77556e-17 wiso 0.298956
+step 14
 step 16
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.981987 w2 0.0126208 w3 0.00539241 wiso 0.265619
+step 15
 step 17
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 -2.77556e-17 w3 0 wiso 0.266312
+step 16
 step 18
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 -1.52656e-16 w3 0 wiso 0.275339
+step 17
 step 19
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.995799 w2 0.00320933 w3 0.00099146 wiso 0.280402
+step 18
 step 20
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.991492 w2 0.0034591 w3 0.00504908 wiso 0.290494
+step 19
 step 21
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 -1.80411e-16 w3 0 wiso 0.289231
+step 20
 step 22
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 0 w3 -6.93889e-18 wiso 0.308954
+step 21
 step 23
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 8.838e-19 w3 1.44849e-16 wiso 0.317999
+step 22
+step 23
 step 24
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 7.42678e-17 w3 -1.0842e-19 wiso 0.292536
+step 24
 step 25
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.99829 w2 0.00170957 w3 0 wiso 0.295799
+step 25
 step 26
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 0 w3 -4.26407e-20 wiso 0.299489
+step 26
 step 27
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 1 w2 0 w3 -1.02515e-19 wiso 0.301363
+step 27
 step 28
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.998405 w2 0.00159484 w3 0 wiso 0.305072
+step 28
 step 29
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.985011 w2 0.00642804 w3 0.00856109 wiso 0.308548
+step 29
 step 30
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.892473 w2 0.0360143 w3 0.0715125 wiso 0.290976
 step 31
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.86726 w2 0.0418441 w3 0.0908958 wiso 0.29482
+step 30
 step 32
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.87116 w2 0.0206406 w3 0.1082 wiso 0.319364
+step 31
 step 33
-n_of_dirs 3
-w sphd ridg 0.330013
-0.338346
-0.331641
-n_of_dirs 3
-w sphd ridg 0.330013
-0.338346
-0.331641
-n_of_dirs 3
-w sphd ridg 0.330013
-0.338346
-0.331641
-n_of_dirs 3
-w sphd ridg 0.332786
-0.332786
-0.334428
-n_of_dirs 3
-w sphd ridg 0.332786
-0.332786
-0.334428
-w1 0.425023 w2 0.329358 w3 0.245619 wiso 0.143637
+step 32
 step 34
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.811451 w2 0.0682072 w3 0.120342 wiso 0.347816
+step 33
 step 35
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.867573 w2 0.0381002 w3 0.0943268 wiso 0.360285
+step 34
 step 36
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.905303 w2 0.0274742 w3 0.0672224 wiso 0.363124
+step 35
 step 37
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.946392 w2 0.0177167 w3 0.0358913 wiso 0.353712
+step 36
+step 37
 step 38
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-n_of_dirs 1
-w sphd ridg 1
-0
-0
-w1 0.947038 w2 0.0233578 w3 0.0296038 wiso 0.340342
-swap 2 triggered
-angle m2 m1 3.44528
-angle dot1 2.75322
-angle dot2 0.792592
-angle dot3 56.2726
-old dir  0.621769
--0.367607
- 0.691569
-m1  0.588809
--0.401049
- 0.701758
-m2  0.626463
--0.354824
- 0.694005
-dot1 0.998846
-dot2 0.999904
-dot3 0.555242
-w1 0.947038 w2 0.0233578
-cov before det = 531744 diff norm 6.29057e-11
-cov after det =  -2.64978e+06 diff norm 6.29057e-11
 step 39
-A    0.100961    0.0345627  -0.00473203     -2.29615    -0.301784    0.0147351    -0.169908   -0.0286333  0.000272192   -0.0326749     -2.10357     -4.53794    -0.555688      6.42951   -0.0136708  0.000606789    -0.023808      1.28541     -1.44377     0.255311     0.128843   -0.0127396    0.0096986     0.003041  -0.00627007
-   0.0345627     0.125859   -0.0172328      -10.422     0.366101   -0.0251126     0.469904     0.034289  -0.00728392    0.0371683     -12.8586     -2.60175     -2.79152      3.26686    0.0260183   -0.0372977   -0.0379245    -0.199174      8.22246   -0.0114784     0.484268    0.0202644   -0.0156684  -0.00459598    0.0142246
- -0.00473203   -0.0172328    0.0979522     0.479631     0.684445   0.00343442     0.493441   -0.0397964   0.00302294   -0.0389506     0.403833     -3.57922     0.753155      -3.3756   -0.0150305    -0.016866   -0.0214396    -0.269055      7.32162   -0.0547502     0.322882   -0.0194972    0.0157502   0.00374704  -0.00956865
-    -2.29615      -10.422     0.479631      19.7601     0.223464    0.0311854    0.0233884   -0.0113145 -0.000102845 -0.000688729      0.58908    -0.782444     -1.71698      4.82891  -0.00180794    0.0401664    0.0130252      1.04267     0.249936      0.19505   0.00220251  0.000345711    0.0042546  -0.00460032  -0.00451425
-   -0.301784     0.366101     0.684445     0.223464      76.2956    0.0065473    -0.100042 -0.000117062  3.97497e-05 -9.89343e-06     0.189762     0.020577  -0.00545634    0.0803414 -6.70948e-05  0.000472221  0.000264594    0.0518776   0.00253533    0.0121861    0.0590014   6.2981e-06 -7.10755e-06  8.09449e-07 -0.000130503
-   0.0147351   -0.0251126   0.00343442    0.0311854    0.0065473      44.1573   0.00465193 -2.02687e-05 -4.68535e-06  1.46445e-05  -0.00881301  -0.00445474  -0.00361583  0.000471004 -1.80358e-05  0.000285284 -0.000134442   -0.0159185   -0.0338796  -0.00230065 -0.000751015 -2.42213e-06 -2.01829e-06  4.44042e-06 -1.29978e-06
-   -0.169908     0.469904     0.493441    0.0233884    -0.100042   0.00465193      44.0687 -0.000108101  5.15153e-05 -3.44556e-05    0.0286298    0.0259919    -0.014997    0.0115172 -1.39115e-05 -0.000520188   0.00122894    -0.050553    -0.214769   -0.0127592   -0.0348399   3.3784e-05  9.08708e-06  -4.2871e-05 -8.42313e-05
-  -0.0286333     0.034289   -0.0397964   -0.0113145 -0.000117062 -2.02687e-05 -0.000108101    0.0881659  -0.00827186    0.0659567     -2.58251      5.27687     0.306594      1.14513    0.0257227    -0.016876    0.0161462    -0.407743     -2.06588    -0.072648   -0.0408827    0.0317478   -0.0342064   0.00245868     0.025295
- 0.000272192  -0.00728392   0.00302294 -0.000102845  3.97497e-05 -4.68535e-06  5.15153e-05  -0.00827186    0.0220046   0.00307355     -6.16831      4.28946     -2.15227    -0.388381   0.00195038  -0.00304728    0.0346489    -0.755751     -1.34616    -0.131563       0.2145   0.00911227    0.0039873   -0.0130996  -0.00837704
-  -0.0326749    0.0371683   -0.0389506 -0.000688729 -9.89343e-06  1.46445e-05 -3.44556e-05    0.0659567   0.00307355    0.0422055     -6.16692      2.20665     -3.22593     -1.06679      0.01325    0.0183036    0.0397835      1.55763     -2.79574     0.304291    0.0180638    0.0193989  -0.00308694   -0.0163119   0.00250821
-    -2.10357     -12.8586     0.403833      0.58908     0.189762  -0.00881301    0.0286298     -2.58251     -6.16831     -6.16692       35.679     -2.29658      2.20803      3.22113  0.000589035   0.00744288   -0.0431187     -2.13798      2.10054     -0.42429    -0.468299  -0.00237461  6.73745e-05   0.00230724  -0.00555789
-    -4.53794     -2.60175     -3.57922    -0.782444     0.020577  -0.00445474    0.0259919      5.27687      4.28946      2.20665     -2.29658      17.6936    -0.729487     0.173438   0.00215776 -4.93156e-05    0.0131096    -0.553818    -0.431319    -0.103657    0.0603766   0.00297171 -0.000519316  -0.00245239  -0.00763323
-   -0.555688     -2.79152     0.753155     -1.71698  -0.00545634  -0.00361583    -0.014997     0.306594     -2.15227     -3.22593      2.20803    -0.729487      12.6595      1.12064  -0.00175824  -0.00623665   -0.0267719   -0.0719989      3.82286     -0.02571   -0.0589713  -0.00347188  0.000268249   0.00320363  0.000195853
-     6.42951      3.26686      -3.3756      4.82891    0.0803414  0.000471004    0.0115172      1.14513    -0.388381     -1.06679      3.22113     0.173438      1.12064      18.9954  -0.00265168    0.0488968   0.00108469  -0.00445394      3.65476  -0.00611261   -0.0193903   0.00159637  -0.00055929  -0.00103708  -0.00354414
-  -0.0136708    0.0260183   -0.0150305  -0.00180794 -6.70948e-05 -1.80358e-05 -1.39115e-05    0.0257227   0.00195038      0.01325  0.000589035   0.00215776  -0.00175824  -0.00265168    0.0877243   -0.0377318    0.0439397    -0.598202      2.12144    -0.125164   -0.0523357   -0.0015846   0.00104835  0.000536255  -0.00152568
- 0.000606789   -0.0372977    -0.016866    0.0401664  0.000472221  0.000285284 -0.000520188    -0.016876  -0.00304728    0.0183036   0.00744288 -4.93156e-05  -0.00623665    0.0488968   -0.0377318    0.0827751   -0.0143645      3.16321      2.29586     0.597165   -0.0405894   0.00279426  -7.8989e-05  -0.00271527  -0.00209234
-   -0.023808   -0.0379245   -0.0214396    0.0130252  0.000264594 -0.000134442   0.00122894    0.0161462    0.0346489    0.0397835   -0.0431187    0.0131096   -0.0267719   0.00108469    0.0439397   -0.0143645    0.0816322     -1.37195     -5.40247    -0.246056     0.606009   0.00770799  6.75392e-05  -0.00777553  -0.00220185
-     1.28541    -0.199174    -0.269055      1.04267    0.0518776   -0.0159185    -0.050553    -0.407743    -0.755751      1.55763     -2.13798    -0.553818   -0.0719989  -0.00445394    -0.598202      3.16321     -1.37195      75.7366    -0.304771     -0.29698   -0.0123806  -0.00019233 -2.27034e-05  0.000215033 -7.00128e-05
-    -1.44377      8.22246      7.32162     0.249936   0.00253533   -0.0338796    -0.214769     -2.06588     -1.34616     -2.79574      2.10054    -0.431319      3.82286      3.65476      2.12144      2.29586     -5.40247    -0.304771      49.7072    -0.059682    -0.333874  -0.00193648  0.000414823   0.00152165 -0.000397935
-    0.255311   -0.0114784   -0.0547502      0.19505    0.0121861  -0.00230065   -0.0127592    -0.072648    -0.131563     0.304291     -0.42429    -0.103657     -0.02571  -0.00611261    -0.125164     0.597165    -0.246056     -0.29698    -0.059682      44.1063   -0.0117922 -5.68897e-05  -9.3883e-06   6.6278e-05 -1.92613e-05
-    0.128843     0.484268     0.322882   0.00220251    0.0590014 -0.000751015   -0.0348399   -0.0408827       0.2145    0.0180638    -0.468299    0.0603766   -0.0589713   -0.0193903   -0.0523357   -0.0405894     0.606009   -0.0123806    -0.333874   -0.0117922      44.0413 -6.37256e-05 -4.18327e-05  0.000105558 -5.91093e-05
-  -0.0127396    0.0202644   -0.0194972  0.000345711   6.2981e-06 -2.42213e-06   3.3784e-05    0.0317478   0.00911227    0.0193989  -0.00237461   0.00297171  -0.00347188   0.00159637   -0.0015846   0.00279426   0.00770799  -0.00019233  -0.00193648 -5.68897e-05 -6.37256e-05    0.0380209  -0.00261386    0.0171956   -0.0726569
-   0.0096986   -0.0156684    0.0157502    0.0042546 -7.10755e-06 -2.01829e-06  9.08708e-06   -0.0342064    0.0039873  -0.00308694  6.73745e-05 -0.000519316  0.000268249  -0.00055929   0.00104835  -7.8989e-05  6.75392e-05 -2.27034e-05  0.000414823  -9.3883e-06 -4.18327e-05  -0.00261386    0.0557434   -0.0173982    0.0438267
-    0.003041  -0.00459598   0.00374704  -0.00460032  8.09449e-07  4.44042e-06  -4.2871e-05   0.00245868   -0.0130996   -0.0163119   0.00230724  -0.00245239   0.00320363  -0.00103708  0.000536255  -0.00271527  -0.00777553  0.000215033   0.00152165   6.6278e-05  0.000105558    0.0171956   -0.0173982    0.0419834    0.0510059
- -0.00627007    0.0142246  -0.00956865  -0.00451425 -0.000130503 -1.29978e-06 -8.42313e-05     0.025295  -0.00837704   0.00250821  -0.00555789  -0.00763323  0.000195853  -0.00354414  -0.00152568  -0.00209234  -0.00220185 -7.00128e-05 -0.000397935 -1.92613e-05 -5.91093e-05   -0.0726569    0.0438267    0.0510059   0.00233932Output file name /home/rinat/Desktop/ukftests/seeds_tc.vtk
+step 38
+step 40
+step 39
+step 41
+step 40
+step 42
+step 41
+step 43
+step 44
+step 42
+step 45
+step 43
+step 46
+step 44
+step 47
+step 45
+step 48
+step 46
+step 49
+step 47
+step 50
+step 51
+step 48
+step 49
+step 52
+step 53
+step 50
+step 54
+step 51
+step 55
+step 52
+step 56
+step 53
+step 57
+step 58
+step 54
+step 59
+step 55
+step 60
+step 56
+step 61
+step 62
+step 57
+step 63
+step 58
+step 64
+step 59
+step 65
+step 60
+step 66
+step 61
+step 67
+step 62
+step 68
+step 63
+step 69
+step 70
+step 64
+step step 65
+71
+step 72
+step 66
+step 73
+step 67
+step 74
+step 75
+step 68
+step 76
+step 69
+step 77
+step 70
+step 78
+step 71
+step 79
+step 72
+step 80
+step 73
+step 81
+step 74
+step 82
+step 75
+step 83
+step 76
+step 77
+step 84
+step 78
+step 85
+step 79
+step 80
+step 86
+step 81
+step 87
+step 82
+step 88
+step 83
+step 89
+step 90
+step 84
+step 91
+step 85
+step 92
+step 86
+step 93
+step 87
+step 94
+step 88
+step 95
+step 89
+step 96
+step 90
+step 97
+step 91
+step 98
+step 92
+step 99
+step 93
+step 94
+step 100
+step 95
+step 96
+step 97
+step 98
+step 99
+step 100
+nmse_avg=0
+Output file name /home/rinat/Desktop/ukftests/seeds_tc.vtk
 CPU Runtime was 4 sec.
