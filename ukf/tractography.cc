@@ -700,9 +700,9 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   for (size_t i = 0; i < starting_points.size(); ++i)
   {
     const ukfVectorType &param = starting_params[i];
-    cout << "i " << i << endl;
-  cout << "start dir " << param[0] << " " << param[1] << " " << param[2] << endl;
-  cout << "start dir inv" << -param[0] << " " << -param[1] << " " << -param[2] << endl;
+  //   cout << "i " << i << endl;
+  // cout << "start dir " << param[0] << " " << param[1] << " " << param[2] << endl;
+  // cout << "start dir inv" << -param[0] << " " << -param[1] << " " << -param[2] << endl;
 
     //assert(param.size() == 9);
 
@@ -1536,7 +1536,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   fixed(10) = state(22);
   fixed(11) = state(23);
 
-  std::cout << "state before\n " << state << std::endl;
+  // std::cout << "state before\n " << state << std::endl;
 
   ukfVectorType state_temp;
   state_temp.resize(13);
@@ -1576,7 +1576,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   optimizer->SetMaximumNumberOfEvaluations(500);
   optimizer->SetMaximumNumberOfCorrections(10);     // The number of corrections to approximate the inverse hessian matrix
   optimizer->SetCostFunctionConvergenceFactor(1e1); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
-  optimizer->SetTrace(true);                        // Print debug info
+  optimizer->SetTrace(false);                        // Print debug info
 
   // Set bounds
   OptimizerType::BoundSelectionType boundSelect(cost->GetNumberOfParameters());
@@ -1660,8 +1660,8 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
 
   state(24) = state_temp(12);
 
-  std::cout << "state after \n"
-            << state << std::endl;
+  // std::cout << "state after \n"
+  //           << state << std::endl;
 }
 
 void Tractography::InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted)

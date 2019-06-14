@@ -20,15 +20,14 @@ seeds_path="/home/rinat/Desktop/ukftests/Segmentation-label.nrrd"
 # OUTPUT FIBER
 output_path='/home/rinat/Desktop/ukftests/seeds_tc.vtk'
 
-# original numT = 2, --diffusionPropagator, --minRTOP 20
+# --seedsFile $seeds_path \
 eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --tracts $output_path \
- --seedsFile $seeds_path \
  --seedsPerVoxel 1 \
  --diffusionPropagator \
- --minRTOP 20 \
+ --minRTOP 50 \
  --numTensor 3 | tee $logFile
  end=`date +%s`
 
