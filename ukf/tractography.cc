@@ -69,6 +69,7 @@ Tractography::Tractography(UKFSettings s) :
                                             _record_kappa(s.record_kappa),
                                             _record_Viso(s.record_Viso),
                                             _record_tensors(s.record_tensors),
+                                            _record_weights(s.record_weights),
                                             _transform_position(s.transform_position),
                                             _store_glyphs(s.store_glyphs),
                                             _branches_only(s.branches_only),
@@ -284,6 +285,12 @@ void Tractography::UpdateFilterModelType()
   if (_record_rtop && !_diffusion_propagator)
   {
     std::cout << "recordRTOP cannot be used with any other models than the diffusionPropagator" << std::endl;
+    throw;
+  }
+
+  if (_record_weights && !_diffusion_propagator)
+  {
+    std::cout << "record_weights parameterscan only be used with Diffusion Propagator Biexponential model\n";
     throw;
   }
 
@@ -700,9 +707,9 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   for (size_t i = 0; i < starting_points.size(); ++i)
   {
     const ukfVectorType &param = starting_params[i];
-  //   cout << "i " << i << endl;
-  // cout << "start dir " << param[0] << " " << param[1] << " " << param[2] << endl;
-  // cout << "start dir inv" << -param[0] << " " << -param[1] << " " << -param[2] << endl;
+    //   cout << "i " << i << endl;
+    // cout << "start dir " << param[0] << " " << param[1] << " " << param[2] << endl;
+    // cout << "start dir inv" << -param[0] << " " << -param[1] << " " << -param[2] << endl;
 
     //assert(param.size() == 9);
 
@@ -1422,34 +1429,69 @@ itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction:
 
   // Convert the parameter to the ukfMtarixType
   ukfMatrixType localState(this->GetNumberOfParameters() + this->GetNumberOfFixed(), 1);
+  if (this->_phase == 1)
+  {
+    localState(0, 0) = _fixed_params(0);
+    localState(1, 0) = _fixed_params(1);
+    localState(2, 0) = _fixed_params(2);
+    localState(7, 0) = _fixed_params(3);
+    localState(8, 0) = _fixed_params(4);
+    localState(9, 0) = _fixed_params(5);
+    localState(14, 0) = _fixed_params(6);
+    localState(15, 0) = _fixed_params(7);
+    localState(16, 0) = _fixed_params(8);
+    localState(21, 0) = _fixed_params(9);
+    localState(22, 0) = _fixed_params(10);
+    localState(23, 0) = _fixed_params(11);
 
-  localState(0, 0) = _fixed_params(0);
-  localState(1, 0) = _fixed_params(1);
-  localState(2, 0) = _fixed_params(2);
-  localState(7, 0) = _fixed_params(3);
-  localState(8, 0) = _fixed_params(4);
-  localState(9, 0) = _fixed_params(5);
-  localState(14, 0) = _fixed_params(6);
-  localState(15, 0) = _fixed_params(7);
-  localState(16, 0) = _fixed_params(8);
+    localState(3, 0) = parameters[0];
+    localState(4, 0) = parameters[1];
+    localState(5, 0) = parameters[2];
+    localState(6, 0) = parameters[3];
+    localState(10, 0) = parameters[4];
+    localState(11, 0) = parameters[5];
+    localState(12, 0) = parameters[6];
+    localState(13, 0) = parameters[7];
+    localState(17, 0) = parameters[8];
+    localState(18, 0) = parameters[9];
+    localState(19, 0) = parameters[10];
+    localState(20, 0) = parameters[11];
+    localState(24, 0) = parameters[12];
+  }
+  else if (this->_phase == 2)
+  {
+    localState(0, 0) = _fixed_params(0);
+    localState(1, 0) = _fixed_params(1);
+    localState(2, 0) = _fixed_params(2);
+    localState(3, 0) = _fixed_params(3);
+    localState(4, 0) = _fixed_params(4);
+    localState(5, 0) = _fixed_params(5);
+    localState(6, 0) = _fixed_params(6);
+    localState(7, 0) = _fixed_params(7);
+    localState(8, 0) = _fixed_params(8);
+    localState(9, 0) = _fixed_params(9);
+    localState(10, 0) = _fixed_params(10);
+    localState(11, 0) = _fixed_params(11);
+    localState(12, 0) = _fixed_params(12);
+    localState(13, 0) = _fixed_params(13);
+    localState(14, 0) = _fixed_params(14);
+    localState(15, 0) = _fixed_params(15);
+    localState(16, 0) = _fixed_params(16);
+    localState(17, 0) = _fixed_params(17);
+    localState(18, 0) = _fixed_params(18);
+    localState(19, 0) = _fixed_params(19);
+    localState(20, 0) = _fixed_params(20);
+    localState(24, 0) = _fixed_params(21);
 
-  localState(21, 0) = _fixed_params(9);
-  localState(22, 0) = _fixed_params(10);
-  localState(23, 0) = _fixed_params(11);
-
-  localState(3, 0) = parameters[0];
-  localState(4, 0) = parameters[1];
-  localState(5, 0) = parameters[2];
-  localState(6, 0) = parameters[3];
-  localState(10, 0) = parameters[4];
-  localState(11, 0) = parameters[5];
-  localState(12, 0) = parameters[6];
-  localState(13, 0) = parameters[7];
-  localState(17, 0) = parameters[8];
-  localState(18, 0) = parameters[9];
-  localState(19, 0) = parameters[10];
-  localState(20, 0) = parameters[11];
-  localState(24, 0) = parameters[12];
+    localState(21, 0) = parameters[0];
+    localState(22, 0) = parameters[1];
+    localState(23, 0) = parameters[2];
+  }
+  else
+  {
+    std::cout << "You have not specified the phase!";
+    throw;
+  }
 
   // Estimate the signal
   ukfMatrixType estimatedSignal(this->GetNumberOfValues(), 1);
@@ -1561,6 +1603,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   cost->SetSignalValues(signal);
   cost->SetModel(model);
   cost->SetFixed(fixed);
+  cost->SetPhase(1);
 
   optimizer->SetCostFunction(cost);
 
@@ -1576,7 +1619,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   optimizer->SetMaximumNumberOfEvaluations(500);
   optimizer->SetMaximumNumberOfCorrections(10);     // The number of corrections to approximate the inverse hessian matrix
   optimizer->SetCostFunctionConvergenceFactor(1e1); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
-  optimizer->SetTrace(false);                        // Print debug info
+  optimizer->SetTrace(false);                       // Print debug info
 
   // Set bounds
   OptimizerType::BoundSelectionType boundSelect(cost->GetNumberOfParameters());
@@ -1630,7 +1673,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   for (int it = 0; it < state_temp.size(); ++it)
     state_temp[it] = p[it];
 
-  // Fill back state tensor to return it the callee
+  // Fill back the state tensor to return it the callee
   state(0) = fixed(0);
   state(1) = fixed(1);
   state(2) = fixed(2);
@@ -1657,8 +1700,124 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   state(18) = state_temp(9);
   state(19) = state_temp(10);
   state(20) = state_temp(11);
-
   state(24) = state_temp(12);
+
+  // Second phase of optimization (optional)
+  // In this phase only w1, w2, w3 are optimizing
+
+  CostType::Pointer cost2 = CostType::New();
+  OptimizerType::Pointer optimizer2 = OptimizerType::New();
+
+  // Fill in array of parameters we are not intented to optimized
+  // We still need to pass this parameters to optimizer because we need to compute
+  // estimated signal during optimization and it requireds full state
+  fixed.resize(22);
+  fixed(0) = state(0);
+  fixed(1) = state(1);
+  fixed(2) = state(2);
+  fixed(3) = state(3);
+  fixed(4) = state(4);
+  fixed(5) = state(5);
+  fixed(6) = state(6);
+  fixed(7) = state(7);
+  fixed(8) = state(8);
+  fixed(9) = state(9);
+  fixed(10) = state(10);
+  fixed(11) = state(11);
+  fixed(12) = state(12);
+  fixed(13) = state(13);
+  fixed(14) = state(14);
+  fixed(15) = state(15);
+  fixed(16) = state(16);
+  fixed(17) = state(17);
+  fixed(18) = state(18);
+  fixed(19) = state(19);
+  fixed(20) = state(20);
+  fixed(21) = state(24);
+
+  // std::cout << "state before\n " << state << std::endl;
+
+  state_temp.resize(3);
+  state_temp(0) = state(21);
+  state_temp(1) = state(22);
+  state_temp(2) = state(23);
+
+  cost2->SetNumberOfParameters(state_temp.size());
+  cost2->SetNumberOfFixed(fixed.size());
+  cost2->SetNumberOfValues(signal.size());
+  cost2->SetSignalValues(signal);
+  cost2->SetModel(model);
+  cost2->SetFixed(fixed);
+  cost2->SetPhase(2);
+
+  optimizer2->SetCostFunction(cost2);
+
+  CostType::ParametersType p2(cost2->GetNumberOfParameters());
+
+  // Fill p
+  for (int it = 0; it < state_temp.size(); ++it)
+    p2[it] = state_temp[it];
+
+  optimizer2->SetInitialPosition(p2);
+  optimizer2->SetProjectedGradientTolerance(1e-5);
+  optimizer2->SetMaximumNumberOfIterations(500);
+  optimizer2->SetMaximumNumberOfEvaluations(500);
+  optimizer2->SetMaximumNumberOfCorrections(5);      // The number of corrections to approximate the inverse hessian matrix
+  optimizer2->SetCostFunctionConvergenceFactor(1e2); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
+  optimizer2->SetTrace(false);                       // Print debug info
+
+  // Set bounds
+  OptimizerType::BoundSelectionType boundSelect2(cost2->GetNumberOfParameters());
+  OptimizerType::BoundValueType upperBound2(cost2->GetNumberOfParameters());
+  OptimizerType::BoundValueType lowerBound2(cost2->GetNumberOfParameters());
+
+  boundSelect2.Fill(2); // BOTHBOUNDED = 2
+  lowerBound2.Fill(0.0);
+  upperBound2.Fill(1.0);
+
+  // Lower bound
+  lowerBound2[0] = lowerBound2[1] = lowerBound2[2] = 0.0;
+
+  // Upper bound
+  upperBound2[0] = upperBound2[1] = upperBound2[2] = 1.0;
+
+  optimizer2->SetBoundSelection(boundSelect2);
+  optimizer2->SetUpperBound(upperBound2);
+  optimizer2->SetLowerBound(lowerBound2);
+  optimizer2->StartOptimization();
+
+  p2 = optimizer2->GetCurrentPosition();
+  // Write back the state
+  for (int it = 0; it < state_temp.size(); ++it)
+    state_temp[it] = p2[it];
+
+  // Fill back the state tensor to return it the callee
+  state(0) = fixed(0);
+  state(1) = fixed(1);
+  state(2) = fixed(2);
+  state(3) = fixed(3);
+  state(4) = fixed(4);
+  state(5) = fixed(5);
+  state(6) = fixed(6);
+  state(7) = fixed(7);
+  state(8) = fixed(8);
+  state(9) = fixed(9);
+  state(10) = fixed(10);
+  state(11) = fixed(11);
+  state(12) = fixed(12);
+  state(13) = fixed(13);
+  state(14) = fixed(14);
+  state(15) = fixed(15);
+  state(16) = fixed(16);
+  state(17) = fixed(17);
+  state(18) = fixed(18);
+  state(19) = fixed(19);
+  state(20) = fixed(20);
+  state(24) = fixed(21);
+
+  state(21) = state_temp(0);
+  state(22) = state_temp(1);
+  state(23) = state_temp(2);
 
   // std::cout << "state after \n"
   //           << state << std::endl;
@@ -1922,7 +2081,7 @@ void Tractography::Follow3T(const int thread_id,
     ++stepnr;
 
     Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, trace, trace2);
-
+    cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
     // Check if we should abort following this fiber. We abort if we reach the
     // CSF, if FA or GA get too small, if the curvature get's too high or if
     // the fiber gets too long.
@@ -1946,8 +2105,7 @@ void Tractography::Follow3T(const int thread_id,
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
     //stepnr > _max_length // Stop if the fiber is too long - Do we need this???
-    if (!is_brain || in_csf
-        || is_curving || dNormMSE_too_high || negative_free_water)
+    if (!is_brain || in_csf || is_curving || dNormMSE_too_high || negative_free_water)
     {
       break;
     }
@@ -3039,14 +3197,23 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
     {
       fiber.fa2.push_back(fa2);
     }
-  }
-
-  if (_diffusion_propagator)
-  {
     if (_num_tensors == 3)
     {
       fiber.fa3.push_back(fa3);
     }
+  }
+
+  if (_record_weights)
+  {
+    ukfPrecisionType w1 = state[21];
+    ukfPrecisionType w2 = state[22];
+    ukfPrecisionType w3 = state[23];
+    ukfPrecisionType wiso = state[24];
+
+    fiber.w1.push_back(w1);
+    fiber.w2.push_back(w2);
+    fiber.w3.push_back(w3);
+    fiber.free_water.push_back(wiso);
   }
 
   if (_record_Viso)
@@ -3183,6 +3350,12 @@ void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
   if (_record_free_water || _record_Viso)
   {
     fiber.free_water.reserve(fiber_size);
+  }
+  if (_record_weights)
+  {
+    fiber.w1.reserve(fiber_size);
+    fiber.w2.reserve(fiber_size);
+    fiber.w3.reserve(fiber_size);
   }
   if (_record_cov)
   {

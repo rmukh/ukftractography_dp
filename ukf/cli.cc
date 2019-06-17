@@ -184,6 +184,15 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     }
   }
 
+  if (!diffusionPropagator)
+  {
+    if (recordWeights)
+    {
+      std::cout << "Can use recordWeights only with diffusion propagator biexponential model";
+      return EXIT_FAILURE;
+    }
+  }
+
   if (l_Qm == 0.0)
   {
     if (noddi)
@@ -440,6 +449,7 @@ UKFBASELIB_EXPORTS int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.record_free_water = recordFreeWater;
     s.record_tensors = recordTensors;
     s.record_Vic = recordVic;
+    s.record_weights = recordWeights;
     s.record_kappa = recordKappa;
     s.record_Viso = recordViso;
     s.record_rtop = recordRTOP;

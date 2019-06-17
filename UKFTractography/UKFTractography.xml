@@ -394,6 +394,14 @@
       <default>false</default>
     </boolean>
 
+    <boolean>
+      <name>recordWeights</name>
+      <longflag>recordWeights</longflag>
+      <label>Record w1, w2, w3, wiso</label>
+      <description>Record each tensor weight and free water weight</description>
+      <default>false</default>
+    </boolean>
+
     <double>
       <name>minRTOP</name>
       <longflag>minRTOP</longflag>

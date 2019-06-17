@@ -22,7 +22,6 @@
 */
 struct UKFFiber
 {
-
   /** vector of 3D points defining the fiber path */
   stdVec_t position;
   /** FA of tensor 1 */
@@ -45,6 +44,10 @@ struct UKFFiber
   std::vector<ukfPrecisionType> trace;
   /** Trace of tensor 2 */
   std::vector<ukfPrecisionType> trace2;
+  /** Weights (diffussion propagator, bi-exponential) */
+  std::vector<ukfPrecisionType> w1;
+  std::vector<ukfPrecisionType> w2;
+  std::vector<ukfPrecisionType> w3;
 };
 
 /**

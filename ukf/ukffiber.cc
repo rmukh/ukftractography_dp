@@ -25,6 +25,9 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
   const bool record_free_water = !raw_primary[0].free_water.empty();
   const bool record_normMSE = !raw_primary[0].normMSE.empty();
   const bool record_cov = !raw_primary[0].covariance.empty();
+  const bool record_w1 = !raw_primary[0].w1.empty();
+  const bool record_w2 = !raw_primary[0].w2.empty();
+  const bool record_w3 = !raw_primary[0].w3.empty();
 
   const int num_primary_fibers = branches_only ? 0 : num_half_fibers / 2;
   const int num_branches = static_cast<int>(raw_branch.size());
@@ -121,6 +124,18 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
     {
       fibers[counter].free_water.resize(num_points_on_primary_fiber[i]);
     }
+    if (record_w1)
+    {
+      fibers[counter].w1.resize(num_points_on_primary_fiber[i]);
+    }
+    if (record_w2)
+    {
+      fibers[counter].w2.resize(num_points_on_primary_fiber[i]);
+    }
+    if (record_w3)
+    {
+      fibers[counter].w3.resize(num_points_on_primary_fiber[i]);
+    }
     if (record_normMSE)
     {
       fibers[counter].normMSE.resize(num_points_on_primary_fiber[i]);
@@ -161,6 +176,18 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       {
         fibers[counter].free_water[k] = first_half.free_water[j];
       }
+      if (record_w1)
+      {
+        fibers[counter].w1[k] = first_half.w1[j];
+      }
+      if (record_w2)
+      {
+        fibers[counter].w2[k] = first_half.w2[j];
+      }
+      if (record_w3)
+      {
+        fibers[counter].w3[k] = first_half.w3[j];
+      }
       if (record_normMSE)
       {
         fibers[counter].normMSE[k] = first_half.normMSE[j];
@@ -199,6 +226,18 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       if (record_free_water)
       {
         fibers[counter].free_water[k] = second_half.free_water[j];
+      }
+      if (record_w1)
+      {
+        fibers[counter].w1[k] = second_half.w1[j];
+      }
+      if (record_w2)
+      {
+        fibers[counter].w2[k] = second_half.w2[j];
+      }
+      if (record_w3)
+      {
+        fibers[counter].w3[k] = second_half.w3[j];
       }
       if (record_normMSE)
       {
@@ -277,6 +316,18 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
     {
       fibers[counter].free_water.resize(num_points_on_branch[i]);
     }
+    if (record_w1)
+    {
+      fibers[counter].w1.resize(num_points_on_branch[i]);
+    }
+    if (record_w2)
+    {
+      fibers[counter].w2.resize(num_points_on_branch[i]);
+    }
+    if (record_w3)
+    {
+      fibers[counter].w3.resize(num_points_on_branch[i]);
+    }
     if (record_normMSE)
     {
       fibers[counter].normMSE.resize(num_points_on_branch[i]);
@@ -316,6 +367,18 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       if (record_free_water)
       {
         fibers[counter].free_water[k] = first_half.free_water[j];
+      }
+      if (record_w1)
+      {
+        fibers[counter].w1[k] = first_half.w1[j];
+      }
+      if (record_w2)
+      {
+        fibers[counter].w2[k] = first_half.w2[j];
+      }
+      if (record_w3)
+      {
+        fibers[counter].w3[k] = first_half.w3[j];
       }
       if (record_normMSE)
       {
@@ -357,6 +420,18 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       {
         fibers[counter].free_water[k] = second_half.free_water[j];
       }
+      if (record_w1)
+      {
+        fibers[counter].w1[k] = second_half.w1[j];
+      }
+      if (record_w2)
+      {
+        fibers[counter].w2[k] = second_half.w2[j];
+      }
+      if (record_w3)
+      {
+        fibers[counter].w3[k] = second_half.w3[j];
+      }
       if (record_normMSE)
       {
         fibers[counter].normMSE[k] = second_half.normMSE[j];
@@ -395,6 +470,18 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       if (record_free_water)
       {
         fibers[counter].free_water[k] = branch.free_water[j];
+      }
+      if (record_w1)
+      {
+        fibers[counter].w1[k] = branch.w1[j];
+      }
+      if (record_w2)
+      {
+        fibers[counter].w2[k] = branch.w2[j];
+      }
+      if (record_w3)
+      {
+        fibers[counter].w3[k] = branch.w3[j];
       }
       if (record_normMSE)
       {

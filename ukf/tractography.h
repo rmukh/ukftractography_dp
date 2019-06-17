@@ -45,6 +45,7 @@ struct UKFSettings
   bool record_Vic;
   bool record_kappa;
   bool record_Viso;
+  bool record_weights;
   bool transform_position;
   bool store_glyphs;
   bool branches_only;
@@ -324,6 +325,7 @@ private:
   /**
    * Wheather to transform the points back to RAS-space before writing the VTK or not.
   */
+  const bool _record_weights;
   const bool _transform_position;
   /** Attach the glyphs to the VTK file */
   const bool _store_glyphs;
@@ -465,6 +467,11 @@ public:
     }
   }
 
+  void SetPhase(unsigned int phase)
+  {
+    _phase = phase;
+  }
+
   /** Compute the relative error between the signal estimate and the signal data */
   void computeError(ukfMatrixType &signal_estimate, const ukfVectorType &signal, ukfPrecisionType &err) const
   {
@@ -509,6 +516,7 @@ private:
   unsigned int _NumberOfParameters;
   unsigned int _NumberOfFixed;
   unsigned int _NumberOfValues;
+  unsigned int _phase;
   ukfVectorType _signal;
   FilterModel *_model;
   ukfVectorType _fixed_params;
