@@ -992,9 +992,9 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       // Estimate the initial state
       // InitLoopUKF(state, p, signal_values[i], dNormMSE);
-      std::cout << "Before nonlinear " << state.transpose() << std::endl;
+      //std::cout << "Before nonlinear " << state.transpose() << std::endl;
       NonLinearLeastSquareOptimization(state, signal_values[i], _model);
-      std::cout << "After nonlinear " << state.transpose() << std::endl;
+      //std::cout << "After nonlinear " << state.transpose() << std::endl;
       // Output of the filter
       tmp_info_state = ConvertVector<State, stdVecState>(state);
 
@@ -1764,7 +1764,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   optimizer2->SetProjectedGradientTolerance(1e-12);
   optimizer2->SetMaximumNumberOfIterations(500);
   optimizer2->SetMaximumNumberOfEvaluations(500);
-  optimizer2->SetMaximumNumberOfCorrections(10);      // The number of corrections to approximate the inverse hessian matrix
+  optimizer2->SetMaximumNumberOfCorrections(10);     // The number of corrections to approximate the inverse hessian matrix
   optimizer2->SetCostFunctionConvergenceFactor(1e1); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
   optimizer2->SetTrace(false);                       // Print debug info
 
@@ -2061,7 +2061,7 @@ void Tractography::Follow3T(const int thread_id,
   ukfPrecisionType trace = fiberStartSeed.trace;
   ukfPrecisionType trace2 = fiberStartSeed.trace2;
 
-  std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
+  //std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
 
   //  Reserving fiber array memory so as to avoid resizing at every step
   FiberReserve(fiber, fiber_size);
@@ -2079,11 +2079,12 @@ void Tractography::Follow3T(const int thread_id,
   int stepnr = 0;
   while (true)
   {
-    std::cout << "step " << stepnr << std::endl;
+    //std::cout << "step " << stepnr << std::endl;
     ++stepnr;
 
-    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, trace, trace2);
-    cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
+    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, fa, trace, trace2);
+
+    //cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
     // Check if we should abort following this fiber. We abort if we reach the
     // CSF, if FA or GA get too small, if the curvature get's too high or if
     // the fiber gets too long.
@@ -2098,8 +2099,10 @@ void Tractography::Follow3T(const int thread_id,
 
     bool dNormMSE_too_high = false;
 
-    ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
-    in_csf = rtopSignal < _rtop_min;
+    //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
+
+    //in_csf = rtopSignal < _rtop_min;
+    in_csf = fa < 15000;
     dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
@@ -2543,6 +2546,7 @@ void Tractography::Step3T(const int thread_id,
                           State &state,
                           ukfMatrixType &covariance,
                           ukfPrecisionType &dNormMSE,
+                          ukfPrecisionType &fa,
                           ukfPrecisionType &trace,
                           ukfPrecisionType &trace2)
 {
@@ -2576,6 +2580,7 @@ void Tractography::Step3T(const int thread_id,
   computeRTOPfromState(local_state, rtopModel, rtop1, rtop2, rtop3);
   computeRTOPfromSignal(rtopSignal, signal);
 
+  fa = rtop1;
   trace = rtopModel;
   trace2 = rtopSignal;
 

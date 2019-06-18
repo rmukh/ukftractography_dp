@@ -223,7 +223,7 @@ private:
 
   /** One step for ridgelets bi-exp case */
   void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &m2, vec3_t &m3, State &state, ukfMatrixType &covariance,
-              ukfPrecisionType &dNormMSE, ukfPrecisionType &trace, ukfPrecisionType &trace2);
+              ukfPrecisionType &dNormMSE, ukfPrecisionType &fa, ukfPrecisionType &trace, ukfPrecisionType &trace2);
 
   /** One step along the fiber for the 2-tensor case. */
   void Step2T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, ukfPrecisionType &fa, ukfPrecisionType &fa2,

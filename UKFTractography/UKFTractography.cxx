@@ -39,7 +39,7 @@ extern "C"
 #if ITK_VERSION_MAJOR >= 5
     const int actualNumThreadsUsed = itk::MultiThreaderBase::GetGlobalDefaultNumberOfThreads();
 #else
-    const int actualNumThreadsUsed = 1; //itk::MultiThreader::GetGlobalDefaultNumberOfThreads();//1; //itk::MultiThreader::GetGlobalDefaultNumberOfThreads();
+    const int actualNumThreadsUsed = itk::MultiThreader::GetGlobalDefaultNumberOfThreads();//1; //itk::MultiThreader::GetGlobalDefaultNumberOfThreads();
 #endif
 
     ukf_settings.num_threads = actualNumThreadsUsed;

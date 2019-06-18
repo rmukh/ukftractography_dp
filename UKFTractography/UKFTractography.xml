@@ -89,8 +89,8 @@
       <default>0.18</default>
       <constraints>
         <minimum>0</minimum>
-        <maximum> 1</maximum>
-        <step> 0.01</step>
+        <maximum>1</maximum>
+        <step>0.01</step>
       </constraints>
     </double>
 

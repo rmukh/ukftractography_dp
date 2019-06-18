@@ -257,6 +257,13 @@ inline ukfPrecisionType BhattacharyyaCoeff(vec3_t &x_sr, vec3_t &x_pred, const u
   return std::exp(-0.125 * diff.transpose() * cov.inverse() * diff);
 }
 
+inline ukfPrecisionType BhattacharyyaCoeff(vec3_t &x_sr, vec3_t &x_pred, const ukfMatrixType &cov, const ukfMatrixType &cov2)
+{
+  vec3_t diff = x_sr - x_pred;
+  ukfMatrixType cov_total = (cov + cov2) / 2.0;
+  return std::exp(-( (0.125 * diff.transpose() * cov_total.inverse() * diff) + 0.5 * std::log(cov_total.determinant() / std::sqrt(cov.determinant() * cov2.determinant()))));
+}
+
 inline ukfPrecisionType AngularSimilarity(vec3_t &x_sr, vec3_t &x_pred)
 {
   ukfPrecisionType dot = x_sr.dot(x_pred);

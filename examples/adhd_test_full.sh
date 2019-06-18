@@ -14,11 +14,8 @@ dwi_path="/home/rinat/Desktop/ukftests/dwi-Aligned-Ed-Bet-Merged-unring-Epi.nhdr
 # MASK
 mask_path="/home/rinat/Desktop/ukftests/epi_corrected_tensormask.nrrd"
 
-# SEEDS
-seeds_path="/home/rinat/Desktop/ukftests/Segmentation-label_363x.nrrd"
-
 # OUTPUT FIBER
-output_path='/home/rinat/Desktop/ukftests/seeds_tc_363x_test.vtk'
+output_path='/home/rinat/Desktop/ukftests/seeds_tc_full.vtk'
 
 # --seedsFile $seeds_path \
 eval $BINARY \
@@ -30,7 +27,7 @@ eval $BINARY \
  --minRTOP 20 \
  --recordNMSE \
  --recordWeights \
- --seedsFile $seeds_path \
+ --seedingThreshold 0.3 \
  --numTensor 3 | tee $logFile
  end=`date +%s`
 

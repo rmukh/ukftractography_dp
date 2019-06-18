@@ -187,13 +187,22 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
             max_odf(2) = max_odf(2) / denom;
         }
 
-        x1 = AngularSimilarity(o1, m1);
+        x1 = BhattacharyyaCoeff(o1, m1, covMatrix.block(0, 0, 3, 3));
+        w1 = BhattacharyyaCoeff(max_odf(0), X(21, i), covMatrix(21, 21));
         x2 = 0;
         x3 = 0;
+        w2 = 0;
+        w3 = 0;
         if (n_of_dirs > 1)
-            x2 = AngularSimilarity(o2, m2);
+        {
+            x2 = BhattacharyyaCoeff(o2, m2, covMatrix.block(7, 7, 3, 3));
+            w2 = BhattacharyyaCoeff(max_odf(1), X(22, i), covMatrix(22, 22));
+        }
         if (n_of_dirs > 2)
-            x3 = AngularSimilarity(o3, m3);
+        {
+            x3 = BhattacharyyaCoeff(o3, m3, covMatrix.block(14, 14, 3, 3));
+            w3 = BhattacharyyaCoeff(max_odf(2), X(23, i), covMatrix(23, 23));
+        }
 
         // Average of direction from state and ridgelets for 1st tensor
         X(0, i) = (1.0 - x1) * m1(0) + x1 * o1(0);
@@ -210,14 +219,62 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
         X(15, i) = (1.0 - x3) * m3(1) + x3 * o3(1);
         X(16, i) = (1.0 - x3) * m3(2) + x3 * o3(2);
 
-        // Average weights
-        w1 = BhattacharyyaCoeff(max_odf(0), X(21, i), covMatrix(21, 21));
-        w2 = BhattacharyyaCoeff(max_odf(1), X(22, i), covMatrix(22, 22));
-        w3 = BhattacharyyaCoeff(max_odf(2), X(23, i), covMatrix(23, 23));
+        // vec3_t test1;
+        // test1(0) = 0.05;
+        // test1(1) = 0.05;
+        // test1(2) = 0.05;
+        // vec3_t test2;
+        //         test2(0) = 0.05;
+        // test2(1) = -0.05;
+        // test2(2) = -0.05;
+        // ukfMatrixType cov2;
+        // cov2.resize(3,3);
+        // cov2 = 0.5*covMatrix.block(0,0,3,3);
+
+        // cout << "test bhat " << BhattacharyyaCoeff(test1, test2, covMatrix.block(0,0,3,3), cov2) << std::endl;
+        // exit(0);
 
         X(21, i) = (1.0 - w1) * X(21, i) + w1 * max_odf(0);
         X(22, i) = (1.0 - w2) * X(22, i) + w2 * max_odf(1);
         X(23, i) = (1.0 - w3) * X(23, i) + w3 * max_odf(2);
+
+        //hack to check
+        if (X(21, i) < 0.05)
+        {
+            m1 << X(7, i), X(8, i), X(9, i);
+            m2 << X(14, i), X(15, i), X(16, i);
+
+            vec3_t orthogonal = m1.cross(m2);
+            orthogonal = orthogonal / orthogonal.norm();
+
+            X(0, i) = orthogonal(0);
+            X(1, i) = orthogonal(1);
+            X(2, i) = orthogonal(2);
+        }
+        else if (X(22, i) < 0.05)
+        {
+            m1 << X(0, i), X(1, i), X(2, i);
+            m2 << X(14, i), X(15, i), X(16, i);
+
+            vec3_t orthogonal = m1.cross(m2);
+            orthogonal = orthogonal / orthogonal.norm();
+
+            X(7, i) = orthogonal(0);
+            X(8, i) = orthogonal(1);
+            X(9, i) = orthogonal(2);
+        }
+        else if (X(23, i) < 0.05)
+        {
+            m1 << X(0, i), X(1, i), X(2, i);
+            m2 << X(7, i), X(8, i), X(9, i);
+
+            vec3_t orthogonal = m1.cross(m2);
+            orthogonal = orthogonal / orthogonal.norm();
+
+            X(14, i) = orthogonal(0);
+            X(15, i) = orthogonal(1);
+            X(16, i) = orthogonal(2);
+        }
     } //for X.cols()
 }
 
