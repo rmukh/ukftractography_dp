@@ -39,7 +39,7 @@ void Simple2T::F(ukfMatrixType& X) const
     }
 }
 
-void Simple2T::F(ukfMatrixType & /** X **/, ukfVectorType /** s **/) const {};
+void Simple2T::F(ukfMatrixType & /** X **/, ukfVectorType /** s **/, const ukfMatrixType & /* &covMatrix */) const {};
 void Simple2T::H(const  ukfMatrixType& X,
                  ukfMatrixType& Y) const
 {

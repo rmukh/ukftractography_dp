@@ -56,7 +56,7 @@ public:
   }
 
   virtual void F(ukfMatrixType &X) const;
-  virtual void F(ukfMatrixType &X, ukfVectorType s) const;
+  virtual void F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &covMatrix) const;
   virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
 
   /** The minimum value of the eigenvalues. Clamped in each step */

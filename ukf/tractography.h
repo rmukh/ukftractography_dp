@@ -489,17 +489,6 @@ public:
     }
 
     err = sum / (norm_sq_signal);
-
-    // MSE
-    // err = 0.0;
-
-    // for (unsigned int i = 0; i < signal.size() / 2; ++i)
-    // {
-    //   ukfPrecisionType diff = signal_estimate(i, 0) - signal[i];
-    //   err += diff * diff;
-    // }
-    // ukfPrecisionType mse = err / (signal.size() / 2);
-    // err = mse;
   }
 
   MeasureType GetValue(const ParametersType &parameters) const;

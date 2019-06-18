@@ -2,7 +2,7 @@
 
 // 2T Bi-Exponential model with spherical ridgelets //
 // Functions for 3-tensor bi-exponential simple model.
-void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
+void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &covMatrix) const
 {
     assert(_signal_dim > 0);
     assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
@@ -37,11 +37,19 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
     vec3_t o2;
     vec3_t m3;
     vec3_t o3;
-    //vec3_t max_odf;
+    vec3_t max_odf;
+
+    ukfPrecisionType x1;
+    ukfPrecisionType x2;
+    ukfPrecisionType x3;
+
+    ukfPrecisionType w1;
+    ukfPrecisionType w2;
+    ukfPrecisionType w3;
 
     for (unsigned int i = 0; i < X.cols(); ++i)
     {
-        // max_odf.setZero();
+        max_odf.setZero();
         o2.setZero();
         o3.setZero();
         // Normalize the direction vectors.
@@ -136,8 +144,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
         ukfVectorType::Index maxInd;
         closest.maxCoeff(&maxInd);
         o1 = dir_vol.row(maxInd);
-
-        //max_odf(0) = ODF(exe_vol(maxInd));
+        max_odf(0) = ODF(exe_vol(maxInd));
 
         if (n_of_dirs > 1)
         {
@@ -149,7 +156,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
 
             closest.maxCoeff(&maxInd);
             o2 = dir_vol.row(maxInd);
-            //max_odf(1) = ODF(exe_vol(maxInd));
+            max_odf(1) = ODF(exe_vol(maxInd));
         }
 
         if (n_of_dirs > 2)
@@ -162,44 +169,55 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s) const
 
             closest.maxCoeff(&maxInd);
             o3 = dir_vol.row(maxInd);
-
-            //max_odf(2) = ODF(exe_vol(maxInd));
+            max_odf(2) = ODF(exe_vol(maxInd));
         }
 
         // Normalize max odf weights
-        // if (n_of_dirs == 2)
-        // {
-        //     ukfPrecisionType denom = max_odf(0) + max_odf(1);
-        //     max_odf(0) = max_odf(0) / denom;
-        //     max_odf(1) = max_odf(1) / denom;
-        // }
-        // else if (n_of_dirs > 2)
-        // {
-        //     ukfPrecisionType denom = max_odf(0) + max_odf(1) + max_odf(2);
-        //     max_odf(0) = max_odf(0) / denom;
-        //     max_odf(1) = max_odf(1) / denom;
-        //     max_odf(2) = max_odf(2) / denom;
-        // }
+        if (n_of_dirs == 2)
+        {
+            ukfPrecisionType denom = max_odf(0) + max_odf(1);
+            max_odf(0) = max_odf(0) / denom;
+            max_odf(1) = max_odf(1) / denom;
+        }
+        else if (n_of_dirs > 2)
+        {
+            ukfPrecisionType denom = max_odf(0) + max_odf(1) + max_odf(2);
+            max_odf(0) = max_odf(0) / denom;
+            max_odf(1) = max_odf(1) / denom;
+            max_odf(2) = max_odf(2) / denom;
+        }
+
+        x1 = AngularSimilarity(o1, m1);
+        x2 = 0;
+        x3 = 0;
+        if (n_of_dirs > 1)
+            x2 = AngularSimilarity(o2, m2);
+        if (n_of_dirs > 2)
+            x3 = AngularSimilarity(o3, m3);
 
         // Average of direction from state and ridgelets for 1st tensor
-        X(0, i) = 0.5 * (m1(0) + o1(0));
-        X(1, i) = 0.5 * (m1(1) + o1(1));
-        X(2, i) = 0.5 * (m1(2) + o1(2));
+        X(0, i) = (1.0 - x1) * m1(0) + x1 * o1(0);
+        X(1, i) = (1.0 - x1) * m1(1) + x1 * o1(1);
+        X(2, i) = (1.0 - x1) * m1(2) + x1 * o1(2);
 
         // Average of direction from state and ridgelets for 2st tensor
-        X(7, i) = 0.5 * (m2(0) + o2(0));
-        X(8, i) = 0.5 * (m2(1) + o2(1));
-        X(9, i) = 0.5 * (m2(2) + o2(2));
+        X(7, i) = (1.0 - x2) * m2(0) + x2 * o2(0);
+        X(8, i) = (1.0 - x2) * m2(1) + x2 * o2(1);
+        X(9, i) = (1.0 - x2) * m2(2) + x2 * o2(2);
 
         // Average of direction from state and ridgelets for 3st tensor
-        X(14, i) = 0.5 * (m3(0) + o3(0));
-        X(15, i) = 0.5 * (m3(1) + o3(1));
-        X(16, i) = 0.5 * (m3(2) + o3(2));
+        X(14, i) = (1.0 - x3) * m3(0) + x3 * o3(0);
+        X(15, i) = (1.0 - x3) * m3(1) + x3 * o3(1);
+        X(16, i) = (1.0 - x3) * m3(2) + x3 * o3(2);
 
         // Average weights
-        //X(21, i) = 0.5 * (X(21, i) + max_odf(0));
-        //X(22, i) = 0.5 * (X(22, i) + max_odf(1));
-        //X(23, i) = 0.5 * (X(23, i) + max_odf(2));
+        w1 = BhattacharyyaCoeff(max_odf(0), X(21, i), covMatrix(21, 21));
+        w2 = BhattacharyyaCoeff(max_odf(1), X(22, i), covMatrix(22, 22));
+        w3 = BhattacharyyaCoeff(max_odf(2), X(23, i), covMatrix(23, 23));
+
+        X(21, i) = (1.0 - w1) * X(21, i) + w1 * max_odf(0);
+        X(22, i) = (1.0 - w2) * X(22, i) + w2 * max_odf(1);
+        X(23, i) = (1.0 - w3) * X(23, i) + w3 * max_odf(2);
     } //for X.cols()
 }
 

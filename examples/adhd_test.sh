@@ -18,7 +18,7 @@ mask_path="/home/rinat/Desktop/ukftests/epi_corrected_tensormask.nrrd"
 seeds_path="/home/rinat/Desktop/ukftests/Segmentation-label_59x.nrrd"
 
 # OUTPUT FIBER
-output_path='/home/rinat/Desktop/ukftests/seeds_tc_59x_wo_probability_balance.vtk'
+output_path='/home/rinat/Desktop/ukftests/seeds_tc_59x_test.vtk'
 
 # --seedsFile $seeds_path \
 eval $BINARY \

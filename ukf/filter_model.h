@@ -75,7 +75,7 @@ public:
 
   /** state transition function */
   virtual void F(ukfMatrixType & /* X */) const = 0;
-  virtual void F(ukfMatrixType & /* X */, ukfVectorType /* s */) const = 0;
+  virtual void F(ukfMatrixType & /* X */, ukfVectorType /* s */, const ukfMatrixType & /* covMatrix */) const = 0;
 
   /** observation, i.e. signal reconstruction */
   virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const = 0;
@@ -242,6 +242,35 @@ inline mat33_t SetIdentityScaled(double diff_fw)
   tmp.setIdentity();
   tmp *= diff_fw;
   return tmp;
+}
+
+const double Pi(std::atan(static_cast<double>(1.0)) * 4);
+
+inline ukfPrecisionType BhattacharyyaCoeff(ukfPrecisionType x_sr, ukfPrecisionType x_pred, ukfPrecisionType cov)
+{
+  return std::exp(-0.25 * (std::pow((x_sr - x_pred), 2) / (2 * cov)));
+}
+
+inline ukfPrecisionType BhattacharyyaCoeff(vec3_t &x_sr, vec3_t &x_pred, const ukfMatrixType &cov)
+{
+  vec3_t diff = x_sr - x_pred;
+  return std::exp(-0.125 * diff.transpose() * cov.inverse() * diff);
+}
+
+inline ukfPrecisionType AngularSimilarity(vec3_t &x_sr, vec3_t &x_pred)
+{
+  ukfPrecisionType dot = x_sr.dot(x_pred);
+  ukfPrecisionType den_a = x_sr.norm();
+  ukfPrecisionType den_b = x_pred.norm();
+
+  if (den_a == 0.0 || den_b == 0.0)
+  {
+    throw std::logic_error(
+        "cosine similarity is not defined whenever one or both "
+        "input vectors are zero-vectors.");
+  }
+
+  return 1.0 - (std::acos(std::min(std::max(dot / (den_a * den_b), -1.0), 1.0)) / Pi);
 }
 
 /* Common Function used for NODDI */

@@ -53,7 +53,7 @@ public:
   }
 
   virtual void F(ukfMatrixType &X) const;
-  virtual void F(ukfMatrixType &X, ukfVectorType s) const;
+  virtual void F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &covMatrix) const;
   virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
 
   virtual void State2Tensor1T(const State &x, vec3_t &m, vec3_t &l);

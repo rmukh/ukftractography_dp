@@ -992,7 +992,9 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       // Estimate the initial state
       // InitLoopUKF(state, p, signal_values[i], dNormMSE);
+      std::cout << "Before nonlinear " << state.transpose() << std::endl;
       NonLinearLeastSquareOptimization(state, signal_values[i], _model);
+      std::cout << "After nonlinear " << state.transpose() << std::endl;
       // Output of the filter
       tmp_info_state = ConvertVector<State, stdVecState>(state);
 
@@ -1759,11 +1761,11 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
     p2[it] = state_temp[it];
 
   optimizer2->SetInitialPosition(p2);
-  optimizer2->SetProjectedGradientTolerance(1e-5);
+  optimizer2->SetProjectedGradientTolerance(1e-12);
   optimizer2->SetMaximumNumberOfIterations(500);
   optimizer2->SetMaximumNumberOfEvaluations(500);
-  optimizer2->SetMaximumNumberOfCorrections(5);      // The number of corrections to approximate the inverse hessian matrix
-  optimizer2->SetCostFunctionConvergenceFactor(1e2); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
+  optimizer2->SetMaximumNumberOfCorrections(10);      // The number of corrections to approximate the inverse hessian matrix
+  optimizer2->SetCostFunctionConvergenceFactor(1e1); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
   optimizer2->SetTrace(false);                       // Print debug info
 
   // Set bounds
@@ -2095,17 +2097,14 @@ void Tractography::Follow3T(const int thread_id,
     bool in_csf = (mean_signal < _mean_signal_min);
 
     bool dNormMSE_too_high = false;
-    bool negative_free_water = false;
 
     ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
     in_csf = rtopSignal < _rtop_min;
     dNormMSE_too_high = dNormMSE > _max_nmse;
-    negative_free_water = state[24] < 0.0;
-
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
     //stepnr > _max_length // Stop if the fiber is too long - Do we need this???
-    if (!is_brain || in_csf || is_curving || dNormMSE_too_high || negative_free_water)
+    if (!is_brain || in_csf || is_curving || dNormMSE_too_high)
     {
       break;
     }
@@ -2587,28 +2586,29 @@ void Tractography::Step3T(const int thread_id,
   // NEED TO FIX
   // if (dot1 < dot2 && dot3 < dot2)
   // {
-  //   std::cout << "swap 2 triggered" << std::endl;
-  //   std::cout << "angle m2 m1 " << RadToDeg(std::acos(m2.dot(m1))) << std::endl;
-  //   std::cout << "angle dot1 " << RadToDeg(std::acos(dot1)) << std::endl;
-  //   std::cout << "angle dot2 " << RadToDeg(std::acos(dot2)) << std::endl;
-  //   std::cout << "angle dot3 " << RadToDeg(std::acos(dot3)) << std::endl;
-  //   std::cout << "old dir " << old_dir << std::endl;
-  //   std::cout << "m1 " << m1 << std::endl;
-  //   std::cout << "m2 " << m2 << std::endl;
-  //   std::cout << "dot1 " << dot1 << std::endl;
-  //   std::cout << "dot2 " << dot2 << std::endl;
-  //   std::cout << "dot3 " << dot3 << std::endl;
+  //   // std::cout << "swap 2 triggered" << std::endl;
+  //   // std::cout << "angle m2 m1 " << RadToDeg(std::acos(m2.dot(m1))) << std::endl;
+  //   // std::cout << "angle dot1 " << RadToDeg(std::acos(dot1)) << std::endl;
+  //   // std::cout << "angle dot2 " << RadToDeg(std::acos(dot2)) << std::endl;
+  //   // std::cout << "angle dot3 " << RadToDeg(std::acos(dot3)) << std::endl;
+  //   // std::cout << "old dir " << old_dir << std::endl;
+  //   // std::cout << "m1 " << m1 << std::endl;
+  //   // std::cout << "m2 " << m2 << std::endl;
+  //   // std::cout << "dot1 " << dot1 << std::endl;
+  //   // std::cout << "dot2 " << dot2 << std::endl;
+  //   // std::cout << "dot3 " << dot3 << std::endl;
 
-  //   std::cout << "w1 " << state(21) << " w2 " << state(22) << std::endl;
+  //   // std::cout << "w1 " << state(21) << " w2 " << state(22) << std::endl;
 
   //   // Switch dirs and lambdas.
   //   vec3_t tmp = m1;
   //   m1 = m2;
   //   m2 = tmp;
-  //   std::cout << "cov before det = " << covariance.determinant() << " diff norm " << (covariance - covariance.transpose()).norm() << std::endl;
+  //   // std::cout << "cov before det = " << covariance.determinant() << " diff norm " << (covariance - covariance.transpose()).norm() << std::endl;
   //   // Swap state.
+  //   std::cout << "swap 2 " << std::endl;
   //   SwapState3T_BiExp(state, covariance, 2);
-  //   std::cout << "cov after det =  " << covariance.determinant()  << " diff norm " << (covariance - covariance.transpose()).norm() << std::endl;
+  //   // std::cout << "cov after det =  " << covariance.determinant()  << " diff norm " << (covariance - covariance.transpose()).norm() << std::endl;
 
   //   //w11 w12 w13 w14
   //   //w21 w22 w23 w24
@@ -2616,7 +2616,7 @@ void Tractography::Step3T(const int thread_id,
   //   //w41 w42 w43 w44
   // }
 
-  // NEED TO FIX
+  // // NEED TO FIX
   // else if (dot1 < dot3)
   // {
   //   // Switch dirs and lambdas.
@@ -2625,11 +2625,12 @@ void Tractography::Step3T(const int thread_id,
   //   m3 = tmp;
 
   //   // Swap state.
-  //   std::cout << "swap 3 triggered" << std::endl;
-  //   std::cout << "normed? " << m1.norm() << " " << m3.norm() << std::endl;
-  //   std::cout << "angle " << std::acos(m3.dot(m1)) << std::endl;
+  //   // std::cout << "swap 3 triggered" << std::endl;
+  //   // std::cout << "normed? " << m1.norm() << " " << m3.norm() << std::endl;
+  //   // std::cout << "angle " << std::acos(m3.dot(m1)) << std::endl;
   //   //std::cout << "state before\n " << state << std::endl;
   //   //std::cout << "covariance before\n " << covariance << std::endl;
+  //   std::cout << "swap 3 " << std::endl;
   //   SwapState3T_BiExp(state, covariance, 3);
   //   //std::cout << "state after\n " << state << std::endl;
   //   // std::cout << "covariance after\n " << covariance << std::endl;
