@@ -2102,7 +2102,7 @@ void Tractography::Follow3T(const int thread_id,
     //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     //in_csf = rtopSignal < _rtop_min;
-    in_csf = fa < 15000;
+    in_csf = fa < 11000;
     dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
