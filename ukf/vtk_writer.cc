@@ -651,6 +651,8 @@ int VtkWriter::WriteGlyphs(const std::string &file_name,
   }
 
   int num_tensors = fibers[0].state[0].size() / 5;
+  if (fibers[0].state[0].size() == 25)
+    num_tensors = 3;
 
   const ukfPrecisionType scale = ukfHalf * _scale_glyphs;
 
@@ -725,6 +727,16 @@ int VtkWriter::WriteGlyphs(const std::string &file_name,
         m1 = state[3] / 100.0 * m1;
         m2 = state[9] / 100.0 * m2;
         m3 = state[15] / 100.0 * m3;
+      }
+      else if (state.size() == 25)
+      {
+        // For BiExp diffusion propagator (check if is correct)
+        m1 << state[2], state[1], state[0];
+        m2 << state[9], state[8], state[7];
+        m3 << state[16], state[15], state[14];
+        m1 = state[3] / 100.0 * m1;
+        m2 = state[10] / 100.0 * m2;
+        m3 = state[17] / 100.0 * m3;
       }
 
       // Calculate the points. The glyphs are represented as two-point lines.
