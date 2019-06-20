@@ -30,9 +30,11 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
     m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 
     ukfVectorType closest;
-    closest.resize(exe_vol.rows());
+    closest.resize(6);
     vec3_t m1;
     vec3_t m_temp;
+    vec3_t o;
+    vec3_t o_a;
     vec3_t o1;
     vec3_t m2;
     vec3_t o2;
@@ -51,6 +53,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
     for (unsigned int i = 0; i < X.cols(); ++i)
     {
         max_odf.setZero();
+        o1.setZero();
         o2.setZero();
         o3.setZero();
 
@@ -113,75 +116,74 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
 
         ukfPrecisionType w1_temp = X(21, i);
 
-        // Compute final state using ridgelets
-        for (unsigned int v = 0; v < exe_vol.rows(); ++v)
+        //
+        for (unsigned int v = 0; v < exe_vol.rows() / 2; v += 2)
         {
-            o1 = dir_vol.row(v);
-            closest(v) = cosine_similarity(m1, o1);
-        }
+            o = dir_vol.row(v);
+            o_a = dir_vol.row(v + 1);
+            closest(0) = cosine_similarity(m1, o);
+            closest(1) = cosine_similarity(m2, o);
+            closest(2) = cosine_similarity(m3, o);
 
-        ukfVectorType::Index maxInd;
-        closest.maxCoeff(&maxInd);
-        o1 = dir_vol.row(maxInd);
-        max_odf(0) = ODF(exe_vol(maxInd));
+            closest(3) = cosine_similarity(m1, o_a);
+            closest(4) = cosine_similarity(m2, o_a);
+            closest(5) = cosine_similarity(m3, o_a);
 
-        if (n_of_dirs > 1)
-        {
-            for (unsigned int v = 0; v < exe_vol.rows(); ++v)
-            {
-                o2 = dir_vol.row(v);
-                closest(v) = cosine_similarity(m2, o2);
-            }
-
+            ukfVectorType::Index maxInd;
             closest.maxCoeff(&maxInd);
-            o2 = dir_vol.row(maxInd);
-            max_odf(1) = ODF(exe_vol(maxInd));
-        }
-
-        if (n_of_dirs > 2)
-        {
-            for (unsigned int v = 0; v < exe_vol.rows(); ++v)
+            if (maxInd == 0)
             {
-                o3 = dir_vol.row(v);
-                closest(v) = cosine_similarity(m3, o3);
+                o1 = o;
+                max_odf(0) = ODF(exe_vol(v));
             }
-
-            closest.maxCoeff(&maxInd);
-            o3 = dir_vol.row(maxInd);
-            max_odf(2) = ODF(exe_vol(maxInd));
+            else if (maxInd == 1)
+            {
+                o2 = o;
+                max_odf(1) = ODF(exe_vol(v));
+            }
+            else if (maxInd == 2)
+            {
+                o3 = o;
+                max_odf(2) = ODF(exe_vol(v));
+            }
+            else if (maxInd == 3)
+            {
+                o1 = o_a;
+                max_odf(0) = ODF(exe_vol(v + 1));
+            }
+            else if (maxInd == 4)
+            {
+                o2 = o_a;
+                max_odf(1) = ODF(exe_vol(v + 1));
+            }
+            else if (maxInd == 5)
+            {
+                o3 = o_a;
+                max_odf(2) = ODF(exe_vol(v + 1));
+            }
         }
 
-        // Normalize max odf weights
-        if (n_of_dirs == 1)
-        {
-            max_odf(0) = 1.0;
-        }
-        else if (n_of_dirs == 2)
-        {
-            denom = max_odf.sum();
-            max_odf(0) = max_odf(0) / denom;
-            max_odf(1) = max_odf(1) / denom;
-        }
-        else if (n_of_dirs > 2)
-        {
-            denom = max_odf.sum();
-            max_odf(0) = max_odf(0) / denom;
-            max_odf(1) = max_odf(1) / denom;
-            max_odf(2) = max_odf(2) / denom;
-        }
+        denom = max_odf.sum();
+        max_odf = max_odf / denom;
 
-        x1 = BhattacharyyaCoeff(o1, m1, covMatrix.block(0, 0, 3, 3));
-        w1 = BhattacharyyaCoeff(max_odf(0), X(21, i), covMatrix(21, 21));
+        x1 = 0;
+        w1 = 0;
         x2 = 0;
         w2 = 0;
         x3 = 0;
         w3 = 0;
-        if (n_of_dirs > 1)
+
+        if (max_odf(0) > 0)
+        {
+            x1 = BhattacharyyaCoeff(o1, m1, covMatrix.block(0, 0, 3, 3));
+            w1 = BhattacharyyaCoeff(max_odf(0), X(21, i), covMatrix(21, 21));
+        }
+        if (max_odf(1) > 0)
         {
             x2 = BhattacharyyaCoeff(o2, m2, covMatrix.block(7, 7, 3, 3));
             w2 = BhattacharyyaCoeff(max_odf(1), X(22, i), covMatrix(22, 22));
         }
-        if (n_of_dirs > 2)
+        if (max_odf(2) > 0)
         {
             x3 = BhattacharyyaCoeff(o3, m3, covMatrix.block(14, 14, 3, 3));
             w3 = BhattacharyyaCoeff(max_odf(2), X(23, i), covMatrix(23, 23));
