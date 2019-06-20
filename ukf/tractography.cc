@@ -895,11 +895,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       if (n_of_dirs == 1)
       {
         vec3_t orthogonal;
-        orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], dir_vol.row(0)[2];
+        orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], 0.0;
         orthogonal = orthogonal / orthogonal.norm();
         dir_init.row(1) = orthogonal;
-        vec3_t orthogonal2;
-        orthogonal2 << -orthogonal[1], orthogonal[0], orthogonal[2];
+
+        vec3_t orthogonal2 = dir_init.row(0).cross(orthogonal);
         orthogonal2 = orthogonal2 / orthogonal2.norm();
         dir_init.row(2) = orthogonal2;
 
@@ -2555,6 +2555,8 @@ void Tractography::Step3T(const int thread_id,
          static_cast<int>(covariance.rows()) == _model->state_dim());
   assert(static_cast<int>(state.size()) == _model->state_dim());
   State state_new(_model->state_dim());
+  State state_prev(_model->state_dim());
+  state_prev = state;
 
   ukfMatrixType covariance_new(_model->state_dim(), _model->state_dim());
   covariance_new.setConstant(ukfZero);
@@ -2571,6 +2573,14 @@ void Tractography::Step3T(const int thread_id,
   vec3_t old_dir = m1;
 
   _model->State2Tensor3T(state, old_dir, m1, m2, m3);
+  // ukfPrecisionType degre = std::acos(std::min(std::max(m1.dot(old_dir) / (m1.norm() * old_dir.norm()), -1.0), 1.0)) * 180 / Pi;
+  // if (degre > 70) {
+  //   cout << "degre " << degre << endl;
+  //   cout << "state " << state.transpose() << endl;
+  //   cout << "old s " << state_prev.transpose() << endl;
+  //   cout << "m1 " << m1.transpose() << endl;
+  //   cout << "m1 old " << old_dir << endl;
+  // }
   // cout << "m1 state " << state(0) << " " << state(1) << " " << state(2) << endl;
   // cout << "m1 " << m1.transpose() << endl;
 

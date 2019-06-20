@@ -149,9 +149,9 @@
       <description>Tractography parameter used in all models. Step size when conducting tractography. Default: 0.3. Range: 0.1-1. </description>
       <default>0.3</default>
       <constraints>
-        <minimum> 0.1 </minimum>
-        <maximum> 1 </maximum>
-        <step> 0.1 </step>
+        <minimum>0.1</minimum>
+        <maximum>1</maximum>
+        <step>0.1</step>
       </constraints>
     </double>
 
@@ -162,9 +162,9 @@
       <description>UKF data fitting parameter for tensor or NODDI model: Process noise for angles/direction. Defaults: Noddi-0.001; Single tensor-0.005; other-0.001. Suggested Range: 0.00001 - 0.25. Default of 0.0 indicates the program will assign value based on other model parameters. </description>
       <default>0.0</default>
       <constraints>
-        <minimum> 0.0 </minimum>
-        <maximum> 0.25 </maximum>
-        <step> 0.00001 </step>
+        <minimum>0.0</minimum>
+        <maximum>0.25</maximum>
+        <step>0.00001</step>
       </constraints>
     </double>
 
@@ -175,9 +175,9 @@
       <description>Tractography parameter used in all models. Step size between points saved along fibers. Default: 0.9. Range: 0.1-4. </description>
       <default>0.9</default>
       <constraints>
-        <minimum> 0.1 </minimum>
-        <maximum> 4 </maximum>
-        <step> 0.1 </step>
+        <minimum>0.1</minimum>
+        <maximum>4</maximum>
+        <step>0.1</step>
       </constraints>
     </double>
 
@@ -188,9 +188,9 @@
       <description>Tractography parameter used in all models. The max length limit of the half fibers generated during tractography. A fiber is "half" when the tractography goes in only one direction from one seed point at a time. Default: 250 mm. Range: 1-500 mm.</description>
       <default>250</default>
       <constraints>
-        <minimum>1 </minimum>
-        <maximum> 500 </maximum>
-        <step> 1 </step>
+        <minimum>1</minimum>
+        <maximum>500</maximum>
+        <step>1</step>
       </constraints>
     </double>
 
@@ -289,9 +289,9 @@
       <description>UKF data fitting parameter for tensor plus free water model: Process noise for free water weights, ignored if no free water estimation. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
       <default>0.0</default>
       <constraints>
-        <minimum> 0.0 </minimum>
-        <maximum> 0.25 </maximum>
-        <step> 0.00001 </step>
+        <minimum>0.0</minimum>
+        <maximum>0.25</maximum>
+        <step>0.00001</step>
       </constraints>
     </double>
 
@@ -365,9 +365,9 @@
       <description>UKF Data Term: Measures expected noise in signal. This is used by the UKF method to decide how much to trust the data. This should be increased for very noisy data or reduced for high quality data. Defaults: single tensor/orientation-0.01; other-0.02. Suggested Range: 0.001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
       <default> 0.0 </default>
       <constraints>
-        <minimum> 0.0 </minimum>
-        <maximum> 0.25 </maximum>
-        <step> 0.001 </step>
+        <minimum>0.0</minimum>
+        <maximum>0.25</maximum>
+        <step>0.001</step>
       </constraints>
     </double>
 

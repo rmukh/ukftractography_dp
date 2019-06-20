@@ -32,6 +32,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
     ukfVectorType closest;
     closest.resize(exe_vol.rows());
     vec3_t m1;
+    vec3_t m_temp;
     vec3_t o1;
     vec3_t m2;
     vec3_t o2;
@@ -52,40 +53,20 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
         max_odf.setZero();
         o2.setZero();
         o3.setZero();
-        // Normalize the direction vectors.
 
-        // Tensor 1
-        ukfPrecisionType norm_inv = ukfZero; // 1e-16;
-        norm_inv += X(0, i) * X(0, i);
-        norm_inv += X(1, i) * X(1, i);
-        norm_inv += X(2, i) * X(2, i);
+        m1 << X(0, i), X(1, i), X(2, i);
+        m2 << X(7, i), X(8, i), X(9, i);
+        m3 << X(14, i), X(15, i), X(16, i);
+        m1.normalize();
+        m2.normalize();
+        m3.normalize();
 
-        norm_inv = ukfOne / sqrt(norm_inv);
-        X(0, i) *= norm_inv;
-        X(1, i) *= norm_inv;
-        X(2, i) *= norm_inv;
+        ukfPrecisionType denom = X(21, i) + X(22, i) + X(23, i);
+        X(21, i) = X(21, i) / denom;
+        X(22, i) = X(22, i) / denom;
+        X(23, i) = X(23, i) / denom;
 
-        // Tensor 2
-        norm_inv = ukfZero; // 1e-16;
-        norm_inv += X(7, i) * X(7, i);
-        norm_inv += X(8, i) * X(8, i);
-        norm_inv += X(9, i) * X(9, i);
-
-        norm_inv = ukfOne / sqrt(norm_inv);
-        X(7, i) *= norm_inv;
-        X(8, i) *= norm_inv;
-        X(9, i) *= norm_inv;
-
-        // Tensor 3
-        norm_inv = ukfZero; // 1e-16;
-        norm_inv += X(14, i) * X(14, i);
-        norm_inv += X(15, i) * X(15, i);
-        norm_inv += X(16, i) * X(16, i);
-
-        norm_inv = ukfOne / sqrt(norm_inv);
-        X(14, i) *= norm_inv;
-        X(15, i) *= norm_inv;
-        X(16, i) *= norm_inv;
+        m_temp = m1;
 
         // Check that the eigenvalues are greater or equal to the minimum value
         // and less or equal to the maximum value
@@ -130,11 +111,9 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
         // Free water
         X(24, i) = CheckZero(X(24, i));
 
-        // Compute final state using ridgelets
-        m1 << X(0, i), X(1, i), X(2, i);
-        m2 << X(7, i), X(8, i), X(9, i);
-        m3 << X(14, i), X(15, i), X(16, i);
+        ukfPrecisionType w1_temp = X(21, i);
 
+        // Compute final state using ridgelets
         for (unsigned int v = 0; v < exe_vol.rows(); ++v)
         {
             o1 = dir_vol.row(v);
@@ -173,15 +152,19 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
         }
 
         // Normalize max odf weights
-        if (n_of_dirs == 2)
+        if (n_of_dirs == 1)
         {
-            ukfPrecisionType denom = max_odf(0) + max_odf(1);
+            max_odf(0) = 1.0;
+        }
+        else if (n_of_dirs == 2)
+        {
+            denom = max_odf.sum();
             max_odf(0) = max_odf(0) / denom;
             max_odf(1) = max_odf(1) / denom;
         }
         else if (n_of_dirs > 2)
         {
-            ukfPrecisionType denom = max_odf(0) + max_odf(1) + max_odf(2);
+            denom = max_odf.sum();
             max_odf(0) = max_odf(0) / denom;
             max_odf(1) = max_odf(1) / denom;
             max_odf(2) = max_odf(2) / denom;
@@ -190,8 +173,8 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
         x1 = BhattacharyyaCoeff(o1, m1, covMatrix.block(0, 0, 3, 3));
         w1 = BhattacharyyaCoeff(max_odf(0), X(21, i), covMatrix(21, 21));
         x2 = 0;
-        x3 = 0;
         w2 = 0;
+        x3 = 0;
         w3 = 0;
         if (n_of_dirs > 1)
         {
@@ -204,77 +187,116 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
             w3 = BhattacharyyaCoeff(max_odf(2), X(23, i), covMatrix(23, 23));
         }
 
+        // if (n_of_dirs == 1 && w1 < 0.1) {
+        //     cout << "before X(21) " << X(21, i) << " X(22) " << X(22, i) << " X(23)  " << X(23, i) << endl;
+        //     cout << "m1 before " << m1.transpose() << endl;
+        //     cout << "m2 before " << m2.transpose() << endl;
+        //     cout << "m3 before " << m3.transpose() << endl;
+        // }
+
         // Average of direction from state and ridgelets for 1st tensor
-        X(0, i) = (1.0 - x1) * m1(0) + x1 * o1(0);
-        X(1, i) = (1.0 - x1) * m1(1) + x1 * o1(1);
-        X(2, i) = (1.0 - x1) * m1(2) + x1 * o1(2);
+        m1 = (1.0 - x1) * m1 + x1 * o1;
 
         // Average of direction from state and ridgelets for 2st tensor
-        X(7, i) = (1.0 - x2) * m2(0) + x2 * o2(0);
-        X(8, i) = (1.0 - x2) * m2(1) + x2 * o2(1);
-        X(9, i) = (1.0 - x2) * m2(2) + x2 * o2(2);
+        m2 = (1.0 - x2) * m2 + x2 * o2;
 
         // Average of direction from state and ridgelets for 3st tensor
-        X(14, i) = (1.0 - x3) * m3(0) + x3 * o3(0);
-        X(15, i) = (1.0 - x3) * m3(1) + x3 * o3(1);
-        X(16, i) = (1.0 - x3) * m3(2) + x3 * o3(2);
-
-        // vec3_t test1;
-        // test1(0) = 0.05;
-        // test1(1) = 0.05;
-        // test1(2) = 0.05;
-        // vec3_t test2;
-        //         test2(0) = 0.05;
-        // test2(1) = -0.05;
-        // test2(2) = -0.05;
-        // ukfMatrixType cov2;
-        // cov2.resize(3,3);
-        // cov2 = 0.5*covMatrix.block(0,0,3,3);
-
-        // cout << "test bhat " << BhattacharyyaCoeff(test1, test2, covMatrix.block(0,0,3,3), cov2) << std::endl;
-        // exit(0);
+        m3 = (1.0 - x3) * m3 + x3 * o3;
 
         X(21, i) = (1.0 - w1) * X(21, i) + w1 * max_odf(0);
         X(22, i) = (1.0 - w2) * X(22, i) + w2 * max_odf(1);
         X(23, i) = (1.0 - w3) * X(23, i) + w3 * max_odf(2);
 
-        //hack to check
-        if (X(21, i) < 0.05)
-        {
-            m1 << X(7, i), X(8, i), X(9, i);
-            m2 << X(14, i), X(15, i), X(16, i);
+        // vec3_t test1;
+        // test1(0) = 0.5;
+        // test1(1) = 0.5;
+        // test1(2) = 0.5;
+        // test1 = test1 / test1.norm();
+        // vec3_t test2;
+        // test2(0) = -0.3;
+        // test2(1) = 0.1;
+        // test2(2) = -test1(2);
+        // test2 = test2 / test2.norm();
+        // ukfMatrixType cov2;
+        // cov2.resize(3, 3);
+        // cov2 = covMatrix.block(0, 0, 3, 3);
 
-            vec3_t orthogonal = m1.cross(m2);
-            orthogonal = orthogonal / orthogonal.norm();
+        // //cout << "test bhat " << BhattacharyyaCoeff(test1, test2, covMatrix.block(0, 0, 3, 3), cov2) << std::endl;
+        // cout << "vec 1 " << test1.transpose() << " vec 2 " << test2.transpose() << endl;
+        // cout << "test bhat " << BhattacharyyaCoeff(test1, test2, covMatrix.block(0, 0, 3, 3)) << " cov\n " << covMatrix.block(0, 0, 3, 3);
+        // exit(0);
 
-            X(0, i) = orthogonal(0);
-            X(1, i) = orthogonal(1);
-            X(2, i) = orthogonal(2);
-        }
-        else if (X(22, i) < 0.05)
-        {
-            m1 << X(0, i), X(1, i), X(2, i);
-            m2 << X(14, i), X(15, i), X(16, i);
+        //hack
+        // if (X(21, i) < 0.05)
+        // {
+        //     vec3_t orthogonal = m2.cross(m3);
+        //     m1 = orthogonal / orthogonal.norm();
+        // }
+        // else if (X(22, i) < 0.05)
+        // {
+        //     vec3_t orthogonal = m1.cross(m3);
+        //     m2 = orthogonal / orthogonal.norm();
+        // }
+        // else if (X(23, i) < 0.05)
+        // {
+        //     vec3_t orthogonal = m1.cross(m2);
+        //     m3 = orthogonal / orthogonal.norm();
+        // }
 
-            vec3_t orthogonal = m1.cross(m2);
-            orthogonal = orthogonal / orthogonal.norm();
+        m1.normalize();
+        m2.normalize();
+        m3.normalize();
 
-            X(7, i) = orthogonal(0);
-            X(8, i) = orthogonal(1);
-            X(9, i) = orthogonal(2);
-        }
-        else if (X(23, i) < 0.05)
-        {
-            m1 << X(0, i), X(1, i), X(2, i);
-            m2 << X(7, i), X(8, i), X(9, i);
+        X(0, i) = m1(0);
+        X(1, i) = m1(1);
+        X(2, i) = m1(2);
 
-            vec3_t orthogonal = m1.cross(m2);
-            orthogonal = orthogonal / orthogonal.norm();
+        X(7, i) = m2(0);
+        X(8, i) = m2(1);
+        X(9, i) = m2(2);
 
-            X(14, i) = orthogonal(0);
-            X(15, i) = orthogonal(1);
-            X(16, i) = orthogonal(2);
-        }
+        X(14, i) = m3(0);
+        X(15, i) = m3(1);
+        X(16, i) = m3(2);
+
+        // Weights
+        denom = X(21, i) + X(22, i) + X(23, i);
+        X(21, i) = X(21, i) / denom;
+        X(22, i) = X(22, i) / denom;
+        X(23, i) = X(23, i) / denom;
+
+        X(21, i) = CheckZero(X(21, i));
+        X(22, i) = CheckZero(X(22, i));
+        X(23, i) = CheckZero(X(23, i));
+
+        // ukfPrecisionType degre = std::acos(std::min(std::max(m1.dot(m_temp) / (m1.norm() * m_temp.norm()), -1.0), 1.0)) * 180 / Pi;
+
+        // if (X(22, i) < X(21, i) && X(22, i) < X(23, i) && n_of_dirs != 1)
+        // {
+        //     cout << "dot " << m1.dot(m_temp) << endl;
+        //     cout << "normed dot " << m1.dot(m_temp) / (m1.norm() * m_temp.norm()) << endl;
+        //     cout << "after n dirs " << n_of_dirs << " w1 " << X(21, i) << " w1 prev " << w1_temp << endl;
+        //     cout << "after " << " w2 " << X(22, i) << " w3 " << X(23, i) << endl;
+        //     cout << "x1 " << x1 << " x2 " << x2 << " x3 " << x3 << endl;
+        //     cout << "dir_vol \n " << dir_vol << endl;
+        //     cout << "m1 before " << m_temp.transpose() << endl;
+        //     cout << "m1 after " << m1.transpose() << endl;
+        //     cout << "o1 " << o1.transpose() << endl;
+        //     cout << "o2 " << o2.transpose() << endl;
+        //     cout << "o3 " << o3.transpose() << endl;
+        // }
+
+        // if (X(21, i) + X(22, i) + X(23, i) > 1)
+        // {
+        //     ukfPrecisionType denom = X(21, i) + X(22, i) + X(23, i);
+        //     X(21, i) = X(21, i) / denom;
+        //     X(22, i) = X(22, i) / denom;
+        //     X(23, i) = X(23, i) / denom;
+        //     if (X(21, i) + X(22, i) + X(23, i) > 1)
+        //     {
+        //         cout << "sum " << X(21, i) + X(22, i) + X(23, i) << " w's " << X(21, i) << " " << X(22, i) << " " << X(23, i) << endl;
+        //     }
+        // }
     } //for X.cols()
 }
 

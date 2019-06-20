@@ -248,7 +248,7 @@ const double Pi(std::atan(static_cast<double>(1.0)) * 4);
 
 inline ukfPrecisionType BhattacharyyaCoeff(ukfPrecisionType x_sr, ukfPrecisionType x_pred, ukfPrecisionType cov)
 {
-  return std::exp(-0.25 * (std::pow((x_sr - x_pred), 2) / (2 * cov)));
+  return std::exp(-0.25 * (std::pow((x_sr - x_pred), 2) / cov));
 }
 
 inline ukfPrecisionType BhattacharyyaCoeff(vec3_t &x_sr, vec3_t &x_pred, const ukfMatrixType &cov)
