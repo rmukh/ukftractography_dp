@@ -114,7 +114,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
         // Free water
         X(24, i) = CheckZero(X(24, i));
 
-        ukfPrecisionType w1_temp = X(21, i);
+        //ukfPrecisionType w1_temp = X(21, i);
 
         //
         for (unsigned int v = 0; v < exe_vol.rows() / 2; v += 2)
@@ -302,11 +302,11 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
     } //for X.cols()
 }
 
-ukfPrecisionType Ridg_BiExp_FW::cosine_similarity(vec3_t &F, vec3_t &S) const
+ukfPrecisionType Ridg_BiExp_FW::cosine_similarity(vec3_t &First, vec3_t &Second) const
 {
-    ukfPrecisionType dot = F.dot(S);
-    ukfPrecisionType den_a = F.norm();
-    ukfPrecisionType den_b = S.norm();
+    ukfPrecisionType dot = First.dot(Second);
+    ukfPrecisionType den_a = First.norm();
+    ukfPrecisionType den_b = Second.norm();
 
     if (den_a == 0.0 || den_b == 0.0)
     {
