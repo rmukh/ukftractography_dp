@@ -3,7 +3,7 @@ Using the 3T Biexponential Spherical Ridgelets model with free water estimation.
 "*": set by user
 "-": default setting
 - stoppingFA: 0.15
-* seedingThreshold: 0.3
+* seedingThreshold: 0.18
 - Qm: 0.0001
 - Ql: 150
 - Qt: 50
@@ -35,5 +35,5 @@ Start computing icosahedron...
 Start computing Q basis...
 Using constrained filter
 Using Spherical Ridgelets
-Processing 147117 starting points
-Final seeds vector size 54858
+Processing 363 starting points
+Final seeds vector size 682
