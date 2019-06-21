@@ -21,12 +21,12 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
 
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_TAG
-    "f7c7a3bbe25ac99b69a20917c3de32fa1bd46655"
+    "09526ca7d84007795d4936878cc7d10439a396e9"
   )
   
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_REPOSITORY 
-    "${git_protocol}://github.com/research-enthusiast/spherical_ridgelets.git"
+    "${git_protocol}://github.com/rmukh/spherical_ridgelets.git"
   )
 
   set(EP_SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj})
