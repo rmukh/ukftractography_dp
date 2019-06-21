@@ -2082,7 +2082,7 @@ void Tractography::Follow3T(const int thread_id,
     //std::cout << "step " << stepnr << std::endl;
     ++stepnr;
 
-    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, fa, trace, trace2);
+    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, fa, fa2, fa3, trace, trace2);
 
     //cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
     // Check if we should abort following this fiber. We abort if we reach the
@@ -2102,7 +2102,7 @@ void Tractography::Follow3T(const int thread_id,
     //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     //in_csf = rtopSignal < _rtop_min;
-    in_csf = fa < 13000;
+    in_csf = fa < 10000;
     dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
@@ -2547,6 +2547,8 @@ void Tractography::Step3T(const int thread_id,
                           ukfMatrixType &covariance,
                           ukfPrecisionType &dNormMSE,
                           ukfPrecisionType &fa,
+                          ukfPrecisionType &fa2,
+                          ukfPrecisionType &fa3,
                           ukfPrecisionType &trace,
                           ukfPrecisionType &trace2)
 {
@@ -2591,6 +2593,8 @@ void Tractography::Step3T(const int thread_id,
   computeRTOPfromSignal(rtopSignal, signal);
 
   fa = rtop1;
+  fa2 = rtop2;
+  fa3 = rtop3;
   trace = rtopModel;
   trace2 = rtopSignal;
 
@@ -3206,6 +3210,12 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
     }
   }
 
+  if (_record_rtop)
+  {
+    fiber.trace.push_back(trace);
+    fiber.trace2.push_back(trace2);
+  }
+
   if (_record_fa || _record_Vic || _record_rtop)
   {
     fiber.fa.push_back(fa);
@@ -3360,6 +3370,9 @@ void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
     if (_num_tensors >= 2)
     {
       fiber.fa2.reserve(fiber_size);
+    }
+    if (_num_tensors >= 3)
+    {
       fiber.fa3.reserve(fiber_size);
     }
   }
