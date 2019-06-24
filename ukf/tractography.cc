@@ -998,26 +998,26 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // Output of the filter
       tmp_info_state = ConvertVector<State, stdVecState>(state);
 
-      ukfPrecisionType rtop = 0.0;
+      ukfPrecisionType rtopModel = 0.0;
       ukfPrecisionType rtop1 = 0.0;
       ukfPrecisionType rtop2 = 0.0;
       ukfPrecisionType rtop3 = 0.0;
       ukfPrecisionType rtopSignal = 0.0;
 
-      computeRTOPfromState(tmp_info_state, rtop, rtop1, rtop2, rtop3);
+      computeRTOPfromState(state, rtopModel, rtop1, rtop2, rtop3);
       computeRTOPfromSignal(rtopSignal, signal_values[i]);
 
       // These values are stored so that: rtop1 -> fa; rtop2 -> fa2; rtop3 -> fa3; rtop -> trace; rtopSignal -> trace2
       info.fa = rtop1;
       info.fa2 = rtop2;
       info.fa3 = rtop3;
-      info.trace = rtop;
+      info.trace = rtopModel;
       info.trace2 = rtopSignal;
 
       info_inv.fa = rtop1;
       info_inv.fa2 = rtop2;
       info_inv.fa3 = rtop3;
-      info_inv.trace = rtop;
+      info_inv.trace = rtopModel;
       info_inv.trace2 = rtopSignal;
 
       if (rtopSignal >= _rtop_min)
@@ -1364,8 +1364,38 @@ void Tractography::computeRTOPfromSignal(ukfPrecisionType &rtopSignal, ukfVector
   }
 }
 
-void Tractography::computeRTOPfromState(stdVecState &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3)
+void Tractography::computeRTOPfromState(State &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3)
 {
+  state[3] = std::max(state[3], 1.0);
+  state[4] = std::max(state[4], 1.0);
+  state[5] = std::max(state[5], 0.1);
+  state[6] = std::max(state[6], 0.1);
+
+  state[3] = std::min(state[3], 3000.0);
+  state[4] = std::min(state[4], 3000.0);
+  state[5] = std::min(state[5], 3000.0);
+  state[6] = std::min(state[6], 3000.0);
+
+    state[10] = std::max(state[10], 1.0);
+  state[11] = std::max(state[11], 1.0);
+  state[12] = std::max(state[12], 0.1);
+  state[13] = std::max(state[13], 0.1);
+
+  state[10] = std::min(state[10], 3000.0);
+  state[11] = std::min(state[11], 3000.0);
+  state[12] = std::min(state[12], 3000.0);
+  state[13] = std::min(state[13], 3000.0);
+
+      state[17] = std::max(state[17], 1.0);
+  state[18] = std::max(state[18], 1.0);
+  state[19] = std::max(state[19], 0.1);
+  state[20] = std::max(state[20], 0.1);
+
+  state[10] = std::min(state[17], 3000.0);
+  state[11] = std::min(state[18], 3000.0);
+  state[12] = std::min(state[19], 3000.0);
+  state[13] = std::min(state[20], 3000.0);
+
   // Control input: state should have 25 rows
   assert(state.size() == 25);
 
@@ -2097,17 +2127,16 @@ void Tractography::Follow3T(const int thread_id,
     const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = (mean_signal < _mean_signal_min);
 
-    bool dNormMSE_too_high = false;
-
     //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     //in_csf = rtopSignal < _rtop_min;
-    in_csf = fa < 10000;
-    dNormMSE_too_high = dNormMSE > _max_nmse;
+    bool in_rtop1 = fa < 10000;
+    //bool in_rtop = trace < 25000; // means 'in rtop' threshold
+    bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
     //stepnr > _max_length // Stop if the fiber is too long - Do we need this???
-    if (!is_brain || in_csf || is_curving || dNormMSE_too_high)
+    if (!is_brain || in_rtop1 || in_csf || is_curving || dNormMSE_too_high)
     {
       break;
     }
@@ -2587,9 +2616,9 @@ void Tractography::Step3T(const int thread_id,
   // cout << "m1 " << m1.transpose() << endl;
 
   ukfPrecisionType rtop1, rtop2, rtop3, rtopModel, rtopSignal;
-  stdVecState local_state = ConvertVector<State, stdVecState>(state);
+  //stdVecState local_state = ConvertVector<State, stdVecState>(state);
 
-  computeRTOPfromState(local_state, rtopModel, rtop1, rtop2, rtop3);
+  computeRTOPfromState(state, rtopModel, rtop1, rtop2, rtop3);
   computeRTOPfromSignal(rtopSignal, signal);
 
   fa = rtop1;
@@ -3184,8 +3213,7 @@ void Tractography::SwapState2T(State &state,
 }
 
 void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfPrecisionType fa2, const ukfPrecisionType fa3, const State &state,
-                          const ukfMatrixType p,
-                          UKFFiber &fiber, const ukfPrecisionType dNormMSE, const ukfPrecisionType trace, const ukfPrecisionType trace2)
+                          const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE, const ukfPrecisionType trace, const ukfPrecisionType trace2)
 {
   // if Noddi model is used Kappa is stored in trace, Vic in fa and Viso in freewater
   assert(_model->state_dim() == static_cast<int>(state.size()));
@@ -3201,7 +3229,7 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
     fiber.normMSE.push_back(dNormMSE);
   }
 
-  if ((_record_trace || _record_kappa) && !_record_rtop)
+  if ((_record_trace || _record_kappa) && !_record_rtop && !_diffusion_propagator)
   {
     fiber.trace.push_back(2 * (atan(1 / trace) / 3.14));
     if (_num_tensors >= 2)
@@ -3385,6 +3413,7 @@ void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
     fiber.w1.reserve(fiber_size);
     fiber.w2.reserve(fiber_size);
     fiber.w3.reserve(fiber_size);
+    fiber.free_water.reserve(fiber_size);
   }
   if (_record_cov)
   {

@@ -26,6 +26,7 @@ eval $BINARY \
  --maskFile $mask_path \
  --tracts $output_path \
  --seedsPerVoxel 1 \
+ --numThreads 8 \
  --diffusionPropagator \
  --minRTOP 20 \
  --recordNMSE \

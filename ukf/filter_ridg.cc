@@ -434,6 +434,8 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X,
         const mat33_t &D3 = diffusion(m3, lambdas31);
         const mat33_t &D3t = diffusion(m3, lambdas32);
 
+        ukfPrecisionType _w_slow_diffusion = 1.0 - _w_fast_diffusion;
+        ukfPrecisionType _not_w = 1.0 - w;
         // Reconstruct signal by the means of the model
         for (int j = 0; j < _signal_dim; ++j)
         {
@@ -441,9 +443,9 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X,
             const vec3_t &u = gradients[j];
 
             Y(j, i) =
-                (1.0 - w) * (w1 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D1 * u)) + (1.0 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D1t * u))) +
-                             w2 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D2 * u)) + (1.0 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D2t * u))) +
-                             w3 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D3 * u)) + (1.0 - _w_fast_diffusion) * std::exp(-b[j] * u.dot(D3t * u)))) +
+                _not_w * (w1 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D1 * u)) + _w_slow_diffusion * std::exp(-b[j] * u.dot(D1t * u))) +
+                          w2 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D2 * u)) + _w_slow_diffusion * std::exp(-b[j] * u.dot(D2t * u))) +
+                          w3 * (_w_fast_diffusion * std::exp(-b[j] * u.dot(D3 * u)) + _w_slow_diffusion * std::exp(-b[j] * u.dot(D3t * u)))) +
                 w * std::exp(-b[j] * u.dot(m_D_iso * u));
         }
     }

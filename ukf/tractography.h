@@ -261,7 +261,7 @@ private:
   void FiberReserve(UKFFiber &fiber, int fiber_size);
 
   /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the state parameters */
-  void computeRTOPfromState(stdVecState &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3);
+  void computeRTOPfromState(State &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3);
 
   /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the interpolated signal */
   void computeRTOPfromSignal(ukfPrecisionType &rtopSignal, ukfVectorType &signal);
