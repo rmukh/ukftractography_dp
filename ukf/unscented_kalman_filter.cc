@@ -159,7 +159,6 @@ void UnscentedKalmanFilter::Filter(const State &x,
   SigmaPoints(x, p, X); // doesnt change p, its const
 
   // X contains values > 1 for weights after sigma points
-
   if (localConstFilterModel->isConstrained())
   {
     // ukfMatrixType p_tmp = p; // will be changed in QuadProg

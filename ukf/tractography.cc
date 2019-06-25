@@ -1376,7 +1376,7 @@ void Tractography::computeRTOPfromState(State &state, ukfPrecisionType &rtop, uk
   state[5] = std::min(state[5], 3000.0);
   state[6] = std::min(state[6], 3000.0);
 
-    state[10] = std::max(state[10], 1.0);
+  state[10] = std::max(state[10], 1.0);
   state[11] = std::max(state[11], 1.0);
   state[12] = std::max(state[12], 0.1);
   state[13] = std::max(state[13], 0.1);
@@ -1386,15 +1386,25 @@ void Tractography::computeRTOPfromState(State &state, ukfPrecisionType &rtop, uk
   state[12] = std::min(state[12], 3000.0);
   state[13] = std::min(state[13], 3000.0);
 
-      state[17] = std::max(state[17], 1.0);
+  state[17] = std::max(state[17], 1.0);
   state[18] = std::max(state[18], 1.0);
   state[19] = std::max(state[19], 0.1);
   state[20] = std::max(state[20], 0.1);
 
-  state[10] = std::min(state[17], 3000.0);
-  state[11] = std::min(state[18], 3000.0);
-  state[12] = std::min(state[19], 3000.0);
-  state[13] = std::min(state[20], 3000.0);
+  state[17] = std::min(state[17], 3000.0);
+  state[18] = std::min(state[18], 3000.0);
+  state[19] = std::min(state[19], 3000.0);
+  state[20] = std::min(state[20], 3000.0);
+
+  state[21] = std::max(state[21], 0.0);
+  state[22] = std::max(state[22], 0.0);
+  state[23] = std::max(state[23], 0.0);
+  state[24] = std::max(state[24], 0.0);
+
+  state[21] = std::min(state[21], 1.0);
+  state[22] = std::min(state[22], 1.0);
+  state[23] = std::min(state[23], 1.0);
+  state[24] = std::min(state[24], 1.0);
 
   // Control input: state should have 25 rows
   assert(state.size() == 25);
@@ -2130,13 +2140,13 @@ void Tractography::Follow3T(const int thread_id,
     //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     //in_csf = rtopSignal < _rtop_min;
-    bool in_rtop1 = fa < 10000;
-    //bool in_rtop = trace < 25000; // means 'in rtop' threshold
+    //bool in_rtop1 = fa < 10000;
+    bool in_rtop = trace < 25000; // means 'in rtop' threshold
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
     //stepnr > _max_length // Stop if the fiber is too long - Do we need this???
-    if (!is_brain || in_rtop1 || in_csf || is_curving || dNormMSE_too_high)
+    if (!is_brain || in_rtop || in_csf || is_curving || dNormMSE_too_high)
     {
       break;
     }
