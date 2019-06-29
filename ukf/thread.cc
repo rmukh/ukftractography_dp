@@ -81,6 +81,9 @@ ITK_THREAD_RETURN_TYPE ThreadCallback(void *arg)
   WorkDistribution work_distribution = *str->work_distribution;
   WorkList &work_list_ = work_distribution[id_];
   std::vector<UKFFiber> &output_fiber_group_ = *str->output_fiber_group_;
+  std::vector<UKFFiber> &output_fiber_group_1_ = *str->output_fiber_group_1_;
+  std::vector<UKFFiber> &output_fiber_group_2_ = *str->output_fiber_group_2_;
+  std::vector<UKFFiber> &output_fiber_group_3_ = *str->output_fiber_group_3_;
   std::vector<SeedPointInfo> &seed_infos_ = *str->seed_infos_;
   std::vector<std::vector<SeedPointInfo>> &branching_seed_info_vec = *str->branching_seed_info_vec;
   std::vector<std::vector<BranchingSeedAffiliation>> &branching_seed_affiliation_vec =
@@ -91,7 +94,7 @@ ITK_THREAD_RETURN_TYPE ThreadCallback(void *arg)
     if (str->num_tensors_ == 3)
     {
       // For bi-exp ridg model only for now
-      str->tractography_->Follow3T(id_, seed_infos_[*it], output_fiber_group_[*it]);
+      str->tractography_->Follow3T(id_, seed_infos_[*it], output_fiber_group_[*it], output_fiber_group_1_[*it], output_fiber_group_2_[*it], output_fiber_group_3_[*it]);
     }
     else if (str->num_tensors_ == 2)
     {

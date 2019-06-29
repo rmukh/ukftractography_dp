@@ -172,9 +172,12 @@ public:
   */
   void Follow3T(const int thread_id, const SeedPointInfo &seed, UKFFiber &fiber);
 
-  void Follow3T_Other(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber,
-                      bool is_branching, std::vector<SeedPointInfo> &branching_seeds,
-                      std::vector<BranchingSeedAffiliation> &branching_seed_affiliation);
+  void Follow3T(const int thread_id, const SeedPointInfo &fiberStartSeed,
+                UKFFiber &fiber, UKFFiber &fiber1, UKFFiber &fiber2, UKFFiber &fiber3);
+
+  void Follow3T(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber,
+                bool is_branching, std::vector<SeedPointInfo> &branching_seeds,
+                std::vector<BranchingSeedAffiliation> &branching_seed_affiliation);
 
   /**
    * Follows one seed point for the 2 Tensor case
@@ -257,8 +260,12 @@ private:
               const State &state, const ukfMatrixType p, UKFFiber &fiber,
               const ukfPrecisionType dNormMSE, const ukfPrecisionType trace, const ukfPrecisionType trace2);
 
+  void RecordWeightTrack(const vec3_t &x, UKFFiber &fiber, ukfPrecisionType d1, ukfPrecisionType d2, ukfPrecisionType d3);
+
   /**  Reserving fiber array memory so as to avoid resizing at every step*/
   void FiberReserve(UKFFiber &fiber, int fiber_size);
+
+  void FiberReserveWeightTrack(UKFFiber &fiber, int fiber_size);
 
   /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the state parameters */
   void computeRTOPfromState(State &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3);

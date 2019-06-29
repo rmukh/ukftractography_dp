@@ -1330,6 +1330,9 @@ bool Tractography::Run()
     writeStatus = writer.Write(_output_file, _output_file_with_second_tensor,
                                fibers, _record_state, _store_glyphs, _noddi, _diffusion_propagator);
 
+    writeStatus = writer.WriteWeight(_output_file, fibers1);
+    writeStatus = writer.WriteWeight(_output_file, fibers2);
+    writeStatus = writer.WriteWeight(_output_file, fibers3);
     // TODO refactor!
     this->SetOutputPolyData(NULL);
   }
@@ -2167,13 +2170,119 @@ void Tractography::Follow3T(const int thread_id,
   FiberReserve(fiber, fiber_length);
 }
 
-void Tractography::Follow3T_Other(const int thread_id,
-                                  const size_t seed_index,
-                                  const SeedPointInfo &fiberStartSeed,
-                                  UKFFiber &fiber,
-                                  bool is_branching,
-                                  std::vector<SeedPointInfo> &branching_seeds,
-                                  std::vector<BranchingSeedAffiliation> &branching_seed_affiliation)
+void Tractography::Follow3T(const int thread_id,
+                            const SeedPointInfo &fiberStartSeed,
+                            UKFFiber &fiber,
+                            UKFFiber &fiber1,
+                            UKFFiber &fiber2,
+                            UKFFiber &fiber3)
+{
+  // For ridgelets bi-exp model only!
+  int fiber_size = 100;
+  int fiber_weight_size = fiber_size * 2 / 3;
+  int fiber_length = 0;
+  assert(_model->signal_dim() == _signal_data->GetSignalDimension() * 2);
+
+  // Unpack the fiberStartSeed information.
+  vec3_t x = fiberStartSeed.point;
+  State state = fiberStartSeed.state;
+  ukfMatrixType p(fiberStartSeed.covariance);
+  ukfPrecisionType fa = fiberStartSeed.fa;
+  ukfPrecisionType fa2 = fiberStartSeed.fa2;
+  ukfPrecisionType fa3 = fiberStartSeed.fa3;
+  ukfPrecisionType dNormMSE = 0; // no error at the fiberStartSeed
+  ukfPrecisionType trace = fiberStartSeed.trace;
+  ukfPrecisionType trace2 = fiberStartSeed.trace2;
+
+  //std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
+
+  //  Reserving fiber array memory so as to avoid resizing at every step
+  FiberReserve(fiber, fiber_size);
+  FiberReserveWeightTrack(fiber1, fiber_weight_size);
+
+  // Record start point.
+  Record(x, fa, fa2, fa3, state, p, fiber, dNormMSE, trace, trace2);
+  RecordWeightTrack(x, fiber1, state(0), state(1), state(2));
+  RecordWeightTrack(x, fiber2, state(7), state(8), state(9));
+  RecordWeightTrack(x, fiber3, state(14), state(15), state(16));
+
+  vec3_t m1 = fiberStartSeed.start_dir;
+  vec3_t m2, m3;
+
+  // Tract the fiber.
+  ukfMatrixType signal_tmp(_model->signal_dim(), 1);
+  ukfMatrixType state_tmp(_model->state_dim(), 1);
+
+  int stepnr = 0;
+  while (true)
+  {
+    //std::cout << "step " << stepnr << std::endl;
+    ++stepnr;
+
+    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, fa, fa2, fa3, trace, trace2);
+
+    //cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
+    // Check if we should abort following this fiber. We abort if we reach the
+    // CSF, if FA or GA get too small, if the curvature get's too high or if
+    // the fiber gets too long.
+    const bool is_brain = _signal_data->ScalarMaskValue(x) > 0; //_signal_data->Interp3ScalarMask(x) > 0.1;
+
+    state_tmp.col(0) = state;
+
+    _model->H(state_tmp, signal_tmp);
+
+    const ukfPrecisionType mean_signal = s2adc(signal_tmp);
+    bool in_csf = (mean_signal < _mean_signal_min);
+
+    //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
+
+    //in_csf = rtopSignal < _rtop_min;
+    //bool in_rtop1 = fa < 10000;
+    bool in_rtop = trace < 25000; // means 'in rtop' threshold
+    bool dNormMSE_too_high = dNormMSE > _max_nmse;
+    bool is_curving = curve_radius(fiber.position) < _min_radius;
+
+    //stepnr > _max_length // Stop if the fiber is too long - Do we need this???
+    if (!is_brain || in_rtop || in_csf || is_curving || dNormMSE_too_high)
+    {
+      break;
+    }
+
+    if (fiber_length >= fiber_size)
+    {
+      // If fibersize is more than initally allocated size resizing further
+      fiber_size += 100;
+      FiberReserve(fiber, fiber_size);
+      FiberReserveWeightTrack(fiber1, fiber_weight_size);
+      FiberReserveWeightTrack(fiber2, fiber_weight_size);
+      FiberReserveWeightTrack(fiber3, fiber_weight_size);
+    }
+
+    if ((stepnr + 1) % _steps_per_record == 0)
+    {
+      fiber_length++;
+      Record(x, fa, fa2, fa3, state, p, fiber, dNormMSE, trace, trace2);
+      if ((stepnr + 1) % 3 == 0)
+      {
+        RecordWeightTrack(x, fiber1, state(0), state(1), state(2));
+        RecordWeightTrack(x, fiber2, state(7), state(8), state(9));
+        RecordWeightTrack(x, fiber3, state(14), state(15), state(16));
+      }
+    }
+  }
+  FiberReserve(fiber, fiber_length);
+  FiberReserveWeightTrack(fiber1, fiber_weight_size);
+  FiberReserveWeightTrack(fiber2, fiber_weight_size);
+  FiberReserveWeightTrack(fiber3, fiber_weight_size);
+}
+
+void Tractography::Follow3T(const int thread_id,
+                            const size_t seed_index,
+                            const SeedPointInfo &fiberStartSeed,
+                            UKFFiber &fiber,
+                            bool is_branching,
+                            std::vector<SeedPointInfo> &branching_seeds,
+                            std::vector<BranchingSeedAffiliation> &branching_seed_affiliation)
 {
   int fiber_size = 100;
   int fiber_length = 0;
@@ -3382,6 +3491,26 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
   }
 }
 
+void Tractography::RecordWeightTrack(const vec3_t &x, UKFFiber &fiber, ukfPrecisionType d1, ukfPrecisionType d2, ukfPrecisionType d3)
+{
+  vec3_t x1;
+  vec3_t x2;
+
+  vec3_t dx;
+  {
+    const vec3_t voxel = _signal_data->voxel();
+    dx << d3 / voxel[0],
+        d2 / voxel[1],
+        d1 / voxel[2];
+
+    x1 = x + dx * _stepLength;
+    x2 = x - dx * _stepLength;
+  }
+
+  fiber.position.push_back(x1);
+  fiber.position.push_back(x2);
+}
+
 void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
 {
   // Reserving space for fiber
@@ -3429,4 +3558,10 @@ void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
   {
     fiber.covariance.reserve(fiber_size);
   }
+}
+
+void Tractography::FiberReserveWeightTrack(UKFFiber &fiber, int fiber_size)
+{
+  // Reserving space for fiber
+  fiber.position.reserve(fiber_size);
 }

@@ -631,6 +631,23 @@ int VtkWriter ::Write(const std::string &file_name,
   return EXIT_SUCCESS;
 }
 
+int VtkWriter ::WriteWeight(const std::string &file_name, const std::vector<UKFFiber> &fibers)
+{
+  if (fibers.size() == 0)
+  {
+    std::cout << "No fiber exists." << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  // polyData object to fill in
+  vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+  // handle fibers and tensors
+  this->PopulateFibersAndTensors(polyData, fibers);
+
+  WritePolyData(polyData, file_name.c_str());
+  return EXIT_SUCCESS;
+}
+
 int VtkWriter::WriteGlyphs(const std::string &file_name,
                            const std::vector<UKFFiber> &fibers)
 {

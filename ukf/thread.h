@@ -12,12 +12,12 @@
 #include "itkMacro.h"
 
 #if ITK_VERSION_MAJOR < 5
-#  include "itkMultiThreader.h"
+#include "itkMultiThreader.h"
 #else
-#  include "itkMultiThreaderBase.h"
+#include "itkMultiThreaderBase.h"
 #endif
 
-typedef std::vector<int>      WorkList;
+typedef std::vector<int> WorkList;
 typedef std::vector<WorkList> WorkDistribution;
 
 // class ProgressThread: public Thread
@@ -35,16 +35,19 @@ typedef std::vector<WorkList> WorkDistribution;
 WorkDistribution GenerateWorkDistribution(const int num_threads, const int total_num_works);
 
 struct thread_struct
-  {
+{
   Tractography *tractography_;
-  WorkDistribution* work_distribution;
-  std::vector<SeedPointInfo>* seed_infos_;
+  WorkDistribution *work_distribution;
+  std::vector<SeedPointInfo> *seed_infos_;
   bool branching_;
   int num_tensors_;
-  std::vector<UKFFiber>* output_fiber_group_;
-  std::vector<std::vector<SeedPointInfo> >* branching_seed_info_vec;
-  std::vector<std::vector<BranchingSeedAffiliation> >* branching_seed_affiliation_vec;
-  };
+  std::vector<UKFFiber> *output_fiber_group_;
+  std::vector<UKFFiber> *output_fiber_group_1_;
+  std::vector<UKFFiber> *output_fiber_group_2_;
+  std::vector<UKFFiber> *output_fiber_group_3_;
+  std::vector<std::vector<SeedPointInfo>> *branching_seed_info_vec;
+  std::vector<std::vector<BranchingSeedAffiliation>> *branching_seed_affiliation_vec;
+};
 
 #if ITK_VERSION_MAJOR >= 5
 extern itk::ITK_THREAD_RETURN_TYPE ThreadCallback(int id_, thread_struct *str);
