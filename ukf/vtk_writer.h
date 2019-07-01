@@ -68,10 +68,13 @@ public:
   void SetWriteCompressed(bool wc) { this->_writeCompressed = wc; }
 
   /**
-   * Writes the fibers and all values attached to them to a VTK file
+   * Writes the fibers and all values attached to them to a PolyData type
   */
   void PopulateFibersAndTensors(vtkPolyData *polyData,
                                 const std::vector<UKFFiber> &fibers);
+
+  void PopulateFibersDirs(vtkPolyData *polyData,
+                          const std::vector<UKFFiber> &fibers);
 
 protected:
   /**

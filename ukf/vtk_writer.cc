@@ -213,6 +213,57 @@ void VtkWriter ::PopulateFibersAndTensors(vtkPolyData *polyData,
   }
 }
 
+void VtkWriter ::PopulateFibersDirs(vtkPolyData *polyData,
+                                    const std::vector<UKFFiber> &fibers)
+{
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+
+  size_t num_fibers = fibers.size();
+  size_t num_points = 0;
+  for (size_t i = 0; i < num_fibers; ++i)
+  {
+    num_points += fibers[i].position.size();
+  }
+
+  for (size_t i = 0; i < num_fibers; ++i)
+  {
+    size_t fiber_size = fibers[i].position.size();
+    for (size_t j = 0; j < fiber_size; ++j)
+    {
+      vec3_t current = PointConvert(fibers[i].position[j]);
+      points->InsertNextPoint(current[0], current[1], current[2]);
+    }
+  }
+  polyData->SetPoints(points);
+
+  // do the lines
+  vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+
+  // Do loop for all fibers
+  vtkIdType counter = 0;
+  for (size_t i = 0; i < num_fibers; ++i)
+  {
+    size_t fiber_size = fibers[i].position.size();
+
+    for (size_t h = 0; h < (size_t)(fiber_size / 2); ++h)
+    {
+      vtkIdType *ids = new vtkIdType[2];
+      for (size_t j = 0; j < 2; ++j)
+      {
+        // each id should be unique
+        ids[j] = counter;
+        counter++;
+      }
+
+      vtkSmartPointer<vtkLine> curLine = vtkSmartPointer<vtkLine>::New();
+      curLine->Initialize(2, ids, points);
+      lines->InsertNextCell(curLine);
+      delete[] ids; // remove indecies for the next fiber
+    }
+  }
+  polyData->SetLines(lines);
+}
+
 void VtkWriter ::WritePolyData(vtkSmartPointer<vtkPolyData> pd, const char *filename) const
 {
   // Add version information to polydata as vtkStringArray
@@ -642,7 +693,7 @@ int VtkWriter ::WriteWeight(const std::string &file_name, const std::vector<UKFF
   // polyData object to fill in
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
   // handle fibers and tensors
-  this->PopulateFibersAndTensors(polyData, fibers);
+  this->PopulateFibersDirs(polyData, fibers);
 
   WritePolyData(polyData, file_name.c_str());
   return EXIT_SUCCESS;

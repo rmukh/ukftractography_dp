@@ -18,7 +18,7 @@ mask_path="/home/rinat/Desktop/ukftests/epi_corrected_tensormask.nrrd"
 seeds_path="/home/rinat/Desktop/ukftests/Segmentation-label_363x.nrrd"
 
 # OUTPUT FIBER
-output_path='/home/rinat/Desktop/ukftests/seeds_tc_363x_test.vtk'
+output_path='/home/rinat/Desktop/ukftests/adhd363/seeds_tc_363x_rtop25k_or_rtop10k.vtk'
 
 # --seedsFile $seeds_path \
 eval $BINARY \
@@ -41,4 +41,3 @@ echo "Output file name $output_path" | tee -a $logFile
 echo "CPU Runtime was $runtime sec."  | tee -a $logFile
 
 #diff $output_path $SRC/ukf/Data/Baseline/seeds_tc.vtk
-

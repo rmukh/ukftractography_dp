@@ -1163,12 +1163,18 @@ bool Tractography::Run()
   }
 
   std::vector<UKFFiber> raw_primary;
+  std::vector<UKFFiber> raw_primary_w1;
+  std::vector<UKFFiber> raw_primary_w2;
+  std::vector<UKFFiber> raw_primary_w3;
 
   {
     if (this->debug)
       std::cout << "Tracing " << primary_seed_infos.size() << " primary fibers:" << std::endl;
 
     raw_primary.resize(primary_seed_infos.size());
+    raw_primary_w1.resize(primary_seed_infos.size() * 2);
+    raw_primary_w2.resize(primary_seed_infos.size() * 2);
+    raw_primary_w3.resize(primary_seed_infos.size() * 2);
 
     WorkDistribution work_distribution = GenerateWorkDistribution(num_of_threads,
                                                                   static_cast<int>(primary_seed_infos.size()));
@@ -1188,6 +1194,9 @@ bool Tractography::Run()
     str.branching_ = _is_branching;
     str.num_tensors_ = _num_tensors;
     str.output_fiber_group_ = &raw_primary;
+    str.output_fiber_group_1_ = &raw_primary_w1;
+    str.output_fiber_group_2_ = &raw_primary_w2;
+    str.output_fiber_group_3_ = &raw_primary_w3;
     str.branching_seed_info_vec = new std::vector<std::vector<SeedPointInfo>>(num_of_threads);
     str.branching_seed_affiliation_vec = new std::vector<std::vector<BranchingSeedAffiliation>>(num_of_threads);
     for (int i = 0; i < num_of_threads; i++)
@@ -1330,9 +1339,11 @@ bool Tractography::Run()
     writeStatus = writer.Write(_output_file, _output_file_with_second_tensor,
                                fibers, _record_state, _store_glyphs, _noddi, _diffusion_propagator);
 
-    writeStatus = writer.WriteWeight(_output_file, fibers1);
-    writeStatus = writer.WriteWeight(_output_file, fibers2);
-    writeStatus = writer.WriteWeight(_output_file, fibers3);
+    std::string out_dir = _output_file;
+    out_dir.erase(_output_file.length() - 4);
+    writeStatus = writer.WriteWeight(out_dir + "_dir1.vtk", raw_primary_w1);
+    writeStatus = writer.WriteWeight(out_dir + "_dir2.vtk", raw_primary_w2);
+    writeStatus = writer.WriteWeight(out_dir + "_dir3.vtk", raw_primary_w3);
     // TODO refactor!
     this->SetOutputPolyData(NULL);
   }
@@ -2097,12 +2108,23 @@ void Tractography::Follow3T(const int thread_id,
   vec3_t x = fiberStartSeed.point;
   State state = fiberStartSeed.state;
   ukfMatrixType p(fiberStartSeed.covariance);
-  ukfPrecisionType fa = fiberStartSeed.fa;
-  ukfPrecisionType fa2 = fiberStartSeed.fa2;
-  ukfPrecisionType fa3 = fiberStartSeed.fa3;
+  /* 
+  I don't create new variables in a SeedPointInfo for rtop values and keep
+  everything in fa variables just to keep consistency with other models 
+  and also, to avoid making new variables which are used only in Bi-exp model.
+  I think think the idea of creating more new variables just for one model
+  is a pure redundancy. 
+  
+  To simplify code 'reading' and understanding I make a local rtop variables
+  in Follow3T and Step3T functions.
+  */
+  ukfPrecisionType rtop1 = fiberStartSeed.fa;
+  ukfPrecisionType rtop2 = fiberStartSeed.fa2;
+  ukfPrecisionType rtop3 = fiberStartSeed.fa3;
+  ukfPrecisionType rtopModel = fiberStartSeed.trace;
+  ukfPrecisionType rtopSignal = fiberStartSeed.trace2;
+
   ukfPrecisionType dNormMSE = 0; // no error at the fiberStartSeed
-  ukfPrecisionType trace = fiberStartSeed.trace;
-  ukfPrecisionType trace2 = fiberStartSeed.trace2;
 
   //std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
 
@@ -2110,7 +2132,7 @@ void Tractography::Follow3T(const int thread_id,
   FiberReserve(fiber, fiber_size);
 
   // Record start point.
-  Record(x, fa, fa2, fa3, state, p, fiber, dNormMSE, trace, trace2);
+  Record(x, rtop1, rtop2, rtop3, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
 
   vec3_t m1 = fiberStartSeed.start_dir;
   vec3_t m2, m3;
@@ -2125,7 +2147,7 @@ void Tractography::Follow3T(const int thread_id,
     //std::cout << "step " << stepnr << std::endl;
     ++stepnr;
 
-    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, fa, fa2, fa3, trace, trace2);
+    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
 
     //cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
     // Check if we should abort following this fiber. We abort if we reach the
@@ -2143,13 +2165,13 @@ void Tractography::Follow3T(const int thread_id,
     //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     //in_csf = rtopSignal < _rtop_min;
-    //bool in_rtop1 = fa < 10000;
-    bool in_rtop = trace < 25000; // means 'in rtop' threshold
+    bool in_rtop1 = rtop1 < 10000;
+    bool in_rtop = rtopModel < 25000; // means 'in rtop' threshold
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
     //stepnr > _max_length // Stop if the fiber is too long - Do we need this???
-    if (!is_brain || in_rtop || in_csf || is_curving || dNormMSE_too_high)
+    if (!is_brain || in_rtop || in_rtop1 || in_csf || is_curving || dNormMSE_too_high)
     {
       break;
     }
@@ -2164,7 +2186,7 @@ void Tractography::Follow3T(const int thread_id,
     if ((stepnr + 1) % _steps_per_record == 0)
     {
       fiber_length++;
-      Record(x, fa, fa2, fa3, state, p, fiber, dNormMSE, trace, trace2);
+      Record(x, rtop1, rtop2, rtop3, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
     }
   }
   FiberReserve(fiber, fiber_length);
@@ -2177,7 +2199,9 @@ void Tractography::Follow3T(const int thread_id,
                             UKFFiber &fiber2,
                             UKFFiber &fiber3)
 {
-  // For ridgelets bi-exp model only!
+  // For ridgelets bi-exp model only! 
+  // Debugging version of bi-exp model. Provides functionality
+  // to output every (out of 3) directions from the state vector
   int fiber_size = 100;
   int fiber_weight_size = fiber_size * 2 / 3;
   int fiber_length = 0;
@@ -2187,21 +2211,33 @@ void Tractography::Follow3T(const int thread_id,
   vec3_t x = fiberStartSeed.point;
   State state = fiberStartSeed.state;
   ukfMatrixType p(fiberStartSeed.covariance);
-  ukfPrecisionType fa = fiberStartSeed.fa;
-  ukfPrecisionType fa2 = fiberStartSeed.fa2;
-  ukfPrecisionType fa3 = fiberStartSeed.fa3;
-  ukfPrecisionType dNormMSE = 0; // no error at the fiberStartSeed
-  ukfPrecisionType trace = fiberStartSeed.trace;
-  ukfPrecisionType trace2 = fiberStartSeed.trace2;
+  /* 
+  I don't create new variables in a SeedPointInfo for rtop values and keep
+  everything in fa variables just to keep consistency with other models 
+  and also, to avoid making new variables which are used only in Bi-exp model.
+  I think think the idea of creating more new variables just for one model
+  is a pure redundancy. 
+  
+  To simplify code 'reading' and understanding I make a local rtop variables
+  in Follow3T and Step3T functions.
+  */
+  ukfPrecisionType rtop1 = fiberStartSeed.fa;
+  ukfPrecisionType rtop2 = fiberStartSeed.fa2;
+  ukfPrecisionType rtop3 = fiberStartSeed.fa3;
+  ukfPrecisionType rtopModel = fiberStartSeed.trace;
+  ukfPrecisionType rtopSignal = fiberStartSeed.trace2;
 
+  ukfPrecisionType dNormMSE = 0; // no error at the fiberStartSeed
   //std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
 
   //  Reserving fiber array memory so as to avoid resizing at every step
   FiberReserve(fiber, fiber_size);
   FiberReserveWeightTrack(fiber1, fiber_weight_size);
+  FiberReserveWeightTrack(fiber2, fiber_weight_size);
+  FiberReserveWeightTrack(fiber3, fiber_weight_size);
 
   // Record start point.
-  Record(x, fa, fa2, fa3, state, p, fiber, dNormMSE, trace, trace2);
+  Record(x, rtop1, rtop2, rtop3, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
   RecordWeightTrack(x, fiber1, state(0), state(1), state(2));
   RecordWeightTrack(x, fiber2, state(7), state(8), state(9));
   RecordWeightTrack(x, fiber3, state(14), state(15), state(16));
@@ -2219,7 +2255,7 @@ void Tractography::Follow3T(const int thread_id,
     //std::cout << "step " << stepnr << std::endl;
     ++stepnr;
 
-    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, fa, fa2, fa3, trace, trace2);
+    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
 
     //cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
     // Check if we should abort following this fiber. We abort if we reach the
@@ -2237,13 +2273,13 @@ void Tractography::Follow3T(const int thread_id,
     //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     //in_csf = rtopSignal < _rtop_min;
-    //bool in_rtop1 = fa < 10000;
-    bool in_rtop = trace < 25000; // means 'in rtop' threshold
+    bool in_rtop1 = rtop1 < 10000;
+    bool in_rtop = rtopModel < 25000; // means 'in rtop' threshold
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
     //stepnr > _max_length // Stop if the fiber is too long - Do we need this???
-    if (!is_brain || in_rtop || in_csf || is_curving || dNormMSE_too_high)
+    if (!is_brain || in_rtop || in_rtop1 || in_csf || is_curving || dNormMSE_too_high)
     {
       break;
     }
@@ -2261,7 +2297,7 @@ void Tractography::Follow3T(const int thread_id,
     if ((stepnr + 1) % _steps_per_record == 0)
     {
       fiber_length++;
-      Record(x, fa, fa2, fa3, state, p, fiber, dNormMSE, trace, trace2);
+      Record(x, rtop1, rtop2, rtop3, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
       if ((stepnr + 1) % 3 == 0)
       {
         RecordWeightTrack(x, fiber1, state(0), state(1), state(2));
@@ -2694,11 +2730,11 @@ void Tractography::Step3T(const int thread_id,
                           State &state,
                           ukfMatrixType &covariance,
                           ukfPrecisionType &dNormMSE,
-                          ukfPrecisionType &fa,
-                          ukfPrecisionType &fa2,
-                          ukfPrecisionType &fa3,
-                          ukfPrecisionType &trace,
-                          ukfPrecisionType &trace2)
+                          ukfPrecisionType &rtop1,
+                          ukfPrecisionType &rtop2,
+                          ukfPrecisionType &rtop3,
+                          ukfPrecisionType &rtopModel,
+                          ukfPrecisionType &rtopSignal)
 {
   // For ridgelets bi-exp model
   assert(static_cast<int>(covariance.cols()) == _model->state_dim() &&
@@ -2734,17 +2770,20 @@ void Tractography::Step3T(const int thread_id,
   // cout << "m1 state " << state(0) << " " << state(1) << " " << state(2) << endl;
   // cout << "m1 " << m1.transpose() << endl;
 
-  ukfPrecisionType rtop1, rtop2, rtop3, rtopModel, rtopSignal;
+  ukfPrecisionType _rtop1, _rtop2, _rtop3, _rtopModel, _rtopSignal;
   //stdVecState local_state = ConvertVector<State, stdVecState>(state);
 
-  computeRTOPfromState(state, rtopModel, rtop1, rtop2, rtop3);
-  computeRTOPfromSignal(rtopSignal, signal);
+  computeRTOPfromState(state, _rtopModel, _rtop1, _rtop2, _rtop3);
+  computeRTOPfromSignal(_rtopSignal, signal);
 
-  fa = rtop1;
-  fa2 = rtop2;
-  fa3 = rtop3;
-  trace = rtopModel;
-  trace2 = rtopSignal;
+  rtop1 = _rtop1;
+  rtop2 = _rtop2;
+  rtop3 = _rtop3;
+  rtopModel = _rtopModel;
+  rtopSignal = _rtopSignal;
+
+  // BELOW is a huge pile of code which might be useful in future or for
+  // debugging
 
   // ukfPrecisionType dot1 = m1.dot(old_dir);
   // ukfPrecisionType dot2 = m2.dot(old_dir);
@@ -3503,10 +3542,9 @@ void Tractography::RecordWeightTrack(const vec3_t &x, UKFFiber &fiber, ukfPrecis
         d2 / voxel[1],
         d1 / voxel[2];
 
-    x1 = x + dx * _stepLength;
-    x2 = x - dx * _stepLength;
+    x1 = x - dx * _stepLength;
+    x2 = x + dx * _stepLength;
   }
-
   fiber.position.push_back(x1);
   fiber.position.push_back(x2);
 }
