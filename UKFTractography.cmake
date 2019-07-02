@@ -85,6 +85,13 @@ find_package(SphericalRidgelets REQUIRED)
 
 #-----------------------------------------------------------------------------
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/common)
+set(UKF_STATIC)
+if(NOT BUILD_SHARED_LIBS)
+    set(UKF_STATIC 1)
+    if(WIN32)
+        add_definitions("-DUKF_STATIC")
+    endif()
+endif()
 add_subdirectory(ukf)
 add_subdirectory(UKFTractography)
 
