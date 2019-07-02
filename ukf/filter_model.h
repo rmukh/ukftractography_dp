@@ -272,9 +272,8 @@ inline ukfPrecisionType AngularSimilarity(vec3_t &x_sr, vec3_t &x_pred)
 
   if (den_a == 0.0 || den_b == 0.0)
   {
-    throw std::logic_error(
-        "cosine similarity is not defined whenever one or both "
-        "input vectors are zero-vectors.");
+    std::cout << "cosine similarity is not defined whenever one or both input vectors are zero-vectors." << std::endl;
+    throw;
   }
 
   return 1.0 - (std::acos(std::min(std::max(dot / (den_a * den_b), -1.0), 1.0)) / Pi);
