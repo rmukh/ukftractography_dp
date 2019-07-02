@@ -25,7 +25,7 @@ ukfPrecisionType l2fa(ukfPrecisionType l1, ukfPrecisionType l2, ukfPrecisionType
 ukfPrecisionType s2ga(const ukfMatrixType &signal)
 {
 
-  int n = signal.rows();
+  int n = static_cast<int>(signal.rows());
 
   assert(signal.cols() == 1);
 
@@ -52,7 +52,7 @@ ukfPrecisionType s2ga(const ukfMatrixType &signal)
 ukfPrecisionType s2adc(const ukfMatrixType &signal)
 {
 
-  int n = signal.rows();
+  int n = static_cast<int>(signal.rows());
 
   assert(signal.cols() == 1);
 
@@ -68,7 +68,7 @@ ukfPrecisionType s2adc(const ukfMatrixType &signal)
 
 ukfPrecisionType curve_radius(const stdVec_t &fiber)
 {
-  int length = fiber.size();
+  size_t length = fiber.size();
 
   if (length < 3)
   {

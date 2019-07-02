@@ -20,7 +20,6 @@
 class vtkWriter
 {
 public:
-
   /** Constructor */
   vtkWriter()
   {
@@ -35,43 +34,41 @@ public:
   bool Run();
 
   /** Set the Output vtk path */
-  void SetOutputPath(const std::string& path);
+  void SetOutputPath(const std::string &path);
 
   /** Set the pointer to the fiber vector */
-  void SetInputFibers(std::vector<Fiber> & fibers);
+  void SetInputFibers(std::vector<Fiber> &fibers);
 
 protected:
-
   /** The output path of the vtk file */
-  const char * _sOutputPath;
+  const char *_sOutputPath;
 
   /** Pointer to the fiber vector */
-  std::vector<Fiber> * _fibers;
+  std::vector<Fiber> *_fibers;
 
   /** Number of points of all fibers */
-  int _nNumOfPoints;
+  size_t _nNumOfPoints;
 
   /** Number of fibers */
-  int _nNumOfFibers;
+  size_t _nNumOfFibers;
 
   /** Number of scalar fields of the fiber */
-  int _nNumOfFields;
+  size_t _nNumOfFields;
 
   /** The respective lengths of each fiber */
   std::vector<int> _fiberLengths;
 
   /** Write the top line of the vtk file */
-  void WriteHeader(std::ofstream & output);
+  void WriteHeader(std::ofstream &output);
 
   /** Write the points section */
-  void WritePoints(std::ofstream & output);
+  void WritePoints(std::ofstream &output);
 
   /** Write the lines section */
-  void WriteLines(std::ofstream & output);
+  void WriteLines(std::ofstream &output);
 
   /** Write the scalar fields */
-  void WriteFields(std::ofstream & output);
-
+  void WriteFields(std::ofstream &output);
 };
 
-#endif  // VTKWRITER_H_
+#endif // VTKWRITER_H_

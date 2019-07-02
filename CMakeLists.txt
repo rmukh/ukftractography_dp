@@ -77,6 +77,7 @@ set(ADDITIONAL_C_FLAGS "" CACHE STRING "Additional C Flags")
 mark_as_advanced(ADDITIONAL_C_FLAGS)
 set(ADDITIONAL_CXX_FLAGS "" CACHE STRING "Additional CXX Flags")
 mark_as_advanced(ADDITIONAL_CXX_FLAGS)
+
 #-----------------------------------------------------------------------------
 # Required by Slicer extension build system for reasons. See
 #    https://github.com/Slicer/Slicer/commit/b160ec13f276a86306513954ef8b08a5332afc2e

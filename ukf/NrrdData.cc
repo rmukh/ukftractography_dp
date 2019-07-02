@@ -242,9 +242,9 @@ void NrrdData::GetSeeds(const std::vector<int> &labels,
     std::vector<int>::const_iterator cit;
 
     // Go through the volume.
-    int nx = _seed_nrrd->axis[2].size;
-    int ny = _seed_nrrd->axis[1].size;
-    int nz = _seed_nrrd->axis[0].size;
+    size_t nx = _seed_nrrd->axis[2].size;
+    size_t ny = _seed_nrrd->axis[1].size;
+    size_t nz = _seed_nrrd->axis[0].size;
     assert(_seed_data);
 
     if (!(nx == _dim[0] && ny == _dim[1] && nz == _dim[2]))
@@ -252,16 +252,16 @@ void NrrdData::GetSeeds(const std::vector<int> &labels,
       itkGenericExceptionMacro(<< "Labelmap ROI volume dimensions DO NOT match DWI dimensions");
     }
 
-    for (int i = 0; i < nx; ++i)
+    for (size_t i = 0; i < nx; ++i)
     {
-      for (int j = 0; j < ny; ++j)
+      for (size_t j = 0; j < ny; ++j)
       {
-        for (int k = 0; k < nz; ++k)
+        for (size_t k = 0; k < nz; ++k)
         {
           for (cit = labels.begin(); cit != labels.end(); ++cit)
           {
             int value = 0;
-            int index = ny * nz * i + nz * j + k;
+            size_t index = ny * nz * i + nz * j + k;
 
             switch (_seed_data_type)
             {
@@ -515,7 +515,7 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
 
   // std::cout << "dim: " << _dim[0] << " " << _dim[1] << " " << _dim[2] << std::endl;
 
-  _num_gradients = _data_nrrd->axis[0].size;
+  _num_gradients = static_cast<int>(_data_nrrd->axis[0].size);
   assert(_num_gradients == static_cast<int>(gradientCount));
 
   // Get the measurement frame.
@@ -596,7 +596,7 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
   // To get the data for the other half-sphere, simply reverse the gradients and duplicate the signals
   for (unsigned int i = 0; i < gradientCount; ++i)
   {
-    const unsigned int dupIndex = i + gradientCount;
+    const unsigned int dupIndex = static_cast<unsigned int>(i + gradientCount);
     // Duplicate and reverse direction.
     _gradients.push_back(-_gradients[i]);
     _b_values[dupIndex] = _b_values[i];
