@@ -21,7 +21,6 @@ set(MODULE_TARGET_LIBRARIES
   ${CMAKE_THREAD_LIBS_INIT}
   ${VTK_LIBRARIES}
   ${TEEM_LIB} ${ZLIB_LIBRARIES}
-  ${SphericalRidgelets_LIBRARY}
   )
 
 #-----------------------------------------------------------------------------
