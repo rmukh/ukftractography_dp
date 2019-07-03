@@ -21,12 +21,14 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
 
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_TAG
-    "09526ca7d84007795d4936878cc7d10439a396e9"
+    "46b48090b9c8b7c315f22de9dbf72b165eff8183"
+    QUIET
   )
   
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_REPOSITORY 
     "${git_protocol}://github.com/rmukh/spherical_ridgelets.git"
+    QUIET
   )
 
   set(EP_SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj})
@@ -50,13 +52,14 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
       -DITK_DIR:PATH=${ITK_DIR}
       -DEigen3_DIR:PATH=${Eigen_DIR}
       -DSPH_DIR:PATH=${EP_SOURCE_DIR}/Ridgelets/SphericalRidgelets
+      -DCMAKE_INSTALL_LIBDIR:PATH=${EP_INSTALL_DIR}/lib
     DEPENDS
       ${${proj}_DEPENDENCIES}
     )
 
   set(SphericalRidgelets_DIR ${EP_INSTALL_DIR}/lib/cmake/SphericalRidgelets)
   set(SphericalRidgelets_ROOT ${EP_INSTALL_DIR})
-  set(SphericalRidgelets_INCLUDE_DIR ${EP_INSTALL_DIR}/include/SphericalRidgelets)
+  set(SphericalRidgelets_INCLUDE_DIR ${EP_INSTALL_DIR}/include)
   if(WIN32)
     set(SphericalRidgelets_LIBRARY ${EP_INSTALL_DIR}/lib/Spherical_Ridgelets.lib)
   else()

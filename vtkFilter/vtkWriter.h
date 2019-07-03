@@ -56,7 +56,7 @@ protected:
   size_t _nNumOfFields;
 
   /** The respective lengths of each fiber */
-  std::vector<int> _fiberLengths;
+  std::vector<size_t> _fiberLengths;
 
   /** Write the top line of the vtk file */
   void WriteHeader(std::ofstream &output);
