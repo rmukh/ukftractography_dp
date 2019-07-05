@@ -2165,8 +2165,8 @@ void Tractography::Follow3T(const int thread_id,
     //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     //in_csf = rtopSignal < _rtop_min;
-    bool in_rtop1 = rtop1 < 10000;
-    bool in_rtop = rtopModel < 25000; // means 'in rtop' threshold
+    bool in_rtop1 = rtop1 < 5000;
+    bool in_rtop = rtopModel < 17000; // means 'in rtop' threshold
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
@@ -2273,9 +2273,9 @@ void Tractography::Follow3T(const int thread_id,
     //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     //in_csf = rtopSignal < _rtop_min;
-    bool in_rtop1 = rtop1 < 4000;
+    bool in_rtop1 = rtop1 < 2000;
     bool is_high_fw = state(24) > 0.7;
-    bool in_rtop = rtopModel < 25000; // means 'in rtop' threshold
+    bool in_rtop = rtopModel < 15000; // means 'in rtop' threshold
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
