@@ -18,7 +18,7 @@ identical) and the other one uses a full tensor representation.
 __Authors__:
 Yogesh Rathi (yogesh@bwh.harvard.edu), Stefan Lienhard, Yinpeng Li, Martin
 Styner, Ipek Oguz, Yundi Shi, Christian Baumgartner (c.f.baumgartner@gmail.com)
-Ryan Eckbo
+Ryan Eckbo, Rinat Mukhometzianov
 
 For references and further documentation, please see the [Slicer module homepage](https://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/UKFTractography).
 
