@@ -341,11 +341,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     ukf_tell(l_Rs, "Rs");
   }
 
-  if (l_stepLength == 0.3 && diffusionPropagator)
-  {
-    ukf_setAndTell(l_stepLength, 0.5, "stepLength");
-  }
-  else if (l_stepLength == 0.0)
+  if (l_stepLength == 0.0)
   {
     if (diffusionPropagator)
     {

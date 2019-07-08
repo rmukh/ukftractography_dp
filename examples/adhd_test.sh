@@ -31,6 +31,7 @@ eval $BINARY \
  --recordNMSE \
  --recordWeights \
  --recordRTOP \
+ --stepLength 0.5 \
  --seedsFile $seeds_path \
  --numTensor 3 | tee $logFile
  end=`date +%s`
