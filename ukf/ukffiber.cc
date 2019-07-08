@@ -28,6 +28,8 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
   const bool record_w1 = !raw_primary[0].w1.empty();
   const bool record_w2 = !raw_primary[0].w2.empty();
   const bool record_w3 = !raw_primary[0].w3.empty();
+  const bool record_w1w2angle = !raw_primary[0].w1w2angle.empty();
+  const bool record_w1w3angle = !raw_primary[0].w1w3angle.empty();
 
   const int num_primary_fibers = branches_only ? 0 : num_half_fibers / 2;
   const int num_branches = static_cast<int>(raw_branch.size());
@@ -136,6 +138,14 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
     {
       fibers[counter].w3.resize(num_points_on_primary_fiber[i]);
     }
+    if (record_w1w2angle)
+    {
+      fibers[counter].w1w2angle.resize(num_points_on_primary_fiber[i]);
+    }
+    if (record_w1w3angle)
+    {
+      fibers[counter].w1w3angle.resize(num_points_on_primary_fiber[i]);
+    }
     if (record_normMSE)
     {
       fibers[counter].normMSE.resize(num_points_on_primary_fiber[i]);
@@ -188,6 +198,14 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       {
         fibers[counter].w3[k] = first_half.w3[j];
       }
+      if (record_w1w2angle)
+      {
+        fibers[counter].w1w2angle[k] = first_half.w1w2angle[j];
+      }
+      if (record_w1w3angle)
+      {
+        fibers[counter].w1w3angle[k] = first_half.w1w3angle[j];
+      }
       if (record_normMSE)
       {
         fibers[counter].normMSE[k] = first_half.normMSE[j];
@@ -238,6 +256,14 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       if (record_w3)
       {
         fibers[counter].w3[k] = second_half.w3[j];
+      }
+      if (record_w1w2angle)
+      {
+        fibers[counter].w1w2angle[k] = second_half.w1w2angle[j];
+      }
+      if (record_w1w3angle)
+      {
+        fibers[counter].w1w3angle[k] = second_half.w1w3angle[j];
       }
       if (record_normMSE)
       {
@@ -328,6 +354,14 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
     {
       fibers[counter].w3.resize(num_points_on_branch[i]);
     }
+    if (record_w1w2angle)
+    {
+      fibers[counter].w1w2angle.resize(num_points_on_branch[i]);
+    }
+    if (record_w1w3angle)
+    {
+      fibers[counter].w1w3angle.resize(num_points_on_branch[i]);
+    }
     if (record_normMSE)
     {
       fibers[counter].normMSE.resize(num_points_on_branch[i]);
@@ -379,6 +413,14 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       if (record_w3)
       {
         fibers[counter].w3[k] = first_half.w3[j];
+      }
+      if (record_w1w2angle)
+      {
+        fibers[counter].w1w2angle[k] = first_half.w1w2angle[j];
+      }
+      if (record_w1w3angle)
+      {
+        fibers[counter].w1w3angle[k] = first_half.w1w3angle[j];
       }
       if (record_normMSE)
       {
@@ -432,6 +474,14 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       {
         fibers[counter].w3[k] = second_half.w3[j];
       }
+      if (record_w1w2angle)
+      {
+        fibers[counter].w1w2angle[k] = second_half.w1w2angle[j];
+      }
+      if (record_w1w3angle)
+      {
+        fibers[counter].w1w3angle[k] = second_half.w1w3angle[j];
+      }
       if (record_normMSE)
       {
         fibers[counter].normMSE[k] = second_half.normMSE[j];
@@ -482,6 +532,14 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       if (record_w3)
       {
         fibers[counter].w3[k] = branch.w3[j];
+      }
+      if (record_w1w2angle)
+      {
+        fibers[counter].w1w2angle[k] = branch.w1w2angle[j];
+      }
+      if (record_w1w3angle)
+      {
+        fibers[counter].w1w3angle[k] = branch.w1w3angle[j];
       }
       if (record_normMSE)
       {

@@ -2199,7 +2199,7 @@ void Tractography::Follow3T(const int thread_id,
                             UKFFiber &fiber2,
                             UKFFiber &fiber3)
 {
-  // For ridgelets bi-exp model only! 
+  // For ridgelets bi-exp model only!
   // Debugging version of bi-exp model. Provides functionality
   // to output every (out of 3) directions from the state vector
   int fiber_size = 100;
@@ -2230,13 +2230,13 @@ void Tractography::Follow3T(const int thread_id,
   ukfPrecisionType dNormMSE = 0; // no error at the fiberStartSeed
   //std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
 
-  //  Reserving fiber array memory so as to avoid resizing at every step
+  // Reserving fiber array memory so as to avoid resizing at every step
   FiberReserve(fiber, fiber_size);
   FiberReserveWeightTrack(fiber1, fiber_weight_size);
   FiberReserveWeightTrack(fiber2, fiber_weight_size);
   FiberReserveWeightTrack(fiber3, fiber_weight_size);
 
-  // Record start point.
+  // Record start point
   Record(x, rtop1, rtop2, rtop3, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
   RecordWeightTrack(x, fiber1, state(0), state(1), state(2));
   RecordWeightTrack(x, fiber2, state(7), state(8), state(9));
@@ -2252,12 +2252,12 @@ void Tractography::Follow3T(const int thread_id,
   int stepnr = 0;
   while (true)
   {
-    //std::cout << "step " << stepnr << std::endl;
+    // std::cout << "step " << stepnr << std::endl;
     ++stepnr;
 
     Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
 
-    //cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
+    // cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
     // Check if we should abort following this fiber. We abort if we reach the
     // CSF, if FA or GA get too small, if the curvature get's too high or if
     // the fiber gets too long.
@@ -2270,16 +2270,16 @@ void Tractography::Follow3T(const int thread_id,
     const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = (mean_signal < _mean_signal_min);
 
-    //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
+    // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
-    //in_csf = rtopSignal < _rtop_min;
+    // in_csf = rtopSignal < _rtop_min;
     bool in_rtop1 = rtop1 < 4000;
     bool is_high_fw = state(24) > 0.7;
     bool in_rtop = rtopModel < 25000; // means 'in rtop' threshold
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
-    //stepnr > _max_length // Stop if the fiber is too long - Do we need this???
+    // stepnr > _max_length // Stop if the fiber is too long - Do we need this???
     if (!is_brain || in_rtop || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high)
     {
       break;
@@ -3427,6 +3427,18 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
     fiber.w2.push_back(w2);
     fiber.w3.push_back(w3);
     fiber.free_water.push_back(wiso);
+
+    /* Angles */
+    State store_state(state);
+    vec3_t dir1;
+    initNormalized(dir1, store_state[0], store_state[1], store_state[2]);
+    vec3_t dir2;
+    initNormalized(dir2, store_state[7], store_state[8], store_state[9]);
+    vec3_t dir3;
+    initNormalized(dir3, store_state[14], store_state[15], store_state[16]);
+
+    fiber.w1w2angle.push_back(RadToDeg(std::acos(dir1.dot(dir2))));
+    fiber.w1w3angle.push_back(RadToDeg(std::acos(dir1.dot(dir3))));
   }
 
   if (_record_Viso)
@@ -3592,6 +3604,8 @@ void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
     fiber.w2.reserve(fiber_size);
     fiber.w3.reserve(fiber_size);
     fiber.free_water.reserve(fiber_size);
+    fiber.w1w2angle.reserve(fiber_size);
+    fiber.w1w3angle.reserve(fiber_size);
   }
   if (_record_cov)
   {

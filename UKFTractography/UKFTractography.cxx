@@ -21,6 +21,7 @@
 
 extern "C"
 {
+
   int ModuleEntryPoint(int argc, char **argv)
   {
     UKFSettings ukf_settings;
@@ -39,9 +40,8 @@ extern "C"
 #if ITK_VERSION_MAJOR >= 5
     const int actualNumThreadsUsed = itk::MultiThreaderBase::GetGlobalDefaultNumberOfThreads();
 #else
-    const int actualNumThreadsUsed = itk::MultiThreader::GetGlobalDefaultNumberOfThreads();//1; //itk::MultiThreader::GetGlobalDefaultNumberOfThreads();
+    const int actualNumThreadsUsed = itk::MultiThreader::GetGlobalDefaultNumberOfThreads();
 #endif
-
     ukf_settings.num_threads = actualNumThreadsUsed;
     {
       std::cout << "Found " << actualNumThreadsUsed << " cores on your system." << std::endl;
@@ -69,7 +69,9 @@ extern "C"
       {
         itkGenericExceptionMacro(<< "::LoadFiles failed with unknown error.");
       }
+
       tract->UpdateFilterModelType();
+
       // Run the tractography.
       writeStatus = tract->Run();
     }

@@ -257,8 +257,8 @@ private:
    * file at the end.
   */
   void Record(const vec3_t &x, const ukfPrecisionType fa, const ukfPrecisionType fa2, const ukfPrecisionType fa3,
-              const State &state, const ukfMatrixType p, UKFFiber &fiber,
-              const ukfPrecisionType dNormMSE, const ukfPrecisionType trace, const ukfPrecisionType trace2);
+              const State &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
+              const ukfPrecisionType trace, const ukfPrecisionType trace2);
 
   void RecordWeightTrack(const vec3_t &x, UKFFiber &fiber, ukfPrecisionType d1, ukfPrecisionType d2, ukfPrecisionType d3);
 

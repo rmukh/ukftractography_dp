@@ -588,6 +588,42 @@ int VtkWriter ::Write(const std::string &file_name,
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
+  if (fibers[0].w1w2angle.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> w1w2angle = vtkSmartPointer<vtkFloatArray>::New();
+    w1w2angle->SetNumberOfComponents(1);
+    w1w2angle->Allocate(num_points);
+    w1w2angle->SetName("d1_d2_angle");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        w1w2angle->InsertNextValue(fibers[i].w1w2angle[j]);
+      }
+    }
+    int idx = pointData->AddArray(w1w2angle);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
+  if (fibers[0].w1w3angle.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> w1w3angle = vtkSmartPointer<vtkFloatArray>::New();
+    w1w3angle->SetNumberOfComponents(1);
+    w1w3angle->Allocate(num_points);
+    w1w3angle->SetName("d1_d3_angle");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        w1w3angle->InsertNextValue(fibers[i].w1w3angle[j]);
+      }
+    }
+    int idx = pointData->AddArray(w1w3angle);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
   if (fibers[0].normMSE.size() > 0)
   {
     ukfPrecisionType nmse_sum(0);

@@ -48,6 +48,9 @@ struct UKFFiber
   std::vector<ukfPrecisionType> w1;
   std::vector<ukfPrecisionType> w2;
   std::vector<ukfPrecisionType> w3;
+  /** Angles (diffussion propagator, bi-exponential) */
+  std::vector<ukfPrecisionType> w1w2angle;
+  std::vector<ukfPrecisionType> w1w3angle;
 };
 
 /**

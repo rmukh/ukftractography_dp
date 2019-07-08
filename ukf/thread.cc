@@ -70,7 +70,6 @@ itk::ITK_THREAD_RETURN_TYPE ThreadCallback(int id_, thread_struct *str)
 ITK_THREAD_RETURN_TYPE ThreadCallback(void *arg)
 #endif
 {
-
 #if ITK_VERSION_MAJOR >= 5
 #else
   int id_ =
@@ -86,8 +85,7 @@ ITK_THREAD_RETURN_TYPE ThreadCallback(void *arg)
   std::vector<UKFFiber> &output_fiber_group_3_ = *str->output_fiber_group_3_;
   std::vector<SeedPointInfo> &seed_infos_ = *str->seed_infos_;
   std::vector<std::vector<SeedPointInfo>> &branching_seed_info_vec = *str->branching_seed_info_vec;
-  std::vector<std::vector<BranchingSeedAffiliation>> &branching_seed_affiliation_vec =
-      *str->branching_seed_affiliation_vec;
+  std::vector<std::vector<BranchingSeedAffiliation>> &branching_seed_affiliation_vec = *str->branching_seed_affiliation_vec;
 
   for (WorkList::const_iterator it = work_list_.begin(); it != work_list_.end(); it++)
   {
