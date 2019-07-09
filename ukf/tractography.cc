@@ -1163,18 +1163,21 @@ bool Tractography::Run()
   }
 
   std::vector<UKFFiber> raw_primary;
-  std::vector<UKFFiber> raw_primary_w1;
-  std::vector<UKFFiber> raw_primary_w2;
-  std::vector<UKFFiber> raw_primary_w3;
+
+  // Output directions
+  // std::vector<UKFFiber> raw_primary_w1;
+  // std::vector<UKFFiber> raw_primary_w2;
+  // std::vector<UKFFiber> raw_primary_w3;
 
   {
     if (this->debug)
       std::cout << "Tracing " << primary_seed_infos.size() << " primary fibers:" << std::endl;
 
     raw_primary.resize(primary_seed_infos.size());
-    raw_primary_w1.resize(primary_seed_infos.size() * 2);
-    raw_primary_w2.resize(primary_seed_infos.size() * 2);
-    raw_primary_w3.resize(primary_seed_infos.size() * 2);
+    // Output directions
+    // raw_primary_w1.resize(primary_seed_infos.size() * 2);
+    // raw_primary_w2.resize(primary_seed_infos.size() * 2);
+    // raw_primary_w3.resize(primary_seed_infos.size() * 2);
 
     WorkDistribution work_distribution = GenerateWorkDistribution(num_of_threads,
                                                                   static_cast<int>(primary_seed_infos.size()));
@@ -1194,9 +1197,11 @@ bool Tractography::Run()
     str.branching_ = _is_branching;
     str.num_tensors_ = _num_tensors;
     str.output_fiber_group_ = &raw_primary;
-    str.output_fiber_group_1_ = &raw_primary_w1;
-    str.output_fiber_group_2_ = &raw_primary_w2;
-    str.output_fiber_group_3_ = &raw_primary_w3;
+
+    // Output directions
+    // str.output_fiber_group_1_ = &raw_primary_w1;
+    // str.output_fiber_group_2_ = &raw_primary_w2;
+    // str.output_fiber_group_3_ = &raw_primary_w3;
     str.branching_seed_info_vec = new std::vector<std::vector<SeedPointInfo>>(num_of_threads);
     str.branching_seed_affiliation_vec = new std::vector<std::vector<BranchingSeedAffiliation>>(num_of_threads);
     for (int i = 0; i < num_of_threads; i++)
@@ -1339,11 +1344,13 @@ bool Tractography::Run()
     writeStatus = writer.Write(_output_file, _output_file_with_second_tensor,
                                fibers, _record_state, _store_glyphs, _noddi, _diffusion_propagator);
 
-    std::string out_dir = _output_file;
-    out_dir.erase(_output_file.length() - 4);
-    writeStatus = writer.WriteWeight(out_dir + "_dir1.vtk", raw_primary_w1);
-    writeStatus = writer.WriteWeight(out_dir + "_dir2.vtk", raw_primary_w2);
-    writeStatus = writer.WriteWeight(out_dir + "_dir3.vtk", raw_primary_w3);
+
+    // Output directions
+    // std::string out_dir = _output_file;
+    // out_dir.erase(_output_file.length() - 4);
+    // writeStatus = writer.WriteWeight(out_dir + "_dir1.vtk", raw_primary_w1);
+    // writeStatus = writer.WriteWeight(out_dir + "_dir2.vtk", raw_primary_w2);
+    // writeStatus = writer.WriteWeight(out_dir + "_dir3.vtk", raw_primary_w3);
     // TODO refactor!
     this->SetOutputPolyData(NULL);
   }
@@ -2162,16 +2169,18 @@ void Tractography::Follow3T(const int thread_id,
     const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = (mean_signal < _mean_signal_min);
 
-    //ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
+    // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
-    //in_csf = rtopSignal < _rtop_min;
-    bool in_rtop1 = rtop1 < 5000;
-    bool in_rtop = rtopModel < 17000; // means 'in rtop' threshold
+    // in_csf = rtopSignal < _rtop_min;
+    bool in_rtop1 = rtop1 < 2000;
+
+    bool is_high_fw = state(24) > 0.7;
+    bool in_rtop = rtopModel < 15000; // means 'in rtop' threshold
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
-    //stepnr > _max_length // Stop if the fiber is too long - Do we need this???
-    if (!is_brain || in_rtop || in_rtop1 || in_csf || is_curving || dNormMSE_too_high)
+    // stepnr > _max_length // Stop if the fiber is too long - Do we need this???
+    if (!is_brain || in_rtop || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high)
     {
       break;
     }

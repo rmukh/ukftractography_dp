@@ -42,9 +42,12 @@ struct thread_struct
   bool branching_;
   int num_tensors_;
   std::vector<UKFFiber> *output_fiber_group_;
-  std::vector<UKFFiber> *output_fiber_group_1_;
-  std::vector<UKFFiber> *output_fiber_group_2_;
-  std::vector<UKFFiber> *output_fiber_group_3_;
+
+  // Output groups for directions
+  // std::vector<UKFFiber> *output_fiber_group_1_;
+  // std::vector<UKFFiber> *output_fiber_group_2_;
+  // std::vector<UKFFiber> *output_fiber_group_3_;
+  
   std::vector<std::vector<SeedPointInfo>> *branching_seed_info_vec;
   std::vector<std::vector<BranchingSeedAffiliation>> *branching_seed_affiliation_vec;
 };

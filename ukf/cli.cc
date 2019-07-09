@@ -208,7 +208,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     }
     else if (diffusionPropagator)
     {
-      ukf_setAndTell(l_Qm, 0.0001, "Qm");
+      ukf_setAndTell(l_Qm, 0.001, "Qm");
     }
     else
     {
