@@ -2172,7 +2172,7 @@ void Tractography::Follow3T(const int thread_id,
     // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     // in_csf = rtopSignal < _rtop_min;
-    bool in_rtop1 = rtop1 < 2000;
+    bool in_rtop1 = rtop1 < 1000;
 
     bool is_high_fw = state(24) > 0.7;
     bool in_rtop = rtopModel < 15000; // means 'in rtop' threshold

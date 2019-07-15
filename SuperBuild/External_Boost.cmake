@@ -61,32 +61,32 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
 
   if(MSVC)
     if(MSVC_VERSION GREATER_EQUAL 1400 AND MSVC_VERSION LESS 1500)
-	  list(APPEND Boost_b2_Command toolset=msvc-8.0)
+	  set(boost_toolset toolset=msvc-8.0)
     elseif(MSVC_VERSION GREATER_EQUAL 1500 AND MSVC_VERSION LESS 1600)
-	  list(APPEND Boost_b2_Command toolset=msvc-9.0)
+	  set(boost_toolset toolset=msvc-9.0)
     elseif(MSVC_VERSION GREATER_EQUAL 1600 AND MSVC_VERSION LESS 1700)
-	  list(APPEND Boost_b2_Command toolset=msvc-10.0)
+	  set(boost_toolset toolset=msvc-10.0)
     elseif(MSVC_VERSION GREATER_EQUAL 1700 AND MSVC_VERSION LESS 1800)
-	  list(APPEND Boost_b2_Command toolset=msvc-11.0)
+	  set(boost_toolset toolset=msvc-11.0)
     elseif(MSVC_VERSION GREATER_EQUAL 1800 AND MSVC_VERSION LESS 1900)
-	  list(APPEND Boost_b2_Command toolset=msvc-12.0)
+	  set(boost_toolset toolset=msvc-12.0)
     elseif(MSVC_VERSION GREATER_EQUAL 1900 AND MSVC_VERSION LESS 1910)
-	  list(APPEND Boost_b2_Command toolset=msvc-14.0)
+	  set(boost_toolset toolset=msvc-14.0)
     elseif(MSVC_VERSION GREATER_EQUAL 1910 AND MSVC_VERSION LESS 1920)
-	  list(APPEND Boost_b2_Command toolset=msvc-14.1)
+	  set(boost_toolset toolset=msvc-14.1)
     elseif(MSVC_VERSION GREATER_EQUAL 1920 AND MSVC_VERSION LESS 1922)
-	  list(APPEND Boost_b2_Command toolset=msvc-14.2)
+	  set(boost_toolset toolset=msvc-14.2)
     else()	
 	  message(FATAL_ERROR "Unknown MSVC compiler version [${MSVC_VERSION}]")
 	endif()
   endif()
 
   if(XCODE_VERSION OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-    list(APPEND Boost_b2_Command toolset=clang)
+    set(boost_toolset toolset=clang)
   elseif(CMAKE_COMPILER_IS_GNUCXX)
-    list(APPEND Boost_b2_Command toolset=gcc)
+    set(boost_toolset toolset=gcc)
   endif()
-	
+
   if(ENV{CC})
     # CMake apprarently puts the full path of the compiler into CC
     # The user might specify a non-default gcc compiler through ENV
@@ -98,13 +98,19 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
 	if(gccToolset STREQUAL "cc")
 	  set(gccToolset "gcc")
 	endif()
-	list(APPEND Boost_b2_Command toolset=${gccToolset})
+	set(boost_toolset toolset=${gccToolset})
   endif()
   
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(Boost_address_model 64)
   else()
     set(Boost_address_model 32)
+  endif()
+
+  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set(Boost_VARIANT debug)
+  else()
+    set(Boost_VARIANT release)
   endif()
 
  ExternalProject_Add(${proj}
@@ -114,7 +120,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
 	URL_MD5 ${Boost_md5}
 	UPDATE_COMMAND ""
 	CONFIGURE_COMMAND ${Boost_Bootstrap_Command} --prefix=${Boost_Install_Dir}/lib
-	BUILD_COMMAND ${Boost_b2_Command} install -j8 --prefix=${Boost_Install_Dir} --with-thread --with-filesystem --with-system --with-date_time --with-program_options  --with-atomic  address-model=${Boost_address_model} link=static
+	BUILD_COMMAND ${Boost_b2_Command} install -j8 --prefix=${Boost_Install_Dir} --with-thread --with-filesystem --with-system --with-date_time --with-program_options --with-atomic ${boost_toolset} link=static address-model=${Boost_address_model} variant=${Boost_VARIANT}
 	INSTALL_COMMAND ""
 	)
 
