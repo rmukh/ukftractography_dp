@@ -18,7 +18,7 @@ mask_path="/home/rinat/Desktop/ukftests/epi_corrected_tensormask.nrrd"
 seeds_path="/home/rinat/Desktop/ukftests/Segmentation-label_363x.nrrd"
 
 # OUTPUT FIBER
-output_path='/home/rinat/Desktop/ukftests/adhd363/seeds_tc_363x_NO_init_multi.vtk'
+output_path='/home/rinat/Desktop/ukftests/adhd363/seeds_tc_363x_init_multi.vtk'
 
 # --seedsFile $seeds_path \
 eval $BINARY \

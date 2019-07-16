@@ -108,7 +108,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
   endif()
 
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set(Boost_VARIANT debug)
+	  set(Boost_VARIANT debug)
   else()
     set(Boost_VARIANT release)
   endif()
@@ -137,7 +137,11 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
 else()
   if(${USE_SYSTEM_${extProjName}})
     find_package(${proj} ${${extProjName}_REQUIRED_VERSION} REQUIRED)
-    message("USING the system ${extProjName}, set ${extProjName}_DIR=${${extProjName}_DIR}")
+    if(BOOST_FOUND)
+      message("Boost_INCLUDE_DIRS = " ${Boost_INCLUDE_DIRS})
+    else()
+      message("USING the system ${extProjName}, set ${extProjName}_DIR=${${extProjName}_DIR}")
+    endif()
   endif()
   # The project is provided using ${extProjName}_DIR, nevertheless since other
   # project may depend on ${extProjName}, let's add an 'empty' one

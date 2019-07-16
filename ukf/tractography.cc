@@ -388,50 +388,53 @@ void Tractography::UpdateFilterModelType()
     weights_on_tensors.norm(); // Normalize for all to add up to 1.
   }
 
-  // 0.1.1. Compute ridgelets basis...
-  // but first convert gradients to ukfMatrixType
-  const int s_dim = _signal_data->GetSignalDimension() * 2;
-  ukfMatrixType GradientDirections(s_dim, 3);
-  const stdVec_t &gradients = _signal_data->gradients();
-  for (int j = 0; j < s_dim; ++j)
+  if (_diffusion_propagator)
   {
-    const vec3_t &u = gradients[j];
-    GradientDirections.row(j) = u;
-  }
-
-  // Get indicies of voxels in a range
-  const ukfVectorType b_vals = _signal_data->GetBValues();
-
-  int vx = 0;
-  for (int i = 0; i < b_vals.size() / 2; ++i)
-  {
-    if (b_vals(i) > 2400)
+    // 0.1.1. Compute ridgelets basis...
+    // but first convert gradients to ukfMatrixType
+    const int s_dim = _signal_data->GetSignalDimension() * 2;
+    ukfMatrixType GradientDirections(s_dim, 3);
+    const stdVec_t &gradients = _signal_data->gradients();
+    for (int j = 0; j < s_dim; ++j)
     {
-      signal_mask.conservativeResize(signal_mask.size() + 1);
-      signal_mask(vx) = i;
-      vx++;
+      const vec3_t &u = gradients[j];
+      GradientDirections.row(j) = u;
     }
+
+    // Get indicies of voxels in a range
+    const ukfVectorType b_vals = _signal_data->GetBValues();
+
+    int vx = 0;
+    for (int i = 0; i < b_vals.size() / 2; ++i)
+    {
+      if (b_vals(i) > 2400)
+      {
+        signal_mask.conservativeResize(signal_mask.size() + 1);
+        signal_mask(vx) = i;
+        vx++;
+      }
+    }
+
+    //Take only highest b-value gradient directions
+    ukfMatrixType HighBGradDirss(signal_mask.size(), 3);
+    for (int indx = 0; indx < signal_mask.size(); ++indx)
+      HighBGradDirss.row(indx) = GradientDirections.row(signal_mask(indx));
+
+    // Compute A basis
+    // Spherical Ridgelets helper functions
+    UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
+    SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
+
+    ridg.RBasis(ARidg, HighBGradDirss);
+    ridg.normBasis(ARidg);
+
+    // Compute Q basis
+    m.icosahedron(nu, fcs, lvl);
+    ridg.QBasis(QRidg, nu); //Build a Q basis
+
+    // Compute connectivity
+    m.FindConnectivity(conn, fcs, nu.rows());
   }
-
-  //Take only highest b-value gradient directions
-  ukfMatrixType HighBGradDirss(signal_mask.size(), 3);
-  for (int indx = 0; indx < signal_mask.size(); ++indx)
-    HighBGradDirss.row(indx) = GradientDirections.row(signal_mask(indx));
-
-  // Compute A basis
-  // Spherical Ridgelets helper functions
-  UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
-  SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
-
-  ridg.RBasis(ARidg, HighBGradDirss);
-  ridg.normBasis(ARidg);
-
-  // Compute Q basis
-  m.icosahedron(nu, fcs, lvl);
-  ridg.QBasis(QRidg, nu); //Build a Q basis
-
-  // Compute connectivity
-  m.FindConnectivity(conn, fcs, nu.rows());
 
   // TODO refactor this NODDI switch
   if (this->_filter_model_type == _1T_FW && this->_noddi && this->_num_tensors == 1)
@@ -727,7 +730,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       trace2 = trace;
     }
 
-    if (fa <= _seeding_threshold)
+    if (_full_brain && fa <= _seeding_threshold)
     {
       ++fa_too_low;
       continue;
@@ -1020,7 +1023,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       info_inv.trace = rtopModel;
       info_inv.trace2 = rtopSignal;
 
-      if (rtopSignal >= _rtop_min)
+      if (rtopSignal >= _rtop_min || !_full_brain)
       {
         // Create the opposite seed
         InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
@@ -1343,7 +1346,6 @@ bool Tractography::Run()
 
     writeStatus = writer.Write(_output_file, _output_file_with_second_tensor,
                                fibers, _record_state, _store_glyphs, _noddi, _diffusion_propagator);
-
 
     // Output directions
     // std::string out_dir = _output_file;
