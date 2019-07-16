@@ -3447,8 +3447,11 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
     vec3_t dir3;
     initNormalized(dir3, store_state[14], store_state[15], store_state[16]);
 
-    fiber.w1w2angle.push_back(RadToDeg(std::acos(dir1.dot(dir2))));
-    fiber.w1w3angle.push_back(RadToDeg(std::acos(dir1.dot(dir3))));
+    ukfPrecisionType d1d2 = std::min(RadToDeg(std::acos(dir1.dot(dir2))), RadToDeg(std::acos(dir1.dot(-dir2))));
+    ukfPrecisionType d1d3 = std::min(RadToDeg(std::acos(dir1.dot(dir3))), RadToDeg(std::acos(dir1.dot(-dir3))));
+
+    fiber.w1w2angle.push_back(d1d2);
+    fiber.w1w3angle.push_back(d1d3);
   }
 
   if (_record_Viso)
