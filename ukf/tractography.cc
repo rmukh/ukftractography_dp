@@ -1025,7 +1025,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       if (rtopSignal >= _rtop_min || !_full_brain)
       {
-        std::cout << "" << state.transpose() << std::endl;
+        //std::cout << "" << state.transpose() << std::endl;
         // Create the opposite seed
         InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
 
