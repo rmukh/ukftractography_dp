@@ -36,3 +36,5 @@ settings.json
 /.vs
 
 CMakeSettings.json
+examples/process_log_eigenvals.py
+examples/log.txt

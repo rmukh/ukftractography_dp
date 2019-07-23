@@ -872,13 +872,14 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // Let's find Maxima of ODF and values in that direction
       ukfMatrixType exe_vol;
       ukfMatrixType dir_vol;
-      ukfVectorType ODF_val_at_max;
+      ukfVectorType ODF_val_at_max(6, 1);
       unsigned n_of_dirs;
 
       m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 
-      ODF_val_at_max.resize(6, 1);
-      for (unsigned j = 0; j < 6; ++j)
+      unsigned exe_vol_size = std::min(static_cast<unsigned>(exe_vol.size()), static_cast<unsigned>(6));
+      ODF_val_at_max.setZero();
+      for (unsigned j = 0; j < exe_vol_size; ++j)
       {
         ODF_val_at_max(j) = ODF(exe_vol(j));
       }
@@ -995,9 +996,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       // Estimate the initial state
       // InitLoopUKF(state, p, signal_values[i], dNormMSE);
-      //std::cout << "Before nonlinear " << state.transpose() << std::endl;
       NonLinearLeastSquareOptimization(state, signal_values[i], _model);
-      //std::cout << "After nonlinear " << state.transpose() << std::endl;
+      
       // Output of the filter
       tmp_info_state = ConvertVector<State, stdVecState>(state);
 
@@ -1025,6 +1025,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       if (rtopSignal >= _rtop_min || !_full_brain)
       {
+        std::cout << "" << state.transpose() << std::endl;
         // Create the opposite seed
         InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
 
@@ -1596,7 +1597,7 @@ void itk::DiffusionPropagatorCostFunction::GetDerivative(const ParametersType &p
   for (unsigned int it = 0; it < this->GetNumberOfParameters(); ++it)
   {
     // Optimal h is sqrt(epsilon machine) * x
-    double h = std::sqrt(2.22e-16) * std::abs(parameters[it]);
+    double h = std::sqrt(2.2204e-16) * std::max(std::abs(parameters[it]), 1e-7);
 
     // Volatile, otherwise compiler will optimize the value for dx
     volatile double xph = parameters[it] + h;
@@ -1734,6 +1735,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   optimizer->StartOptimization();
 
   p = optimizer->GetCurrentPosition();
+  
   // Write back the state
   for (int it = 0; it < state_temp.size(); ++it)
     state_temp[it] = p[it];
