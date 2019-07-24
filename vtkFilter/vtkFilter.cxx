@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
   reader->SetVerbose(Verbose);
   reader->Run();
   delete reader;
+  reader = NULL;
   if (Verbose) std::cout << "-Number of fibers in the input: " << in_fibers.size() << std::endl;
 
   // Parse end convert the input logic expression to postifx
@@ -85,6 +86,7 @@ int main(int argc, char* argv[]) {
   writer->SetInputFibers(out_fibers);
   writer->Run();
   delete writer;
+  writer = NULL;
 
   if (Verbose) std::cout << "** done\n";
 

@@ -18,6 +18,7 @@ ExpressionEvaluator::ExpressionEvaluator()
 ExpressionEvaluator::~ExpressionEvaluator()
 {
   delete _filter;
+  _filter = NULL;
 }
 
 bool ExpressionEvaluator::Run()

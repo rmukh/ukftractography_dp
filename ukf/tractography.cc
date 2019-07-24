@@ -131,10 +131,12 @@ Tractography::~Tractography()
   if (this->_signal_data)
   {
     delete this->_signal_data;
+    this->_signal_data = NULL;
   }
   if (this->_model)
   {
     delete this->_model; // TODO smartpointer
+    this->_model = NULL;
   }
 }
 
@@ -148,6 +150,7 @@ void Tractography::UpdateFilterModelType()
   if (this->_model)
   {
     delete this->_model; // TODO smartpointer
+    this->_model = NULL;
   }
 
   this->_filter_model_type = Tractography::_1T;
@@ -403,46 +406,23 @@ void Tractography::UpdateFilterModelType()
 
     // Get indicies of voxels in a range
     const ukfVectorType b_vals = _signal_data->GetBValues();
-    unsigned b_threshold = 2000;
-
-    ukfPrecisionType max_b_val = b_vals.maxCoeff();
-    unsigned n_of_intervals = (max_b_val - b_threshold) / 100;
-    unsigned *count_in_interval = new unsigned[n_of_intervals];
-
-    for (unsigned i = 0; i < n_of_intervals; ++i)
-      if ()
-      count_in_interval[i]++;
-
-      //make array go through all b vals and check using mod the current range of value and increase respected value
-
-    std::cout << "b_vals before\n " << b_vals.transpose() << std::endl;
-    std::cout << "max b val " << max_b_val << std::endl;
-
-    for (unsigned i = 1; i <= n_of_intervals; ++i)
-      std::cout << max_b_val - i * 100 << " ";
+    const ukfPrecisionType nominal_b_val = _signal_data->GetNominalBValue();
 
     int vx = 0;
     for (int i = 0; i < b_vals.size() / 2; ++i)
     {
-      if (b_vals(i) >= b_threshold)
+      if (b_vals(i) >= (nominal_b_val - 150) && b_vals(i) <= (nominal_b_val + 150))
       {
-        //max_b_val
-
-        //signal_mask.conservativeResize(signal_mask.size() + 1);
-        //signal_mask(vx) = i;
+        signal_mask.conservativeResize(signal_mask.size() + 1);
+        signal_mask(vx) = i;
         vx++;
       }
     }
-
-    delete [] count_in_interval;
-    count_in_interval = NULL;
 
     //Take only highest b-value gradient directions
     ukfMatrixType HighBGradDirss(signal_mask.size(), 3);
     for (int indx = 0; indx < signal_mask.size(); ++indx)
       HighBGradDirss.row(indx) = GradientDirections.row(signal_mask(indx));
-
-    exit(0);
 
     // Compute A basis
     // Spherical Ridgelets helper functions
@@ -728,7 +708,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   }
 
   // Pack information for each seed point.
-  int fa_too_low = 0;
   std::cout << "Processing " << starting_points.size() << " starting points" << std::endl;
 
   for (size_t i = 0; i < starting_points.size(); ++i)
@@ -756,7 +735,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
     if (_full_brain && fa <= _seeding_threshold)
     {
-      ++fa_too_low;
       continue;
     }
 
@@ -878,8 +856,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // Compute number of branches at the seed point using spherical ridgelets
       UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
 
-      ukfVectorType HighBSignalValues;
-      HighBSignalValues.resize(signal_mask.size());
+      ukfVectorType HighBSignalValues(signal_mask.size());
       for (int indx = 0; indx < signal_mask.size(); ++indx)
         HighBSignalValues(indx) = signal_values[i](signal_mask(indx));
 
@@ -2200,9 +2177,9 @@ void Tractography::Follow3T(const int thread_id,
     // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     // in_csf = rtopSignal < _rtop_min;
-    bool in_rtop1 = rtop1 < 1000;
+    bool in_rtop1 = rtop1 < 500;
 
-    bool is_high_fw = state(24) > 0.7;
+    bool is_high_fw = state(24) > 0.75;
     bool in_rtop = rtopModel < 15000; // means 'in rtop' threshold
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;

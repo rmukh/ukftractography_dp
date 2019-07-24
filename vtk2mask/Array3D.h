@@ -16,7 +16,6 @@ template <class T>
 class Array3D
 {
 private:
-
   /** X Dimension */
   int _nDimX;
 
@@ -25,10 +24,10 @@ private:
 
   /** Z Dimension */
   int _nDimZ;
-public:
 
+public:
   /** Pointer to the data */
-  T * * *_;
+  T ***_;
 
   /** Constructor, allocates the space in each dimension */
   Array3D(const int x, const int y, const int z)
@@ -37,22 +36,23 @@ public:
     _nDimY = y;
     _nDimZ = z;
 
-    _ = new T * *[_nDimX];
-    for( int i = 0; i < _nDimX; ++i )
-      {
+    _ = new T **[_nDimX];
+    for (int i = 0; i < _nDimX; ++i)
+    {
       _[i] = new T *[_nDimY];
-      for( int j = 0; j < _nDimY; ++j )
-        {
+      for (int j = 0; j < _nDimY; ++j)
+      {
         _[i][j] = new T[_nDimZ];
-        }
       }
+    }
   }
 
   /** Deconstructor, deletes the data */
   ~Array3D()
   {
-    delete _; //HACK: This is a huge memory leak here
-  };                          // maybe have to iterate through matrix and delete
+    delete [] _; //HACK: This is a huge memory leak here
+    _ = NULL;
+  };         // maybe have to iterate through matrix and delete
 
   /** Get the X dimensions */
   int dimX()
@@ -71,7 +71,6 @@ public:
   {
     return _nDimZ;
   }
-
 };
 
 #endif

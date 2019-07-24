@@ -52,6 +52,7 @@ int main(int argc, char* argv[]) {
   reader->SetVerbose(Verbose);
   reader->Run();
   delete reader;
+  reader = NULL;
   if (Verbose) std::cout << "-Number of fibers in the input: " << in_fibers.size() << std::endl;
 
 
@@ -89,6 +90,7 @@ int main(int argc, char* argv[]) {
   }
   conv->Run();
   delete conv;
+  conv = NULL;
 
   // DONE /////////////////////////////////////////////////////////////////////
   return EXIT_SUCCESS;

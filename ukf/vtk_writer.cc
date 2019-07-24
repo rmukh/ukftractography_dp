@@ -166,6 +166,7 @@ void VtkWriter ::PopulateFibersAndTensors(vtkPolyData *polyData,
     curLine->Initialize(fiber_size, ids, points);
     lines->InsertNextCell(curLine);
     delete[] ids;
+    ids = NULL;
   }
   polyData->SetLines(lines);
 
@@ -259,6 +260,7 @@ void VtkWriter ::PopulateFibersDirs(vtkPolyData *polyData,
       curLine->Initialize(2, ids, points);
       lines->InsertNextCell(curLine);
       delete[] ids; // remove indecies for the next fiber
+      ids = NULL;
     }
   }
   polyData->SetLines(lines);
@@ -677,6 +679,7 @@ int VtkWriter ::Write(const std::string &file_name,
     int idx = pointData->AddArray(stateArray);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::VECTORS);
     delete[] tmpArray;
+    tmpArray = NULL;
   }
 
   if (fibers[0].covariance.size() > 0)
@@ -712,6 +715,7 @@ int VtkWriter ::Write(const std::string &file_name,
     int idx = pointData->AddArray(covarianceArray);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::VECTORS);
     delete[] tmpArray;
+    tmpArray = NULL;
   }
 
   WritePolyData(polyData, file_name.c_str());

@@ -23,7 +23,6 @@
 class NrrdData : public ISignalData
 {
 public:
-
   /** Constructor */
   NrrdData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask);
 
@@ -31,13 +30,13 @@ public:
   ~NrrdData();
 
   /** Interpolates the DWI signal at a certain position */
-  virtual void Interp3Signal(const vec3_t& pos, ukfVectorType& signal) const;
+  virtual void Interp3Signal(const vec3_t &pos, ukfVectorType &signal) const;
 
   /** Interpolates the brain mask at a certain position */
-  virtual ukfPrecisionType Interp3ScalarMask(const vec3_t& pos) const;
+  virtual ukfPrecisionType Interp3ScalarMask(const vec3_t &pos) const;
 
   /** Gets brain mask value at a certain position */
-  virtual ukfPrecisionType ScalarMaskValue(const vec3_t& pos) const;
+  virtual ukfPrecisionType ScalarMaskValue(const vec3_t &pos) const;
 
   /**
    * \brief Get the seed points from the nrrd file
@@ -47,10 +46,10 @@ public:
    * \param[in]  labels  a vector of labels that define the seed region
    * \param[out] seeds   a vector containing the positions in ijk-space of the seeds
   */
-  virtual void GetSeeds(const std::vector<int>& labels, stdVec_t& seeds) const;
+  virtual void GetSeeds(const std::vector<int> &labels, stdVec_t &seeds) const;
 
   /** returns the gradients of the diffusion image */
-  virtual const stdVec_t & gradients() const
+  virtual const stdVec_t &gradients() const
   {
     return _gradients;
   }
@@ -60,9 +59,17 @@ public:
    * Note: Except for cases recorded with multiple b-values it
    *       contains identical values
   */
-  virtual const ukfVectorType & GetBValues() const
+  virtual const ukfVectorType &GetBValues() const
   {
     return _b_values;
+  }
+
+  /**
+   * returns the nominal of b-value from NRRD file<br>
+  */
+  virtual const ukfPrecisionType &GetNominalBValue() const
+  {
+    return bValue;
   }
 
   /**
@@ -84,11 +91,10 @@ public:
     *
     * Loads all the data necessary to perform tractography
   */
-  virtual bool LoadData(const std::string& data_file, const std::string& seed_file, const std::string& mask_file,
+  virtual bool LoadData(const std::string &data_file, const std::string &seed_file, const std::string &mask_file,
                         const bool normalizedDWIData, const bool outputNormalizedDWIData);
 
-
-  virtual bool SetData(Nrrd* data, Nrrd* seed, Nrrd* mask, bool normalizedDWIData);
+  virtual bool SetData(Nrrd *data, Nrrd *seed, Nrrd *mask, bool normalizedDWIData);
 
   /** Returns the dimensions of the signal in each directions as a vector */
   vec3_t dim() const
@@ -101,7 +107,7 @@ private:
     * Load the signal, called by LoadData
     * \todo Should be a private function of this class, and not implementing ISignalData
   */
-  bool LoadSignal(Nrrd* input_nrrd, const bool normalizedDWIData);
+  bool LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData);
 
   /** The volume dimensions */
   vec3_t _dim;
@@ -112,6 +118,7 @@ private:
   stdVec_t _gradients;
 
   ukfVectorType _b_values;
+  ukfPrecisionType bValue;
 
   /** pointer diffusion data as float */
   float *_data;
@@ -132,4 +139,4 @@ private:
   Nrrd *_mask_nrrd;
 };
 
-#endif  // NRRDDATA_H_
+#endif // NRRDDATA_H_

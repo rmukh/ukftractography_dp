@@ -434,7 +434,7 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
 
   assert(size == 2);
 
-  ukfPrecisionType bValue = ukfZero;
+  bValue = ukfZero;
 
   assert(_gradients.size() == 0);
   // Read key value pairs.

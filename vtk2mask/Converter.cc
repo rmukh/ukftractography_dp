@@ -117,6 +117,7 @@ void Converter::ProcessField(const std::string & field_name, const std::string &
   AverageVoxels();
   WriteOutNrrd(path);
   delete _matField;
+  _matField = NULL;
 }
 
 // Fill the matrix of vectors with the values

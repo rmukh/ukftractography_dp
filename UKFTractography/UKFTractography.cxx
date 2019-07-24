@@ -98,6 +98,7 @@ extern "C"
 
     // Clean up.
     delete tract;
+    tract = NULL;
 
     return writeStatus;
   }
