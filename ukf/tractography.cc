@@ -403,22 +403,46 @@ void Tractography::UpdateFilterModelType()
 
     // Get indicies of voxels in a range
     const ukfVectorType b_vals = _signal_data->GetBValues();
+    unsigned b_threshold = 2000;
+
+    ukfPrecisionType max_b_val = b_vals.maxCoeff();
+    unsigned n_of_intervals = (max_b_val - b_threshold) / 100;
+    unsigned *count_in_interval = new unsigned[n_of_intervals];
+
+    for (unsigned i = 0; i < n_of_intervals; ++i)
+      if ()
+      count_in_interval[i]++;
+
+      //make array go through all b vals and check using mod the current range of value and increase respected value
+
+    std::cout << "b_vals before\n " << b_vals.transpose() << std::endl;
+    std::cout << "max b val " << max_b_val << std::endl;
+
+    for (unsigned i = 1; i <= n_of_intervals; ++i)
+      std::cout << max_b_val - i * 100 << " ";
 
     int vx = 0;
     for (int i = 0; i < b_vals.size() / 2; ++i)
     {
-      if (b_vals(i) > 2400)
+      if (b_vals(i) >= b_threshold)
       {
-        signal_mask.conservativeResize(signal_mask.size() + 1);
-        signal_mask(vx) = i;
+        //max_b_val
+
+        //signal_mask.conservativeResize(signal_mask.size() + 1);
+        //signal_mask(vx) = i;
         vx++;
       }
     }
+
+    delete [] count_in_interval;
+    count_in_interval = NULL;
 
     //Take only highest b-value gradient directions
     ukfMatrixType HighBGradDirss(signal_mask.size(), 3);
     for (int indx = 0; indx < signal_mask.size(); ++indx)
       HighBGradDirss.row(indx) = GradientDirections.row(signal_mask(indx));
+
+    exit(0);
 
     // Compute A basis
     // Spherical Ridgelets helper functions
@@ -997,7 +1021,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // Estimate the initial state
       // InitLoopUKF(state, p, signal_values[i], dNormMSE);
       NonLinearLeastSquareOptimization(state, signal_values[i], _model);
-      
+
       // Output of the filter
       tmp_info_state = ConvertVector<State, stdVecState>(state);
 
@@ -1735,7 +1759,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   optimizer->StartOptimization();
 
   p = optimizer->GetCurrentPosition();
-  
+
   // Write back the state
   for (int it = 0; it < state_temp.size(); ++it)
     state_temp[it] = p[it];

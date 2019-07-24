@@ -255,9 +255,9 @@
       <description>UKF data fitting parameter for tensor model: Process noise for eigenvalues. Defaults: 1 tensor-300 ; 2 tensor-50 ; 3 tensor-100. Suggested Range: 1-1000. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
       <default>0.0</default>
       <constraints>
-        <minimum> 0 </minimum>
-        <maximum> 1000</maximum>
-        <step> 1 </step>
+        <minimum>0</minimum>
+        <maximum>1000</maximum>
+        <step>1</step>
       </constraints>
     </double>
 
@@ -268,9 +268,9 @@
       <description>UKF data fitting parameter for tensor plus free water model: Process noise for volume fraction weights. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
       <default>0.0</default>
       <constraints>
-        <minimum> 0.0 </minimum>
-        <maximum> 0.25 </maximum>
-        <step> 0.00001 </step>
+        <minimum>0.0</minimum>
+        <maximum>0.25</maximum>
+        <step>0.00001</step>
       </constraints>
     </double>
 

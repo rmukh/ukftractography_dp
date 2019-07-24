@@ -430,9 +430,8 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
   int size = _data_nrrd->kvpArr->size;
 
   if (size != 2)
-  {
     size = 2;
-  }
+
   assert(size == 2);
 
   ukfPrecisionType bValue = ukfZero;
@@ -468,6 +467,7 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
       assert(!std::string(_data_nrrd->kvp[i + 1]).compare("DWMRI"));
     }
   }
+
   // if multiple bValues are present the gradient norms are the bValues
   // otherwise the bValues are taken from the header
   // if bValue not in header also take the norm
@@ -480,7 +480,12 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
     const ukfPrecisionType effectiveBvalue = (fabs(gradientNorm - ukfOne) > 1e-4) ? gradientNorm * gradientNorm * bValue : bValue;
     //http://www.na-mic.org/Wiki/index.php/NAMIC_Wiki:DTI:Nrrd_format
     //It is after this magnitude rescaling that the nominal bValue (given via "DWMRI_b-value:=bValue") applies.
-    _b_values[i] = effectiveBvalue;
+
+    if (effectiveBvalue <= 50)
+      _b_values[i] = 0;
+    else
+      _b_values[i] = effectiveBvalue;
+
     _gradients[i].normalize();
   }
 
@@ -496,13 +501,9 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
   for (unsigned int i = 0; i < this->_data_nrrd->dim; ++i)
   {
     if (!AIR_EXISTS(space_dir[i]))
-    {
       space_dir[i] = 1.0;
-    }
     if (!AIR_EXISTS(this->_data_nrrd->spaceOrigin[i]))
-    {
       this->_data_nrrd->spaceOrigin[i] = -((_data_nrrd->axis[i].size / 2) * space_dir[i]);
-    }
   }
 
   // DEBUGING
