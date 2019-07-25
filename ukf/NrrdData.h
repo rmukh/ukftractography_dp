@@ -24,7 +24,7 @@ class NrrdData : public ISignalData
 {
 public:
   /** Constructor */
-  NrrdData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask);
+  NrrdData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask, ukfPrecisionType sigma_csf);
 
   /** Destructor */
   ~NrrdData();
@@ -34,6 +34,9 @@ public:
 
   /** Interpolates the brain mask at a certain position */
   virtual ukfPrecisionType Interp3ScalarMask(const vec3_t &pos) const;
+
+  /* Interpolates the csf mask at a certain position */
+  virtual ukfPrecisionType Interp3ScalarCSF(const vec3_t &pos) const;
 
   /** Gets brain mask value at a certain position */
   virtual ukfPrecisionType ScalarMaskValue(const vec3_t &pos) const;
@@ -92,9 +95,9 @@ public:
     * Loads all the data necessary to perform tractography
   */
   virtual bool LoadData(const std::string &data_file, const std::string &seed_file, const std::string &mask_file,
-                        const bool normalizedDWIData, const bool outputNormalizedDWIData);
+                        const std::string &csf_file, const bool normalizedDWIData, const bool outputNormalizedDWIData);
 
-  virtual bool SetData(Nrrd *data, Nrrd *seed, Nrrd *mask, bool normalizedDWIData);
+  virtual bool SetData(Nrrd *data, Nrrd *seed, Nrrd *mask, Nrrd *csf, bool normalizedDWIData);
 
   /** Returns the dimensions of the signal in each directions as a vector */
   vec3_t dim() const
@@ -128,6 +131,8 @@ private:
   int _seed_data_type;
   /** pointer to mask data, is casted at runtime */
   void *_mask_data;
+  /* pointer to the csf data, is casted at runtime */
+  void *_csf_data;
   /** number of bytes of the mask is needed for casting */
   int _mask_num_bytes;
 
@@ -137,6 +142,8 @@ private:
   Nrrd *_seed_nrrd;
   /** The actual mask data */
   Nrrd *_mask_nrrd;
+  /* The CSF mask data */
+  Nrrd *_csf_nrrd;
 };
 
 #endif // NRRDDATA_H_

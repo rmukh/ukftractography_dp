@@ -24,16 +24,14 @@
 class ISignalData
 {
 public:
-
   /**
    * Constructor
    * \param[in] sigma_signal the interpolation 'factor' for the signal
    * \param[in] sigma_mask the interpolation 'factor' for the mask
   */
-  ISignalData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask)
-    : _sigma_signal(sigma_signal), _sigma_mask(sigma_mask)
+  ISignalData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask, ukfPrecisionType sigma_csf)
+      : _sigma_signal(sigma_signal), _sigma_mask(sigma_mask), _sigma_csf(sigma_csf)
   {
-
   }
 
   /** Deconstructor */
@@ -42,22 +40,25 @@ public:
   }
 
   /** Gets the signal values at a specified position. */
-  virtual void Interp3Signal(const vec3_t& pos, ukfVectorType & signal) const = 0;
+  virtual void Interp3Signal(const vec3_t &pos, ukfVectorType &signal) const = 0;
 
   /** Checks if a certian position is still within the brain mask. */
-  virtual ukfPrecisionType Interp3ScalarMask(const vec3_t& pos) const = 0;
+  virtual ukfPrecisionType Interp3ScalarMask(const vec3_t &pos) const = 0;
+
+  /* Checks if a certain postion is in csf mask */
+  virtual ukfPrecisionType Interp3ScalarCSF(const vec3_t &pos) const = 0;
 
   /** Checks if a certian position is still within the brain mask. */
-  virtual ukfPrecisionType ScalarMaskValue(const vec3_t& pos) const = 0;
+  virtual ukfPrecisionType ScalarMaskValue(const vec3_t &pos) const = 0;
 
   /** Get all the seed points. */
-  virtual void GetSeeds(const std::vector<int>& labels, stdVec_t& seeds) const = 0;
+  virtual void GetSeeds(const std::vector<int> &labels, stdVec_t &seeds) const = 0;
 
   /** Returns the gradients. */
-  virtual const stdVec_t & gradients() const = 0;
+  virtual const stdVec_t &gradients() const = 0;
 
   /** Returns the vector of b values */
-  virtual const ukfVectorType & GetBValues() const = 0;
+  virtual const ukfVectorType &GetBValues() const = 0;
 
   /** Return the size of the signal vector */
   virtual int GetSignalDimension() const = 0;
@@ -72,7 +73,7 @@ public:
     *
     * Loads all the data necessary to perform tractography
   */
-  virtual bool LoadData(const std::string& data_file, const std::string& seed_file, const std::string& mask_file,
+  virtual bool LoadData(const std::string &data_file, const std::string &seed_file, const std::string &mask_file, const std::string &csf_file,
                         const bool normalizedDWIData, const bool outputNormalizedDWIData) = 0;
 
   /** Returns the dimensions of the image */
@@ -97,11 +98,12 @@ public:
   }
 
 protected:
-
   /** sigma for gaussian interpolation of signal */
   const ukfPrecisionType _sigma_signal;
   /** sigma for gaussian interpolation of mask */
   const ukfPrecisionType _sigma_mask;
+  /* sigma for gaussian interpolation of csf mask */
+  const ukfPrecisionType _sigma_csf;
 
   /** voxel size */
   vec3_t _voxel;

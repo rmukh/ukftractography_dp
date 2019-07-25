@@ -51,6 +51,14 @@
       <description>Brain mask for diffusion tractography. Tracking will only be performed inside this mask.</description>
     </image>
 
+    <image type="scalar" fileExtensions=".nhdr,.nrrd">
+      <name>csfFile</name>
+      <longflag alias="csfData">csfFile</longflag>
+      <label>Input CSF mask file</label>
+      <channel>input</channel>
+      <description>CSF mask file. Tracking terminated and fiber discarded when reaching CSF voxels.</description>
+    </image>
+
     <geometry type="fiberbundle" fileExtensions=".vtp,.vtk">
       <name>tracts</name>
       <longflag>tracts</longflag>

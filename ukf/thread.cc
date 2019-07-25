@@ -80,6 +80,7 @@ ITK_THREAD_RETURN_TYPE ThreadCallback(void *arg)
   WorkDistribution work_distribution = *str->work_distribution;
   WorkList &work_list_ = work_distribution[id_];
   std::vector<UKFFiber> &output_fiber_group_ = *str->output_fiber_group_;
+  std::vector<unsigned char> &discarded_fibers_ = *str->discarded_fibers_;
   // Output groups for directions
   // std::vector<UKFFiber> &output_fiber_group_1_ = *str->output_fiber_group_1_;
   // std::vector<UKFFiber> &output_fiber_group_2_ = *str->output_fiber_group_2_;
@@ -97,7 +98,7 @@ ITK_THREAD_RETURN_TYPE ThreadCallback(void *arg)
       // With debugging direction files
       // str->tractography_->Follow3T(id_, seed_infos_[*it], output_fiber_group_[*it], output_fiber_group_1_[*it], output_fiber_group_2_[*it], output_fiber_group_3_[*it]);
       // Standart output
-      str->tractography_->Follow3T(id_, seed_infos_[*it], output_fiber_group_[*it]);
+      str->tractography_->Follow3T(id_, seed_infos_[*it], output_fiber_group_[*it], discarded_fibers_[*it]);
     }
     else if (str->num_tensors_ == 2)
     {

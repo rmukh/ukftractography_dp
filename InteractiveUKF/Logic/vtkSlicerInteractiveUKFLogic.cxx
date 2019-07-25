@@ -194,7 +194,7 @@ void vtkSlicerInteractiveUKFLogic::SetDataNodes(
   dwiNode->GetMeasurementFrameMatrix(mf.GetPointer());
   writer->SetMeasurementFrameMatrix(mf.GetPointer());
 
-  vtkDoubleArray *grads = NULL;
+  vtkDoubleArray *grads = NULl;
   vtkDoubleArray *bValues = NULL;
   grads = dwiNode->GetDiffusionGradients();
   bValues = dwiNode->GetBValues();

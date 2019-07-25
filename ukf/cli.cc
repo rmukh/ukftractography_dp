@@ -486,6 +486,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.p0 = P0;
     s.sigma_signal = SIGMA_SIGNAL;
     s.sigma_mask = SIGMA_MASK;
+    s.sigma_csf = SIGMA_CSF;
     s.min_radius = MIN_RADIUS;
 
     s.output_file = tracts;
@@ -493,6 +494,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.dwiFile = dwiFile;
     s.seedsFile = seedsFile;
     s.maskFile = maskFile;
+    s.csfFile = csfFile;
     s.writeAsciiTracts = writeAsciiTracts;
     s.writeUncompressedTracts = writeUncompressedTracts;
   }

@@ -65,6 +65,7 @@ extern "C"
       if (tract->LoadFiles(ukf_settings.dwiFile,
                            ukf_settings.seedsFile,
                            ukf_settings.maskFile,
+                           ukf_settings.csfFile,
                            normalizedDWIData, outputNormalizedDWIData) == EXIT_FAILURE)
       {
         itkGenericExceptionMacro(<< "::LoadFiles failed with unknown error.");

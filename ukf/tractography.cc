@@ -77,9 +77,11 @@ Tractography::Tractography(UKFSettings s) :
                                             _p0(s.p0),
                                             _sigma_signal(s.sigma_signal),
                                             _sigma_mask(s.sigma_mask),
+                                            _sigma_csf(s.sigma_csf),
                                             _min_radius(s.min_radius),
                                             _max_length(static_cast<int>(std::ceil(s.maxHalfFiberLength / s.stepLength))),
                                             _full_brain(false),
+                                            _csf_provided(false),
                                             _noddi(s.noddi),
                                             _diffusion_propagator(s.diffusion_propagator),
                                             _rtop_min(s.rtop_min),
@@ -505,7 +507,7 @@ void Tractography::UpdateFilterModelType()
   _model->set_signal_dim(_signal_data->GetSignalDimension() * 2);
 }
 
-bool Tractography::SetData(void *data, void *mask, void *seed,
+bool Tractography::SetData(void *data, void *mask, void *csf, void *seed,
                            bool normalizedDWIData)
 {
   if (!data || !mask)
@@ -515,12 +517,13 @@ bool Tractography::SetData(void *data, void *mask, void *seed,
   }
 
   if (!seed)
-  {
     _full_brain = true;
-  }
 
-  _signal_data = new NrrdData(_sigma_signal, _sigma_mask);
-  _signal_data->SetData((Nrrd *)data, (Nrrd *)mask, (Nrrd *)seed, normalizedDWIData);
+  if (csf)
+    _csf_provided = true;
+
+  _signal_data = new NrrdData(_sigma_signal, _sigma_mask, _sigma_csf);
+  _signal_data->SetData((Nrrd *)data, (Nrrd *)mask, (Nrrd *)csf, (Nrrd *)seed, normalizedDWIData);
 
   return false;
 }
@@ -528,17 +531,21 @@ bool Tractography::SetData(void *data, void *mask, void *seed,
 bool Tractography::LoadFiles(const std::string &data_file,
                              const std::string &seed_file,
                              const std::string &mask_file,
+                             const std::string &csf_file,
                              const bool normalized_DWI_data,
                              const bool output_normalized_DWI_data)
 {
-  _signal_data = new NrrdData(_sigma_signal, _sigma_mask);
+  _signal_data = new NrrdData(_sigma_signal, _sigma_mask, _sigma_csf);
 
   if (seed_file.empty())
-  {
     _full_brain = true;
-  }
 
-  if (_signal_data->LoadData(data_file, seed_file, mask_file, normalized_DWI_data, output_normalized_DWI_data))
+  if (csf_file.empty())
+    _csf_provided = false;
+  else
+    _csf_provided = true;
+
+  if (_signal_data->LoadData(data_file, seed_file, mask_file, csf_file, normalized_DWI_data, output_normalized_DWI_data))
   {
     std::cout << "ISignalData could not be loaded" << std::endl;
     delete _signal_data;
@@ -554,6 +561,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   {
     itkGenericExceptionMacro(<< "No signal data!");
   }
+
+  if (_csf_provided)
+    std::cout << "CSF Provided!\n";
+  else
+    std::cout << "CSF is NOT provided!\n";
 
   int signal_dim = _signal_data->GetSignalDimension();
 
@@ -1168,6 +1180,7 @@ bool Tractography::Run()
   }
 
   std::vector<UKFFiber> raw_primary;
+  std::vector<unsigned char> discarded_fibers;
 
   // Output directions
   // std::vector<UKFFiber> raw_primary_w1;
@@ -1179,6 +1192,7 @@ bool Tractography::Run()
       std::cout << "Tracing " << primary_seed_infos.size() << " primary fibers:" << std::endl;
 
     raw_primary.resize(primary_seed_infos.size());
+    discarded_fibers.resize(primary_seed_infos.size());
     // Output directions
     // raw_primary_w1.resize(primary_seed_infos.size() * 2);
     // raw_primary_w2.resize(primary_seed_infos.size() * 2);
@@ -1202,6 +1216,7 @@ bool Tractography::Run()
     str.branching_ = _is_branching;
     str.num_tensors_ = _num_tensors;
     str.output_fiber_group_ = &raw_primary;
+    str.discarded_fibers_ = &discarded_fibers;
 
     // Output directions
     // str.output_fiber_group_1_ = &raw_primary_w1;
@@ -1312,6 +1327,15 @@ bool Tractography::Run()
 #endif
   }
 
+  // Remove discarded fiber from a vector
+  std::cout << "raw before " << raw_primary.size() << std::endl;
+  for (std::vector<unsigned char>::size_type i = 0; i != discarded_fibers.size(); ++i)
+  {
+    if (discarded_fibers[i] == 1)
+      raw_primary.erase(raw_primary.begin() + i);
+  }
+  std::cout << "raw after " << raw_primary.size() << std::endl;
+
   std::vector<UKFFiber> fibers;
   PostProcessFibers(raw_primary, raw_branch, branch_seed_affiliation, _branches_only, fibers);
 
@@ -1363,6 +1387,7 @@ bool Tractography::Run()
   for (size_t i = 0; i < _ukf.size(); i++)
   {
     delete _ukf[i];
+    _ukf[i] = NULL;
   }
   _ukf.clear();
   return writeStatus;
@@ -2109,7 +2134,8 @@ void Tractography::UnpackTensor(const ukfVectorType &b, // b - bValues
 
 void Tractography::Follow3T(const int thread_id,
                             const SeedPointInfo &fiberStartSeed,
-                            UKFFiber &fiber)
+                            UKFFiber &fiber,
+                            unsigned char &is_discarded)
 {
   // For ridgelets bi-exp model only!
   int fiber_size = 100;
@@ -2156,12 +2182,10 @@ void Tractography::Follow3T(const int thread_id,
   int stepnr = 0;
   while (true)
   {
-    //std::cout << "step " << stepnr << std::endl;
     ++stepnr;
 
     Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
 
-    //cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
     // Check if we should abort following this fiber. We abort if we reach the
     // CSF, if FA or GA get too small, if the curvature get's too high or if
     // the fiber gets too long.
@@ -2172,20 +2196,27 @@ void Tractography::Follow3T(const int thread_id,
     _model->H(state_tmp, signal_tmp);
 
     const ukfPrecisionType mean_signal = s2adc(signal_tmp);
-    bool in_csf = (mean_signal < _mean_signal_min);
+    bool in_csf = false;
+    if (_csf_provided)
+      in_csf = _signal_data->Interp3ScalarCSF(x) > 0.5;
+    else
+      in_csf = mean_signal < _mean_signal_min;
 
     // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
-
     // in_csf = rtopSignal < _rtop_min;
-    bool in_rtop1 = rtop1 < 500;
 
+    bool in_rtop1 = rtop1 < 500;
     bool is_high_fw = state(24) > 0.75;
     bool in_rtop = rtopModel < 15000; // means 'in rtop' threshold
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
 
-    // stepnr > _max_length // Stop if the fiber is too long - Do we need this???
-    if (!is_brain || in_rtop || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high)
+    if (_csf_provided && in_csf)
+      is_discarded = 1;
+    else
+      is_discarded = 0;
+
+    if (!is_brain || in_rtop || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
     {
       break;
     }
@@ -2388,7 +2419,6 @@ void Tractography::Follow3T(const int thread_id,
     if (!is_brain || in_csf || stepnr > _max_length // Stop if the fiber is too long
         || is_curving)
     {
-
       break;
     }
 
@@ -2890,7 +2920,6 @@ void Tractography::Step3T(const int thread_id,
                           ukfPrecisionType &trace,
                           ukfPrecisionType &trace2)
 {
-
   assert(static_cast<int>(covariance.cols()) == _model->state_dim() &&
          static_cast<int>(covariance.rows()) == _model->state_dim());
   assert(static_cast<int>(state.size()) == _model->state_dim());
@@ -2915,6 +2944,7 @@ void Tractography::Step3T(const int thread_id,
   ukfPrecisionType dot1 = m1.dot(old_dir);
   ukfPrecisionType dot2 = m2.dot(old_dir);
   ukfPrecisionType dot3 = m3.dot(old_dir);
+
   if (dot1 < dot2 && dot3 < dot2)
   {
     // Switch dirs and lambdas.
@@ -3152,7 +3182,6 @@ void Tractography::Step1T(const int thread_id,
                           ukfPrecisionType &dNormMSE,
                           ukfPrecisionType &trace)
 {
-
   assert(static_cast<int>(covariance.cols()) == _model->state_dim() &&
          static_cast<int>(covariance.rows()) == _model->state_dim());
   assert(static_cast<int>(state.size()) == _model->state_dim());

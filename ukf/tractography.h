@@ -28,6 +28,8 @@ class Tractography;
 
 // Internal constants
 const ukfPrecisionType SIGMA_MASK = 0.5;
+const ukfPrecisionType SIGMA_CSF = 0.5;
+const ukfPrecisionType SIMGA_WM = 0.5;
 const ukfPrecisionType P0 = 0.01;
 const ukfPrecisionType MIN_RADIUS = 0.87;
 const ukfPrecisionType FULL_BRAIN_MEAN_SIGNAL_MIN = 0.18;
@@ -81,6 +83,8 @@ struct UKFSettings
   ukfPrecisionType p0;
   ukfPrecisionType sigma_signal;
   ukfPrecisionType sigma_mask;
+  ukfPrecisionType sigma_csf;
+  ukfPrecisionType sigma_wm;
   ukfPrecisionType min_radius;
   ukfPrecisionType full_brain_mean_signal_min;
   size_t num_threads;
@@ -97,6 +101,7 @@ struct UKFSettings
   std::string dwiFile;
   std::string seedsFile;
   std::string maskFile;
+  std::string csfFile;
 };
 
 /**
@@ -138,13 +143,13 @@ public:
    * defining the volume of the brain.
   */
   bool LoadFiles(const std::string &data_file, const std::string &seed_file, const std::string &mask_file,
-                 const bool normalized_DWI_data, const bool output_normalized_DWI_data);
+                 const std::string &csf_file, const bool normalized_DWI_data, const bool output_normalized_DWI_data);
 
   /**
    * Directly set the data volume pointers
   */
 
-  bool SetData(void *data, void *mask, void *seed, bool normalizedDWIData);
+  bool SetData(void *data, void *mask, void *csf, void *seed, bool normalizedDWIData);
 
   /**
    * Directly set the seed locations
@@ -170,7 +175,7 @@ public:
   /**
    * Follows one seed point for the 3 Tensor case
   */
-  void Follow3T(const int thread_id, const SeedPointInfo &seed, UKFFiber &fiber);
+  void Follow3T(const int thread_id, const SeedPointInfo &seed, UKFFiber &fiber, unsigned char &is_discarded);
 
   void Follow3T(const int thread_id, const SeedPointInfo &fiberStartSeed,
                 UKFFiber &fiber, UKFFiber &fiber1, UKFFiber &fiber2, UKFFiber &fiber3);
@@ -210,19 +215,17 @@ private:
    * Calculate six tensor coefficients by solving B * d = log(s), where d are
    * tensor coefficients, B is gradient weighting, s is signal.
   */
-  void UnpackTensor(const ukfVectorType &b, const stdVec_t &u, stdEigVec_t &s,
-                    stdEigVec_t &ret);
+  void UnpackTensor(const ukfVectorType &b, const stdVec_t &u, stdEigVec_t &s, stdEigVec_t &ret);
 
   /**
   * Creates necessary variable for noddi
   */
-  void createProtocol(const ukfVectorType &b, ukfVectorType &gradientStrength,
-                      ukfVectorType &pulseSeparation);
+  void createProtocol(const ukfVectorType &b, ukfVectorType &gradientStrength, ukfVectorType &pulseSeparation);
 
   /** One step along the fiber for the 3-tensor case. */
   void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3,
-              ukfPrecisionType &fa, ukfPrecisionType &fa2, ukfPrecisionType &fa3, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE,
-              ukfPrecisionType &trace, ukfPrecisionType &trace2);
+              ukfPrecisionType &fa, ukfPrecisionType &fa2, ukfPrecisionType &fa3, State &state, ukfMatrixType &covariance,
+              ukfPrecisionType &dNormMSE, ukfPrecisionType &trace, ukfPrecisionType &trace2);
 
   /** One step for ridgelets bi-exp case */
   void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &m2, vec3_t &m3, State &state, ukfMatrixType &covariance,
@@ -296,6 +299,7 @@ private:
 
   /** Output file for tracts generated with first tensor */
   const std::string _output_file;
+
   /** Output file for tracts generated with second tensor */
   const std::string _output_file_with_second_tensor;
 
@@ -344,6 +348,8 @@ private:
   const ukfPrecisionType _p0;
   const ukfPrecisionType _sigma_signal;
   const ukfPrecisionType _sigma_mask;
+  const ukfPrecisionType _sigma_csf;
+  const ukfPrecisionType _sigma_wm;
   const ukfPrecisionType _min_radius;
 
   ukfVectorType weights_on_tensors;
@@ -351,6 +357,7 @@ private:
   /** Maximal number of points in the tract */
   const int _max_length;
   bool _full_brain;
+  bool _csf_provided;
   bool _noddi;
   ukfVectorType _gradientStrength, _pulseSeparation;
   /** Diffustion propagator parameters **/
