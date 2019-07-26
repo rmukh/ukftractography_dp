@@ -78,10 +78,12 @@ Tractography::Tractography(UKFSettings s) :
                                             _sigma_signal(s.sigma_signal),
                                             _sigma_mask(s.sigma_mask),
                                             _sigma_csf(s.sigma_csf),
+                                            _sigma_wm(s.sigma_wm),
                                             _min_radius(s.min_radius),
                                             _max_length(static_cast<int>(std::ceil(s.maxHalfFiberLength / s.stepLength))),
                                             _full_brain(false),
                                             _csf_provided(false),
+                                            _wm_provided(false),
                                             _noddi(s.noddi),
                                             _diffusion_propagator(s.diffusion_propagator),
                                             _rtop_min(s.rtop_min),
@@ -507,8 +509,8 @@ void Tractography::UpdateFilterModelType()
   _model->set_signal_dim(_signal_data->GetSignalDimension() * 2);
 }
 
-bool Tractography::SetData(void *data, void *mask, void *csf, void *seed,
-                           bool normalizedDWIData)
+bool Tractography::SetData(void *data, void *mask, void *csf, void *wm,
+                           void *seed, bool normalizedDWIData)
 {
   if (!data || !mask)
   {
@@ -522,8 +524,11 @@ bool Tractography::SetData(void *data, void *mask, void *csf, void *seed,
   if (csf)
     _csf_provided = true;
 
-  _signal_data = new NrrdData(_sigma_signal, _sigma_mask, _sigma_csf);
-  _signal_data->SetData((Nrrd *)data, (Nrrd *)mask, (Nrrd *)csf, (Nrrd *)seed, normalizedDWIData);
+  if (wm)
+    _wm_provided = true;
+
+  _signal_data = new NrrdData(_sigma_signal, _sigma_mask, _sigma_csf, _sigma_wm);
+  _signal_data->SetData((Nrrd *)data, (Nrrd *)mask, (Nrrd *)csf, (Nrrd *)wm, (Nrrd *)seed, normalizedDWIData);
 
   return false;
 }
@@ -532,10 +537,11 @@ bool Tractography::LoadFiles(const std::string &data_file,
                              const std::string &seed_file,
                              const std::string &mask_file,
                              const std::string &csf_file,
+                             const std::string &wm_file,
                              const bool normalized_DWI_data,
                              const bool output_normalized_DWI_data)
 {
-  _signal_data = new NrrdData(_sigma_signal, _sigma_mask, _sigma_csf);
+  _signal_data = new NrrdData(_sigma_signal, _sigma_mask, _sigma_csf, _sigma_wm);
 
   if (seed_file.empty())
     _full_brain = true;
@@ -545,7 +551,12 @@ bool Tractography::LoadFiles(const std::string &data_file,
   else
     _csf_provided = true;
 
-  if (_signal_data->LoadData(data_file, seed_file, mask_file, csf_file, normalized_DWI_data, output_normalized_DWI_data))
+  if (wm_file.empty())
+    _wm_provided = false;
+  else
+    _wm_provided = true;
+
+  if (_signal_data->LoadData(data_file, seed_file, mask_file, csf_file, wm_file, normalized_DWI_data, output_normalized_DWI_data))
   {
     std::cout << "ISignalData could not be loaded" << std::endl;
     delete _signal_data;
@@ -566,6 +577,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
     std::cout << "CSF Provided!\n";
   else
     std::cout << "CSF is NOT provided!\n";
+
+  if (_wm_provided)
+    std::cout << "WM Provided!\n";
+  else
+    std::cout << "WM is NOT provided!\n";
 
   int signal_dim = _signal_data->GetSignalDimension();
 
@@ -2205,20 +2221,31 @@ void Tractography::Follow3T(const int thread_id,
     // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
     // in_csf = rtopSignal < _rtop_min;
 
-    bool in_rtop1 = rtop1 < 500;
-    bool is_high_fw = state(24) > 0.75;
-    bool in_rtop = rtopModel < 15000; // means 'in rtop' threshold
-    bool dNormMSE_too_high = dNormMSE > _max_nmse;
-    bool is_curving = curve_radius(fiber.position) < _min_radius;
-
     if (_csf_provided && in_csf)
-      is_discarded = 1;
-    else
-      is_discarded = 0;
-
-    if (!is_brain || in_rtop || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
     {
+      is_discarded = 1; // mark fiber to remove it later
       break;
+    }
+    else
+    {
+      is_discarded = 0; // that's fiber is fine, we are going to keep it on
+    }
+
+    if (_wm_provided)
+    {
+      if (_signal_data->Interp3ScalarWM(x) < 0.30)
+        break;
+    }
+    else
+    {
+      bool in_rtop1 = rtop1 < 500;
+      bool is_high_fw = state(24) > 0.75;
+      bool in_rtop = rtopModel < 15000; // means 'in rtop' threshold
+      bool dNormMSE_too_high = dNormMSE > _max_nmse;
+      bool is_curving = curve_radius(fiber.position) < _min_radius;
+
+      if (!is_brain || in_rtop || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
+        break;
     }
 
     if (fiber_length >= fiber_size)

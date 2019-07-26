@@ -21,7 +21,6 @@
 
 extern "C"
 {
-
   int ModuleEntryPoint(int argc, char **argv)
   {
     UKFSettings ukf_settings;
@@ -66,6 +65,7 @@ extern "C"
                            ukf_settings.seedsFile,
                            ukf_settings.maskFile,
                            ukf_settings.csfFile,
+                           ukf_settings.wmFile,
                            normalizedDWIData, outputNormalizedDWIData) == EXIT_FAILURE)
       {
         itkGenericExceptionMacro(<< "::LoadFiles failed with unknown error.");

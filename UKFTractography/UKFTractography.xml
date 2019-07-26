@@ -59,6 +59,14 @@
       <description>CSF mask file. Tracking terminated and fiber discarded when reaching CSF voxels.</description>
     </image>
 
+    <image type="scalar" fileExtensions=".nhdr,.nrrd">
+      <name>wmFile</name>
+      <longflag alias="wmData">wmFile</longflag>
+      <label>Input WM mask file</label>
+      <channel>input</channel>
+      <description>WM mask file. Tracking terminated and fiber discarded when reaching WM voxels.</description>
+    </image>
+
     <geometry type="fiberbundle" fileExtensions=".vtp,.vtk">
       <name>tracts</name>
       <longflag>tracts</longflag>

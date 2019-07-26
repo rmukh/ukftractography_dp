@@ -10,9 +10,9 @@
 #include <cassert>
 #include "itkMacro.h"
 
-NrrdData::NrrdData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask, ukfPrecisionType sigma_csf)
-    : ISignalData(sigma_signal, sigma_mask, sigma_csf),
-      _data(NULL), _seed_data(NULL), _mask_data(NULL), _csf_data(NULL), _data_nrrd(NULL)
+NrrdData::NrrdData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask, ukfPrecisionType sigma_csf, ukfPrecisionType sigma_wm)
+    : ISignalData(sigma_signal, sigma_mask, sigma_csf, sigma_wm),
+      _data(NULL), _seed_data(NULL), _mask_data(NULL), _csf_data(NULL), _wm_data(NULL), _data_nrrd(NULL)
 {
 }
 
@@ -26,6 +26,8 @@ NrrdData::~NrrdData()
     nrrdNuke(_mask_nrrd);
   if (_csf_data)
     nrrdNuke(_csf_nrrd);
+  if (_wm_data)
+    nrrdNuke(_wm_nrrd);
 }
 
 void NrrdData::Interp3Signal(const vec3_t &pos,
@@ -288,6 +290,65 @@ ukfPrecisionType NrrdData::Interp3ScalarCSF(const vec3_t &pos) const
   return s / w_sum;
 }
 
+ukfPrecisionType NrrdData::Interp3ScalarWM(const vec3_t &pos) const
+{
+  const int nx = static_cast<const int>(_dim[0]);
+  const int ny = static_cast<const int>(_dim[1]);
+  const int nz = static_cast<const int>(_dim[2]);
+
+  unsigned int index;
+  ukfPrecisionType value;
+
+  ukfPrecisionType w_sum = 1e-16;
+  ukfPrecisionType s = ukfZero;
+
+  for (int xx = -1; xx <= 1; xx++)
+  {
+    const int x = static_cast<const int>(round(pos[0]) + xx);
+    if (x < 0 || nx <= x)
+    {
+      continue;
+    }
+    ukfPrecisionType dx = (x - pos[0]) * _voxel[0];
+    ukfPrecisionType dxx = dx * dx;
+    for (int yy = -1; yy <= 1; yy++)
+    {
+      const int y = static_cast<const int>(round(pos[1]) + yy);
+      if (y < 0 || ny <= y)
+      {
+        continue;
+      }
+      ukfPrecisionType dy = (y - pos[1]) * _voxel[1];
+      ukfPrecisionType dyy = dy * dy;
+      for (int zz = -1; zz <= 1; zz++)
+      {
+        const int z = static_cast<const int>(round(pos[2]) + zz);
+        if (z < 0 || nz <= z)
+        {
+          continue;
+        }
+        ukfPrecisionType dz = (z - pos[2]) * _voxel[2];
+        ukfPrecisionType dzz = dz * dz;
+
+        index = nz * ny * x + nz * y + z;
+
+        // signed or unsigned doesn't make a difference since masks don't contain any negative values
+        value = static_cast<ukfPrecisionType *>(_wm_data)[index];
+
+        ukfPrecisionType w = std::exp(-(dxx + dyy + dzz) / _sigma_wm);
+        if (value)
+        {
+          s += w;
+        }
+
+        w_sum += w;
+      }
+    }
+  }
+
+  return s / w_sum;
+}
+
 void NrrdData::GetSeeds(const std::vector<int> &labels,
                         stdVec_t &seeds) const
 {
@@ -354,7 +415,7 @@ void NrrdData::GetSeeds(const std::vector<int> &labels,
   }
 }
 
-bool NrrdData::SetData(Nrrd *data_nrrd, Nrrd *mask_nrrd, Nrrd *csf_nrrd,
+bool NrrdData::SetData(Nrrd *data_nrrd, Nrrd *mask_nrrd, Nrrd *csf_nrrd, Nrrd *wm_nrrd,
                        Nrrd *seed_nrrd, bool normalizedDWIData)
 {
   //_data_nrrd = (Nrrd*)data;
@@ -393,6 +454,9 @@ bool NrrdData::SetData(Nrrd *data_nrrd, Nrrd *mask_nrrd, Nrrd *csf_nrrd,
   this->_csf_nrrd = csf_nrrd;
   this->_csf_data = csf_nrrd->data;
 
+  this->_wm_nrrd = wm_nrrd;
+  this->_wm_data = wm_nrrd->data;
+
   return false;
 }
 
@@ -400,10 +464,11 @@ bool NrrdData::LoadData(const std::string &data_file,
                         const std::string &seed_file,
                         const std::string &mask_file,
                         const std::string &csf_file,
+                        const std::string &wm_file,
                         const bool normalizedDWIData,
                         const bool outputNormalizedDWIData)
 {
-  if (_data || _seed_data || _mask_data || _csf_data)
+  if (_data || _seed_data || _mask_data || _csf_data || _wm_data)
   {
     std::cout << "There is already some data!" << std::endl;
     return true;
@@ -458,7 +523,7 @@ bool NrrdData::LoadData(const std::string &data_file,
   }
 
   Nrrd *csf_nrrd = nrrdNew();
-  // Load mask
+  // Load CSF mask
   if (!csf_file.empty())
   {
     if (nrrdLoad(csf_nrrd, csf_file.c_str(), NULL))
@@ -470,7 +535,20 @@ bool NrrdData::LoadData(const std::string &data_file,
     }
   }
 
-  bool status = SetData(input_nrrd, mask_nrrd, csf_nrrd, seed_nrrd, normalizedDWIData);
+  Nrrd *wm_nrrd = nrrdNew();
+  // Load WM mask
+  if (!wm_file.empty())
+  {
+    if (nrrdLoad(wm_nrrd, wm_file.c_str(), NULL))
+    {
+      char *err = biffGetDone(NRRD);
+      std::cout << "Trouble reading " << wm_nrrd << ": " << err << std::endl;
+      free(err);
+      return true;
+    }
+  }
+
+  bool status = SetData(input_nrrd, mask_nrrd, csf_nrrd, wm_nrrd, seed_nrrd, normalizedDWIData);
   return status;
 }
 

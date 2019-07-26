@@ -15,9 +15,11 @@ dwi_path="/home/rinat/Desktop/ukftests/dwi_0008_ed.nhdr"
 mask_path="/home/rinat/Desktop/ukftests/dwi_0008_ed_mask_edited.nhdr"
 
 # OUTPUT FIBER
-output_path='/home/rinat/Desktop/ukftests/dcs_full_2.vtk'
+output_path='/home/rinat/Desktop/ukftests/dcs_full_3.vtk'
 
 csf_path='/home/rinat/Desktop/ukftests/dwi_0008_CSF.nrrd'
+wm_path='/home/rinat/Desktop/ukftests/dwi_0008_WM.nrrd'
+
 seeds_path='/home/rinat/Desktop/ukftests/dwi_0008_seeds.nrrd'
 
 # --seedsFile $seeds_path \
@@ -25,6 +27,7 @@ eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --csfFile $csf_path \
+ --wmFile $wm_path \
  --seedsFile $seeds_path \
  --tracts $output_path \
  --seedsPerVoxel 1 \

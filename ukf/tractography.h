@@ -29,7 +29,7 @@ class Tractography;
 // Internal constants
 const ukfPrecisionType SIGMA_MASK = 0.5;
 const ukfPrecisionType SIGMA_CSF = 0.5;
-const ukfPrecisionType SIMGA_WM = 0.5;
+const ukfPrecisionType SIGMA_WM = 0.5;
 const ukfPrecisionType P0 = 0.01;
 const ukfPrecisionType MIN_RADIUS = 0.87;
 const ukfPrecisionType FULL_BRAIN_MEAN_SIGNAL_MIN = 0.18;
@@ -102,6 +102,7 @@ struct UKFSettings
   std::string seedsFile;
   std::string maskFile;
   std::string csfFile;
+  std::string wmFile;
 };
 
 /**
@@ -142,14 +143,14 @@ public:
    * Load the files that contain the DWI signal, the seeds and a mask
    * defining the volume of the brain.
   */
-  bool LoadFiles(const std::string &data_file, const std::string &seed_file, const std::string &mask_file,
-                 const std::string &csf_file, const bool normalized_DWI_data, const bool output_normalized_DWI_data);
+  bool LoadFiles(const std::string &data_file, const std::string &seed_file, const std::string &mask_file, const std::string &csf_file,
+                 const std::string &wm_file, const bool normalized_DWI_data, const bool output_normalized_DWI_data);
 
   /**
    * Directly set the data volume pointers
   */
 
-  bool SetData(void *data, void *mask, void *csf, void *seed, bool normalizedDWIData);
+  bool SetData(void *data, void *mask, void *csf, void *wm, void *seed, bool normalizedDWIData);
 
   /**
    * Directly set the seed locations
@@ -356,8 +357,9 @@ private:
 
   /** Maximal number of points in the tract */
   const int _max_length;
-  bool _full_brain;
-  bool _csf_provided;
+  bool _full_brain; // check if seed file provided?
+  bool _csf_provided; // check if CSF file provided?
+  bool _wm_provided; // check if WM file provided?
   bool _noddi;
   ukfVectorType _gradientStrength, _pulseSeparation;
   /** Diffustion propagator parameters **/

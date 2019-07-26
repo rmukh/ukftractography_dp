@@ -29,8 +29,8 @@ public:
    * \param[in] sigma_signal the interpolation 'factor' for the signal
    * \param[in] sigma_mask the interpolation 'factor' for the mask
   */
-  ISignalData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask, ukfPrecisionType sigma_csf)
-      : _sigma_signal(sigma_signal), _sigma_mask(sigma_mask), _sigma_csf(sigma_csf)
+  ISignalData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask, ukfPrecisionType sigma_csf, ukfPrecisionType sigma_wm)
+      : _sigma_signal(sigma_signal), _sigma_mask(sigma_mask), _sigma_csf(sigma_csf), _sigma_wm(sigma_wm)
   {
   }
 
@@ -45,8 +45,11 @@ public:
   /** Checks if a certian position is still within the brain mask. */
   virtual ukfPrecisionType Interp3ScalarMask(const vec3_t &pos) const = 0;
 
-  /* Checks if a certain postion is in csf mask */
+  /* Checks if a certain postion is in CSF mask */
   virtual ukfPrecisionType Interp3ScalarCSF(const vec3_t &pos) const = 0;
+
+  /* Checks if a certain postion is in WM mask */
+  virtual ukfPrecisionType Interp3ScalarWM(const vec3_t &pos) const = 0;
 
   /** Checks if a certian position is still within the brain mask. */
   virtual ukfPrecisionType ScalarMaskValue(const vec3_t &pos) const = 0;
@@ -74,7 +77,7 @@ public:
     * Loads all the data necessary to perform tractography
   */
   virtual bool LoadData(const std::string &data_file, const std::string &seed_file, const std::string &mask_file, const std::string &csf_file,
-                        const bool normalizedDWIData, const bool outputNormalizedDWIData) = 0;
+                        const std::string &wm_file, const bool normalizedDWIData, const bool outputNormalizedDWIData) = 0;
 
   /** Returns the dimensions of the image */
   virtual vec3_t dim() const = 0;
@@ -102,8 +105,10 @@ protected:
   const ukfPrecisionType _sigma_signal;
   /** sigma for gaussian interpolation of mask */
   const ukfPrecisionType _sigma_mask;
-  /* sigma for gaussian interpolation of csf mask */
+  /* sigma for gaussian interpolation of CSF mask */
   const ukfPrecisionType _sigma_csf;
+  /* sigma for gaussian interpolation of WM mask */
+  const ukfPrecisionType _sigma_wm;
 
   /** voxel size */
   vec3_t _voxel;
