@@ -357,7 +357,8 @@ private:
 
   /** Maximal number of points in the tract */
   const int _max_length;
-  bool _full_brain; // check if seed file provided?
+  bool _full_brain; // is full brain?
+  bool _is_seeds; // check if seeds file provided?
   bool _csf_provided; // check if CSF file provided?
   bool _wm_provided; // check if WM file provided?
   bool _noddi;

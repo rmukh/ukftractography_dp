@@ -54,6 +54,12 @@ public:
   */
   virtual void GetSeeds(const std::vector<int> &labels, stdVec_t &seeds) const;
 
+  /**
+   * \brief Get the seed points from the WM mask file, assuming that white matter voxels corresponds to value of 1.o
+   * \param[out] seeds   a vector containing the positions in ijk-space of the seeds
+  */
+  virtual void GetWMSeeds(stdVec_t &seeds) const;
+
   /** returns the gradients of the diffusion image */
   virtual const stdVec_t &gradients() const
   {

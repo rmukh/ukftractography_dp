@@ -365,7 +365,8 @@ void NrrdData::GetSeeds(const std::vector<int> &labels,
 
     if (!(nx == _dim[0] && ny == _dim[1] && nz == _dim[2]))
     {
-      itkGenericExceptionMacro(<< "Labelmap ROI volume dimensions DO NOT match DWI dimensions");
+      std::cout << "Labelmap ROI volume dimensions DO NOT match DWI dimensions!";
+      throw;
     }
 
     for (size_t i = 0; i < nx; ++i)
@@ -412,6 +413,41 @@ void NrrdData::GetSeeds(const std::vector<int> &labels,
   else
   {
     std::cout << "No seed data available." << std::endl;
+  }
+}
+
+void NrrdData::GetWMSeeds(stdVec_t &seeds) const
+{
+  assert(seeds.size() == 0);
+
+  // Go through the volume.
+  size_t nx = _wm_nrrd->axis[2].size;
+  size_t ny = _wm_nrrd->axis[1].size;
+  size_t nz = _wm_nrrd->axis[0].size;
+
+  if (!(nx == _dim[0] && ny == _dim[1] && nz == _dim[2]))
+  {
+    std::cout << "WM Mask file dimensions DO NOT match DWI dimensions!";
+    throw;
+  }
+
+  for (size_t i = 0; i < nx; ++i)
+  {
+    for (size_t j = 0; j < ny; ++j)
+    {
+      for (size_t k = 0; k < nz; ++k)
+      {
+        int value = 0;
+        size_t index = ny * nz * i + nz * j + k;
+
+        value = static_cast<float *>(_wm_data)[index];
+
+        if (value == 1.0)
+        {
+          seeds.push_back(vec3_t(i, j, k));
+        }
+      }
+    }
   }
 }
 

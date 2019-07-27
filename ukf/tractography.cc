@@ -82,6 +82,7 @@ Tractography::Tractography(UKFSettings s) :
                                             _min_radius(s.min_radius),
                                             _max_length(static_cast<int>(std::ceil(s.maxHalfFiberLength / s.stepLength))),
                                             _full_brain(false),
+                                            _is_seeds(false),
                                             _csf_provided(false),
                                             _wm_provided(false),
                                             _noddi(s.noddi),
@@ -545,6 +546,8 @@ bool Tractography::LoadFiles(const std::string &data_file,
 
   if (seed_file.empty())
     _full_brain = true;
+  else
+    _is_seeds = true;
 
   if (csf_file.empty())
     _csf_provided = false;
@@ -552,9 +555,14 @@ bool Tractography::LoadFiles(const std::string &data_file,
     _csf_provided = true;
 
   if (wm_file.empty())
+  {
     _wm_provided = false;
+  }
   else
+  {
     _wm_provided = true;
+    _full_brain = false;
+  }
 
   if (_signal_data->LoadData(data_file, seed_file, mask_file, csf_file, wm_file, normalized_DWI_data, output_normalized_DWI_data))
   {
@@ -570,8 +578,14 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 {
   if (!(_signal_data))
   {
-    itkGenericExceptionMacro(<< "No signal data!");
+    std::cout << "No signal data!";
+    throw;
   }
+
+  if (_is_seeds)
+    std::cout << "Seed file Provided!\n";
+  else
+    std::cout << "Seed file is NOT provided!\n";
 
   if (_csf_provided)
     std::cout << "CSF Provided!\n";
@@ -588,16 +602,23 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   stdVec_t seeds;
   if (!(_labels.size() > 0))
   {
-    itkGenericExceptionMacro(<< "No label data!");
+    std::cout << "No label data!";
+    throw;
   }
 
   if (!_ext_seeds.empty())
   {
     seeds = _ext_seeds;
   }
-  else if (!_full_brain)
+  else if (_is_seeds)
   {
+    std::cout << "USE SEED POINTS FILE" << std::endl;
     _signal_data->GetSeeds(_labels, seeds);
+  }
+  else if (_wm_provided)
+  {
+    std::cout << "USE WM AS SEED POINTS" << std::endl;
+    _signal_data->GetWMSeeds(seeds);
   }
   else
   {
@@ -611,9 +632,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
         {
           vec3_t pos(x, y, z); //  = make_vec(x, y, z);
           if (_signal_data->ScalarMaskValue(pos) > 0)
-          {
             seeds.push_back(pos);
-          }
         }
       }
     }
@@ -621,7 +640,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
   if (!(seeds.size() > 0))
   {
-    itkGenericExceptionMacro(<< "No matching label ROI seeds found! Please verify label selection.");
+    std::cout << "No matching label ROI seeds found! Please verify label selection!";
+    throw;
   }
 
   // Determinism.
@@ -762,9 +782,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
     }
 
     if (_full_brain && fa <= _seeding_threshold)
-    {
       continue;
-    }
 
     // Create seed info for both directions;
     SeedPointInfo info;

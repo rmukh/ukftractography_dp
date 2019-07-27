@@ -57,6 +57,9 @@ public:
   /** Get all the seed points. */
   virtual void GetSeeds(const std::vector<int> &labels, stdVec_t &seeds) const = 0;
 
+  /* Make seed points from WM mask file*/
+  virtual void GetWMSeeds(stdVec_t &seeds) const = 0;
+
   /** Returns the gradients. */
   virtual const stdVec_t &gradients() const = 0;
 

@@ -68,7 +68,8 @@ extern "C"
                            ukf_settings.wmFile,
                            normalizedDWIData, outputNormalizedDWIData) == EXIT_FAILURE)
       {
-        itkGenericExceptionMacro(<< "::LoadFiles failed with unknown error.");
+        std::cout << "LoadFiles failed with unknown error!";
+        throw;
       }
 
       tract->UpdateFilterModelType();
