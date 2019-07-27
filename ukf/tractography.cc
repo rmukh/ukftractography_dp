@@ -2251,7 +2251,8 @@ void Tractography::Follow3T(const int thread_id,
 
     if (_wm_provided)
     {
-      if (_signal_data->Interp3ScalarWM(x) < 0.30)
+      bool in_rtop1 = rtop1 < 500;
+      if (_signal_data->Interp3ScalarWM(x) < 0.30 || in_rtop1)
         break;
     }
     else
