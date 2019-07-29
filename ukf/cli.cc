@@ -62,6 +62,13 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   }
   /* End deprecation section */
 
+  if (argc < 3)
+  {
+    std::cout << "Usage: " << argv[0] << " --dwiFile dMRI file --maskFile mask file --tracts output fiber tracts file name" << std::endl;
+    std::cout << "To see other parameters call " << argv[0] << " --help" << std::endl;
+    return 1;
+  }
+
   ukfPrecisionType l_stoppingFA = stoppingFA;
   ukfPrecisionType l_stoppingThreshold = stoppingThreshold;
   ukfPrecisionType l_stepLength = stepLength;
