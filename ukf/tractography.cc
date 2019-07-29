@@ -2218,6 +2218,7 @@ void Tractography::Follow3T(const int thread_id,
   {
     ++stepnr;
 
+    // That's one small step for a propagator, one giant leap for tractography...
     Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
 
     // Check if we should abort following this fiber. We abort if we reach the
@@ -2232,13 +2233,15 @@ void Tractography::Follow3T(const int thread_id,
     const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = false;
     if (_csf_provided)
-      in_csf = _signal_data->Interp3ScalarCSF(x) > 0.5;
+      in_csf = _signal_data->Interp3ScalarCSF(x) > 0.5; // consider CSF as a true only if pve value > 0.5
     else
-      in_csf = mean_signal < _mean_signal_min;
+      in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' from a signal
 
     // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
     // in_csf = rtopSignal < _rtop_min;
 
+    //The trick is to discard fibers only when we have CSF mask?
+    //Wonder why? Because we can't say if estimated from voxel 'CSF' is CSF.
     if (_csf_provided && in_csf)
     {
       is_discarded = 1; // mark fiber to remove it later
@@ -2249,18 +2252,18 @@ void Tractography::Follow3T(const int thread_id,
       is_discarded = 0; // that's fiber is fine, we are going to keep it on
     }
 
+    bool dNormMSE_too_high = dNormMSE > _max_nmse;
+    bool in_rtop1 = rtop1 < 500;
+
     if (_wm_provided)
     {
-      bool in_rtop1 = rtop1 < 500;
-      if (_signal_data->Interp3ScalarWM(x) < 0.30 || in_rtop1)
+      if (_signal_data->Interp3ScalarWM(x) < 0.30 || in_rtop1 || !is_brain || dNormMSE_too_high || stepnr > _max_length)
         break;
     }
     else
     {
-      bool in_rtop1 = rtop1 < 500;
       bool is_high_fw = state(24) > 0.75;
       bool in_rtop = rtopModel < 15000; // means 'in rtop' threshold
-      bool dNormMSE_too_high = dNormMSE > _max_nmse;
       bool is_curving = curve_radius(fiber.position) < _min_radius;
 
       if (!is_brain || in_rtop || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
@@ -2269,7 +2272,7 @@ void Tractography::Follow3T(const int thread_id,
 
     if (fiber_length >= fiber_size)
     {
-      // If fibersize is more than initally allocated size resizing further
+      // If fibersize is more than initially allocated size resizing further.
       fiber_size += 100;
       FiberReserve(fiber, fiber_size);
     }
@@ -2843,10 +2846,8 @@ void Tractography::Step3T(const int thread_id,
   ukfVectorType signal(_signal_data->GetSignalDimension() * 2);
   _signal_data->Interp3Signal(x, signal);
 
+  // Estimated state until acceptable convergence or number iterations exceeded
   LoopUKF(thread_id, state, covariance, signal, state_new, covariance_new, dNormMSE);
-  // cout << "ukf loop end" << endl;
-  // cout << "m1 state " << state(0) << " " << state(1) << " " << state(2) << endl;
-  // cout << "m1 " << m1.transpose() << endl;
 
   vec3_t old_dir = m1;
 
@@ -2863,7 +2864,6 @@ void Tractography::Step3T(const int thread_id,
   // cout << "m1 " << m1.transpose() << endl;
 
   ukfPrecisionType _rtop1, _rtop2, _rtop3, _rtopModel, _rtopSignal;
-  //stdVecState local_state = ConvertVector<State, stdVecState>(state);
 
   computeRTOPfromState(state, _rtopModel, _rtop1, _rtop2, _rtop3);
   computeRTOPfromSignal(_rtopSignal, signal);
@@ -2874,8 +2874,8 @@ void Tractography::Step3T(const int thread_id,
   rtopModel = _rtopModel;
   rtopSignal = _rtopSignal;
 
-  // BELOW is a huge pile of code which might be useful in future or for
-  // debugging
+  // BELOW is a huge pile of the code which might be useful in future for
+  // debugging or not... ¯\_(ツ)_/¯
 
   // ukfPrecisionType dot1 = m1.dot(old_dir);
   // ukfPrecisionType dot2 = m2.dot(old_dir);
@@ -3068,7 +3068,7 @@ void Tractography::LoopUKF(const int thread_id,
     er_org = er;
     er = dNormMSE;
 
-    if (er_org - er < 0.001)
+    if (er_org - er < 0.001) // if error is fine then stop
       break;
 
     state_prev = state;
