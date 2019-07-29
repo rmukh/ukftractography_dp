@@ -299,17 +299,17 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
 
   if (diffusionPropagator)
   {
-    if (l_maxUKFIterations == -1.0)
+    if (l_maxUKFIterations < 0.0)
+    {
+      std::cout << "Error: maxUKFIterations cannot be negative. Exiting" << std::endl;
+      exit(1);
+    }
+    if (l_maxUKFIterations == 5)
     {
       ukf_setAndTell(l_maxUKFIterations, 5, "maxUKFIterations");
     }
     else
     {
-      if (l_maxUKFIterations < 0.0)
-      {
-        std::cout << "Error: maxUKFIterations cannot be negative. Exiting" << std::endl;
-        exit(1);
-      }
       ukf_tell(l_maxUKFIterations, "maxUKFIterations");
     }
   }

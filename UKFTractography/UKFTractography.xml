@@ -376,21 +376,21 @@
 
   <parameters advanced="true">
     <label>Diffusion Propagator model </label>
-    <description> Use the Bi-exponential diffusion propagator model, with 3 tensors and free water </description>
+    <description> Use the Bi-exponential diffusion propagator model, with 3 tensors and free water. </description>
 
     <boolean>
       <name>diffusionPropagator</name>
       <longflag>diffusionPropagator</longflag>
       <label>Diffusion Propagator model </label>
-      <description>Use the Bi-exponential diffusion propagator model, with 3 tensors and free water </description>
+      <description>Use the Bi-exponential diffusion propagator model, with 3 tensors and free water. </description>
       <default>false</default>
     </boolean>
 
     <boolean>
       <name>recordRTOP</name>
       <longflag>recordRTOP</longflag>
-      <label>Record the return to origin probability </label>
-      <description>Record the return to origin probability when using the diffusion propagator model </description>
+      <label>Record the return to origin probability</label>
+      <description>Record the return to origin probability when using the diffusion propagator model. </description>
       <default>false</default>
     </boolean>
 
@@ -398,7 +398,7 @@
       <name>recordWeights</name>
       <longflag>recordWeights</longflag>
       <label>Record w1, w2, w3, wiso</label>
-      <description>Record each tensor weight and free water weight</description>
+      <description>Record each tensor weight and free water weight. </description>
       <default>false</default>
     </boolean>
 
@@ -418,13 +418,13 @@
       <default>0.0</default>
     </double>
 
-    <double>
+    <integer>
       <name>maxUKFIterations</name>
       <longflag>maxUKFIterations</longflag>
       <label>Maximum number of iterations of the Kalman filter at a given position when following a fiber</label>
       <description>Maximum number of iterations of the Kalman filter at a given position when following a fiber (default is 5)</description>
-      <default>-1.0</default>
-    </double>
+      <default>5</default>
+    </integer>
   </parameters>
 
   <parameters advanced="true">

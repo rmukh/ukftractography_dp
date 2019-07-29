@@ -653,7 +653,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   if ((seeds.size() == 1 && _seeds_per_voxel <= 1.0) || _seeds_per_voxel <= 1.0) // if there is only one seed don't use offset so fibers can be
                                                                              // compared
   {
-    std::cout << "checked " << std::endl;
     rand_dirs.push_back(vec3_t(0, 0, 0) /* make_vec(0, 0, 0) */); // in the test cases.
   }
   else
