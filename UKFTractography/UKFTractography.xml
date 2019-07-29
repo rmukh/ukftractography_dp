@@ -8,12 +8,11 @@
 
   <description><![CDATA[This module traces fibers in a DWI Volume using the multiple tensor unscented Kalman Filter methodology. At each point on the fiber the most consistent direction is found as a mixture of previous estimates and of the local model.<br><br>For more information, please reference: Malcolm, James G., Martha E. Shenton, and Yogesh Rathi. "Filtered multitensor tractography." Medical Imaging, IEEE Transactions on 29.9 (2010): 1664-1675. (http://www.ncbi.nlm.nih.gov/pubmed/20805043)]]></description>
 
-  <version>1.0</version>
+  <version>2.0</version>
   <documentation-url>https://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/UKFTractography</documentation-url>
   <license></license>
-  <contributor>Yogesh Rathi, Stefan Lienhard, Yinpeng Li, Martin Styner, Ipek Oguz, Yundi Shi, Christian Baumgartner, Kent Williams, Hans Johnson, Peter Savadjiev, Carl-Fredrik Westin, Lauren O'Donnell, Jessica Lee.</contributor>
+  <contributor>Yogesh Rathi, Stefan Lienhard, Yinpeng Li, Martin Styner, Ipek Oguz, Yundi Shi, Christian Baumgartner, Kent Williams, Hans Johnson, Peter Savadjiev, Carl-Fredrik Westin, Lauren O'Donnell, Jessica Lee, Rinat Mukhometzianov.</contributor>
   <acknowledgements><![CDATA[The development of this module was supported by NIH grants R01 MH097979 (PI Rathi), R01 MH092862 (PIs Westin and Verma), U01 NS083223 (PI Westin), R01 MH074794 (PI Westin) and P41 EB015902 (PI Kikinis), U01 CA199459 (PI O'Donnell), and P41 EB015898 (NCIGT).]]></acknowledgements>
-
 
   <parameters>
     <label>IO</label>
@@ -81,25 +80,21 @@
     <label>Tractography Options</label>
     <description>Basic Parameters</description>
 
-    <integer>
+    <double>
       <name>seedsPerVoxel</name>
       <longflag>seedsPerVoxel</longflag>
       <label>Seeding: Number of seeds per voxel</label>
-      <description> Tractography parameter used in all models. Each seed generates a fiber, thus using more seeds generates more fibers. In general use 1 or 2 seeds, and for a more thorough result use 5 or 10 (depending on your machine this may take up to 2 days to run). Default: 1. Range: 0-50.
-      </description>
+      <description>This parameter is available for all models. Each seed generates a fiber, so more seeds - more fibers. In general use 1 or 2 seeds, and for a more thorough result use 5 or 10 (depending on your machine this may take up to 2 days to run). The fraction value means seeding every 1/fraction voxel. For example, if set this parameter as 0.1, then seeding happens every 10th voxel. Default: 1. Range: 0-50.</description>
       <default>1</default>
       <constraints>
         <minimum>0</minimum>
         <maximum>50</maximum>
-        <step>1</step>
       </constraints>
-    </integer>
+    </double>
 
     <double>
       <name>seedingThreshold</name>
-      <longflag deprecatedalias="seedFALimit">
-        seedingThreshold
-      </longflag>
+      <longflag deprecatedalias="seedFALimit">seedingThreshold</longflag>
       <label>Seeding: Minimum seed FA</label>
       <description>Tractography parameter used in all models. Seed points whose fractional anisotropy (FA) or mean signal are below this value are excluded. Default: 0.18. Range: 0-1.</description>
       <default>0.18</default>
@@ -112,9 +107,7 @@
 
     <double>
       <name>stoppingFA</name>
-      <longflag deprecatedalias="minFA">
-        stoppingFA
-      </longflag>
+      <longflag deprecatedalias="minFA">stoppingFA</longflag>
       <label>Stopping Criterion: Terminating FA</label>
       <description>Tractography parameter used in tensor model. Tractography will stop when the fractional anisotropy (FA) of the tensor being tracked is less than this value. Note: make sure to also decrease the GA to track through lower anisotropy areas. This parameter is used only in tensor models. Default: 0.15. Range: 0-1.</description>
       <default>0.15</default>
@@ -156,7 +149,6 @@
       <element>2</element>
       <element>3</element>
     </integer-enumeration>
-
 
     <double>
       <name>stepLength</name>
@@ -217,7 +209,6 @@
       <description>Record output from data fitting: Store normalized mean square error (NMSE) along fibers. </description>
       <default>false</default>
     </boolean>
-
   </parameters>
 
   <parameters>
@@ -310,7 +301,6 @@
         <step>0.00001</step>
       </constraints>
     </double>
-
   </parameters>
 
   <parameters advanced="true">
@@ -324,7 +314,6 @@
       <description>Use neurite orientation dispersion and density imaging (NODDI) model instead of tensor model. </description>
       <default>false</default>
     </boolean>
-
 
     <boolean>
       <name>recordVic</name>
@@ -365,12 +354,9 @@
       <description>UKF data fitting parameter for NODDI model: Rate of change of volume fraction of intracellular component. Default: 0.004. </description>
       <default>0.004</default>
     </double>
-
   </parameters>
 
-
   <parameters advanced="true">
-
     <label>Signal Parameters (Expert Only)</label>
     <description></description>
 
@@ -386,8 +372,6 @@
         <step>0.001</step>
       </constraints>
     </double>
-
-
   </parameters>
 
   <parameters advanced="true">
@@ -441,7 +425,6 @@
       <description>Maximum number of iterations of the Kalman filter at a given position when following a fiber (default is 5)</description>
       <default>-1.0</default>
     </double>
-
   </parameters>
 
   <parameters advanced="true">
@@ -487,9 +470,9 @@
       <description>Develop/Debug Only: Maximum branching angle, in degrees. When using multiple tensors, a new branch will be created when the tensors' major directions form an angle between (minBranchingAngle, maxBranchingAngle). Branching is supressed when this maxBranchingAngle is set to 0.0. Default: 0.0. Range: 0-90.</description>
       <default>0.0</default>
       <constraints>
-        <minimum>0 </minimum>
-        <maximum> 90</maximum>
-        <step> 1</step>
+        <minimum>0</minimum>
+        <maximum>90</maximum>
+        <step>1</step>
       </constraints>
     </double>
 
@@ -500,9 +483,9 @@
       <description>Develop/Debug Only: Minimum branching angle, in degrees. When using multiple tensors, a new branch will be created when the tensors' major directions form an angle between (minBranchingAngle, maxBranchingAngle). Default: 0. Range: 0-90.</description>
       <default>0.0</default>
       <constraints>
-        <minimum> 0 </minimum>
-        <maximum> 90 </maximum>
-        <step> 1 </step>
+        <minimum>0</minimum>
+        <maximum>90</maximum>
+        <step>1</step>
       </constraints>
     </double>
 
@@ -565,7 +548,6 @@
       <description>Allow in-memory data transfer</description>
       <default>false</default>
     </boolean>
-
   </parameters>
 
 </executable>

@@ -55,7 +55,7 @@ struct UKFSettings
   ukfPrecisionType mean_signal_min;
   ukfPrecisionType seeding_threshold;
   int num_tensors;
-  int seeds_per_voxel;
+  ukfPrecisionType seeds_per_voxel;
   ukfPrecisionType min_branching_angle;
   ukfPrecisionType max_branching_angle;
   bool is_full_model;
@@ -377,7 +377,7 @@ private:
   ukfPrecisionType _mean_signal_min;
   ukfPrecisionType _seeding_threshold;
   int _num_tensors;
-  int _seeds_per_voxel;
+  ukfPrecisionType _seeds_per_voxel;
   ukfPrecisionType _cos_theta_min;
   ukfPrecisionType _cos_theta_max;
   bool _is_full_model;

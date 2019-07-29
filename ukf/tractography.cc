@@ -650,9 +650,10 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   // Create random offsets from the seed voxel.
   stdVec_t rand_dirs;
 
-  if ((seeds.size() == 1 && _seeds_per_voxel == 1) || _seeds_per_voxel == 1) // if there is only one seed don't use offset so fibers can be
+  if ((seeds.size() == 1 && _seeds_per_voxel <= 1.0) || _seeds_per_voxel <= 1.0) // if there is only one seed don't use offset so fibers can be
                                                                              // compared
   {
+    std::cout << "checked " << std::endl;
     rand_dirs.push_back(vec3_t(0, 0, 0) /* make_vec(0, 0, 0) */); // in the test cases.
   }
   else
@@ -685,57 +686,65 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   int num_mean_signal_too_low = 0;
 
   int tmp_counter = 1;
+  unsigned every_n = 1;
+
+  if (_seeds_per_voxel < 1.0) {
+    every_n = static_cast<unsigned>(1.0 / _seeds_per_voxel); // will be rounded to the nearest int
+    std::cout << "Seed every " << every_n << " point" << std::endl;
+  }
+
   for (stdVec_t::const_iterator cit = seeds.begin(); cit != seeds.end(); ++cit)
   {
     for (stdVec_t::iterator jt = rand_dirs.begin(); jt != rand_dirs.end(); ++jt)
     {
-      vec3_t point = *cit + *jt;
+      if (tmp_counter % every_n == 0)
+      {
+        vec3_t point = *cit + *jt;
 
-      _signal_data->Interp3Signal(point, signal); // here and in every step
+        _signal_data->Interp3Signal(point, signal); // here and in every step
+
+        // Filter out all starting points that have negative signal values (due to
+        // noise) or that otherwise have invalid signal values.
+        bool keep = true;
+        // We only scan half of the signal values since the second half is simply
+        // a copy of the first half.
+        for (int k = 0; k < signal_dim; ++k)
+        {
+          if (signal[k] < 0)
+          {
+            keep = false;
+            ++num_less_than_zero;
+            break;
+          }
+
+          if (std::isnan(signal[k]) || std::isinf(signal[k]))
+          {
+            keep = false;
+            ++num_invalid;
+            break;
+          }
+
+          // If we do full brain tractography we only want seed voxels where the
+          // GA is bigger than 0.18.
+          ukfMatrixType signal_tmp(signal_dim * 2, 1);
+          signal_tmp.col(0) = signal;
+          if (_full_brain && s2adc(signal_tmp) < _seeding_threshold)
+          {
+            keep = false;
+            ++num_mean_signal_too_low;
+            break;
+          }
+        }
+
+        // If all the criteria is met we keep that point and the signal data.
+        if (keep)
+        {
+          signal_values.push_back(signal);
+          starting_points.push_back(point);
+        }
+      }
+
       tmp_counter++;
-
-      // DEBUG
-      // std::cout << "point: " << point._[0] << " " << point._[1] << " " << point._[2] << std::endl;
-
-      // Filter out all starting points that have negative signal values (due to
-      // noise) or that otherwise have invalid signal values.
-      bool keep = true;
-      // We only scan half of the signal values since the second half is simply
-      // a copy of the first half.
-      for (int k = 0; k < signal_dim; ++k)
-      {
-        if (signal[k] < 0)
-        {
-          keep = false;
-          ++num_less_than_zero;
-          break;
-        }
-
-        if (std::isnan(signal[k]) || std::isinf(signal[k]))
-        {
-          keep = false;
-          ++num_invalid;
-          break;
-        }
-
-        // If we do full brain tractography we only want seed voxels where the
-        // GA is bigger than 0.18.
-        ukfMatrixType signal_tmp(signal_dim * 2, 1);
-        signal_tmp.col(0) = signal;
-        if (_full_brain && s2adc(signal_tmp) < _seeding_threshold)
-        {
-          keep = false;
-          ++num_mean_signal_too_low;
-          break;
-        }
-      }
-
-      // If all the criteria is met we keep that point and the signal data.
-      if (keep)
-      {
-        signal_values.push_back(signal);
-        starting_points.push_back(point);
-      }
     }
   }
 
@@ -1362,13 +1371,11 @@ bool Tractography::Run()
   }
 
   // Remove discarded fiber from a vector
-  std::cout << "raw before " << raw_primary.size() << std::endl;
   for (std::vector<unsigned char>::size_type i = 0; i != discarded_fibers.size(); ++i)
   {
     if (discarded_fibers[i] == 1)
       raw_primary.erase(raw_primary.begin() + i);
   }
-  std::cout << "raw after " << raw_primary.size() << std::endl;
 
   std::vector<UKFFiber> fibers;
   PostProcessFibers(raw_primary, raw_branch, branch_seed_affiliation, _branches_only, fibers);

@@ -341,7 +341,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     ukf_tell(l_Rs, "Rs");
   }
 
-  if (l_stepLength == 0.0)
+  if (l_stepLength == 0.3)
   {
     if (diffusionPropagator)
     {
@@ -365,20 +365,9 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     ukf_tell(l_stepLength, "stepLength");
   }
 
-  if (l_recordLength == 0.0)
+  if (l_recordLength == 0.9)
   {
-    if (numTensor == 1)
-    {
-      ukf_setAndTell(l_recordLength, 0.9, "recordLength");
-    }
-    else if (numTensor == 2)
-    {
-      ukf_setAndTell(l_recordLength, 0.9, "recordLength"); //was 0.2 for old Interp3Signal
-    }
-    else
-    { // 3T
-      ukf_setAndTell(l_recordLength, 0.45, "recordLength");
-    }
+    ukf_setAndTell(l_recordLength, 0.9, "recordLength");
   }
   else
   {
@@ -423,7 +412,14 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     ukf_setAndTell(l_Qwiso, 0.002, "Qwiso");
   }
 
-  ukf_tell(l_stoppingThreshold, "stoppingThreshold");
+  if (l_stoppingThreshold == 0.1)
+  {
+    ukf_setAndTell(l_stoppingThreshold, 0.1, "stoppingThreshold");
+  }
+  else
+  {
+    ukf_tell(l_stoppingThreshold, "stoppingThreshold");
+  }
 
   if (seedsPerVoxel == 1)
   {
@@ -432,6 +428,15 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   else
   {
     std::cout << "* seedsPerVoxel: " << seedsPerVoxel << std::endl;
+  }
+
+  if (seedsPerVoxel != static_cast<int>(seedsPerVoxel) && seedsPerVoxel > 1.0)
+  {
+    cout << "You set seedsPerVoxel = " << seedsPerVoxel << " which is real number that > 1, "
+                                                           "so it will be rounded to nearest integer = "
+         << static_cast<int>(seedsPerVoxel) << endl;
+    cout << "If you want to specify fraction of seed voxels than restart program with value in the range (0,1)" << endl;
+    seedsPerVoxel = static_cast<int>(seedsPerVoxel);
   }
 
   // initializing settings

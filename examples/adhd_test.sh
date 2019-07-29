@@ -25,9 +25,10 @@ eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --tracts $output_path \
- --seedsPerVoxel 1 \
+ --seedsPerVoxel 0.1 \
  --diffusionPropagator \
  --minRTOP 20 \
+ --stepLength 0.5 \
  --recordNMSE \
  --recordWeights \
  --recordRTOP \
