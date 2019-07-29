@@ -427,7 +427,7 @@ void NrrdData::GetWMSeeds(stdVec_t &seeds) const
 
   if (!(nx == _dim[0] && ny == _dim[1] && nz == _dim[2]))
   {
-    std::cout << "WM Mask file dimensions DO NOT match DWI dimensions!";
+    std::cout << "WM Mask file dimensions DO NOT match DWI file dimensions!";
     throw;
   }
 
