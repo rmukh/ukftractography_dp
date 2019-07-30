@@ -29,8 +29,8 @@ public:
    * \param[in] sigma_signal the interpolation 'factor' for the signal
    * \param[in] sigma_mask the interpolation 'factor' for the mask
   */
-  ISignalData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask, ukfPrecisionType sigma_csf, ukfPrecisionType sigma_wm)
-      : _sigma_signal(sigma_signal), _sigma_mask(sigma_mask), _sigma_csf(sigma_csf), _sigma_wm(sigma_wm)
+  ISignalData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask)
+      : _sigma_signal(sigma_signal), _sigma_mask(sigma_mask)
   {
   }
 
@@ -46,10 +46,10 @@ public:
   virtual ukfPrecisionType Interp3ScalarMask(const vec3_t &pos) const = 0;
 
   /* Checks if a certain postion is in CSF mask */
-  virtual ukfPrecisionType Interp3ScalarCSF(const vec3_t &pos) const = 0;
+  virtual ukfPrecisionType ScalarCSFValue(const vec3_t &pos) const = 0;
 
   /* Checks if a certain postion is in WM mask */
-  virtual ukfPrecisionType Interp3ScalarWM(const vec3_t &pos) const = 0;
+  virtual ukfPrecisionType ScalarWMValue(const vec3_t &pos) const = 0;
 
   /** Checks if a certian position is still within the brain mask. */
   virtual ukfPrecisionType ScalarMaskValue(const vec3_t &pos) const = 0;
@@ -108,10 +108,6 @@ protected:
   const ukfPrecisionType _sigma_signal;
   /** sigma for gaussian interpolation of mask */
   const ukfPrecisionType _sigma_mask;
-  /* sigma for gaussian interpolation of CSF mask */
-  const ukfPrecisionType _sigma_csf;
-  /* sigma for gaussian interpolation of WM mask */
-  const ukfPrecisionType _sigma_wm;
 
   /** voxel size */
   vec3_t _voxel;

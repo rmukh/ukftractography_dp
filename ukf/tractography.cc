@@ -77,8 +77,6 @@ Tractography::Tractography(UKFSettings s) :
                                             _p0(s.p0),
                                             _sigma_signal(s.sigma_signal),
                                             _sigma_mask(s.sigma_mask),
-                                            _sigma_csf(s.sigma_csf),
-                                            _sigma_wm(s.sigma_wm),
                                             _min_radius(s.min_radius),
                                             _max_length(static_cast<int>(std::ceil(s.maxHalfFiberLength / s.stepLength))),
                                             _full_brain(false),
@@ -528,7 +526,7 @@ bool Tractography::SetData(void *data, void *mask, void *csf, void *wm,
   if (wm)
     _wm_provided = true;
 
-  _signal_data = new NrrdData(_sigma_signal, _sigma_mask, _sigma_csf, _sigma_wm);
+  _signal_data = new NrrdData(_sigma_signal, _sigma_mask);
   _signal_data->SetData((Nrrd *)data, (Nrrd *)mask, (Nrrd *)csf, (Nrrd *)wm, (Nrrd *)seed, normalizedDWIData);
 
   return false;
@@ -542,7 +540,7 @@ bool Tractography::LoadFiles(const std::string &data_file,
                              const bool normalized_DWI_data,
                              const bool output_normalized_DWI_data)
 {
-  _signal_data = new NrrdData(_sigma_signal, _sigma_mask, _sigma_csf, _sigma_wm);
+  _signal_data = new NrrdData(_sigma_signal, _sigma_mask);
 
   if (seed_file.empty())
     _full_brain = true;
@@ -1369,15 +1367,8 @@ bool Tractography::Run()
 #endif
   }
 
-  // Remove discarded fiber from a vector
-  for (std::vector<unsigned char>::size_type i = 0; i != discarded_fibers.size(); ++i)
-  {
-    if (discarded_fibers[i] == 1)
-      raw_primary.erase(raw_primary.begin() + i);
-  }
-
   std::vector<UKFFiber> fibers;
-  PostProcessFibers(raw_primary, raw_branch, branch_seed_affiliation, _branches_only, fibers);
+  PostProcessFibers(raw_primary, raw_branch, branch_seed_affiliation, discarded_fibers, _branches_only, fibers);
 
   if (this->debug)
     std::cout << "fiber size after PostProcessFibers: " << fibers.size() << std::endl;
@@ -2239,7 +2230,7 @@ void Tractography::Follow3T(const int thread_id,
     const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = false;
     if (_csf_provided)
-      in_csf = _signal_data->Interp3ScalarCSF(x) > 0.5; // consider CSF as a true only if pve value > 0.5
+      in_csf = _signal_data->ScalarCSFValue(x) > 0.5; // consider CSF as a true only if pve value > 0.5
     else
       in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' from a signal
 
@@ -2263,7 +2254,7 @@ void Tractography::Follow3T(const int thread_id,
 
     if (_wm_provided)
     {
-      if (_signal_data->Interp3ScalarWM(x) < 0.30 || in_rtop1 || !is_brain || dNormMSE_too_high || stepnr > _max_length)
+      if (_signal_data->ScalarWMValue(x) < 0.30 || in_rtop1 || !is_brain || dNormMSE_too_high || stepnr > _max_length)
         break;
     }
     else

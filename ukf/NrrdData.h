@@ -24,7 +24,7 @@ class NrrdData : public ISignalData
 {
 public:
   /** Constructor */
-  NrrdData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask, ukfPrecisionType sigma_csf, ukfPrecisionType sigma_wm);
+  NrrdData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask);
 
   /** Destructor */
   ~NrrdData();
@@ -36,10 +36,10 @@ public:
   virtual ukfPrecisionType Interp3ScalarMask(const vec3_t &pos) const;
 
   /* Interpolates the csf mask at a certain position */
-  virtual ukfPrecisionType Interp3ScalarCSF(const vec3_t &pos) const;
+  virtual ukfPrecisionType ScalarCSFValue(const vec3_t &pos) const;
 
   /* Interpolates the WM mask at a certain position */
-  virtual ukfPrecisionType Interp3ScalarWM(const vec3_t &pos) const;
+  virtual ukfPrecisionType ScalarWMValue(const vec3_t &pos) const;
 
   /** Gets brain mask value at a certain position */
   virtual ukfPrecisionType ScalarMaskValue(const vec3_t &pos) const;

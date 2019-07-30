@@ -10,8 +10,8 @@
 #include <cassert>
 #include "itkMacro.h"
 
-NrrdData::NrrdData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask, ukfPrecisionType sigma_csf, ukfPrecisionType sigma_wm)
-    : ISignalData(sigma_signal, sigma_mask, sigma_csf, sigma_wm),
+NrrdData::NrrdData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask)
+    : ISignalData(sigma_signal, sigma_mask),
       _data(NULL), _seed_data(NULL), _mask_data(NULL), _csf_data(NULL), _wm_data(NULL), _data_nrrd(NULL)
 {
 }
@@ -114,49 +114,6 @@ void NrrdData::Interp3Signal(const vec3_t &pos,
   }
 }
 
-ukfPrecisionType NrrdData::ScalarMaskValue(const vec3_t &pos) const
-{
-  const int nx = static_cast<const int>(_dim[0]);
-  const int ny = static_cast<const int>(_dim[1]);
-  const int nz = static_cast<const int>(_dim[2]);
-
-  unsigned int index;
-  ukfPrecisionType value;
-
-  const int x = static_cast<const int>(round(pos[0]));
-  const int y = static_cast<const int>(round(pos[1]));
-  const int z = static_cast<const int>(round(pos[2]));
-
-  if ((x < 0 || nx <= x) ||
-      (y < 0 || ny <= y) ||
-      (z < 0 || nz <= z))
-  {
-    return ukfZero;
-  }
-
-  index = nz * ny * x + nz * y + z;
-
-  // signed or unsigned doesn't make a difference since masks don't contain any negative values
-  switch (_mask_num_bytes)
-  {
-  case 1:
-  {
-    value = static_cast<char *>(_mask_data)[index];
-  }
-  break;
-  case 2:
-  {
-    value = static_cast<short *>(_mask_data)[index];
-  }
-  break;
-  default:
-    std::cout << "Unsupported data type for mask file!" << std::endl;
-    throw;
-  }
-
-  return value;
-}
-
 ukfPrecisionType NrrdData::Interp3ScalarMask(const vec3_t &pos) const
 {
   const int nx = static_cast<const int>(_dim[0]);
@@ -231,7 +188,7 @@ ukfPrecisionType NrrdData::Interp3ScalarMask(const vec3_t &pos) const
   return s / w_sum;
 }
 
-ukfPrecisionType NrrdData::Interp3ScalarCSF(const vec3_t &pos) const
+ukfPrecisionType NrrdData::ScalarMaskValue(const vec3_t &pos) const
 {
   const int nx = static_cast<const int>(_dim[0]);
   const int ny = static_cast<const int>(_dim[1]);
@@ -240,113 +197,86 @@ ukfPrecisionType NrrdData::Interp3ScalarCSF(const vec3_t &pos) const
   unsigned int index;
   ukfPrecisionType value;
 
-  ukfPrecisionType w_sum = 1e-16;
-  ukfPrecisionType s = ukfZero;
+  const int x = static_cast<const int>(round(pos[0]));
+  const int y = static_cast<const int>(round(pos[1]));
+  const int z = static_cast<const int>(round(pos[2]));
 
-  for (int xx = -1; xx <= 1; xx++)
+  if ((x < 0 || nx <= x) ||
+      (y < 0 || ny <= y) ||
+      (z < 0 || nz <= z))
   {
-    const int x = static_cast<const int>(round(pos[0]) + xx);
-    if (x < 0 || nx <= x)
-    {
-      continue;
-    }
-    ukfPrecisionType dx = (x - pos[0]) * _voxel[0];
-    ukfPrecisionType dxx = dx * dx;
-    for (int yy = -1; yy <= 1; yy++)
-    {
-      const int y = static_cast<const int>(round(pos[1]) + yy);
-      if (y < 0 || ny <= y)
-      {
-        continue;
-      }
-      ukfPrecisionType dy = (y - pos[1]) * _voxel[1];
-      ukfPrecisionType dyy = dy * dy;
-      for (int zz = -1; zz <= 1; zz++)
-      {
-        const int z = static_cast<const int>(round(pos[2]) + zz);
-        if (z < 0 || nz <= z)
-        {
-          continue;
-        }
-        ukfPrecisionType dz = (z - pos[2]) * _voxel[2];
-        ukfPrecisionType dzz = dz * dz;
-
-        index = nz * ny * x + nz * y + z;
-
-        // signed or unsigned doesn't make a difference since masks don't contain any negative values
-        value = static_cast<ukfPrecisionType *>(_csf_data)[index];
-
-        ukfPrecisionType w = std::exp(-(dxx + dyy + dzz) / _sigma_csf);
-        if (value)
-        {
-          s += w;
-        }
-
-        w_sum += w;
-      }
-    }
+    return ukfZero;
   }
 
-  return s / w_sum;
+  index = nz * ny * x + nz * y + z;
+
+  // signed or unsigned doesn't make a difference since masks don't contain any negative values
+  switch (_mask_num_bytes)
+  {
+  case 1:
+  {
+    value = static_cast<char *>(_mask_data)[index];
+  }
+  break;
+  case 2:
+  {
+    value = static_cast<short *>(_mask_data)[index];
+  }
+  break;
+  default:
+    std::cout << "Unsupported data type for mask file!" << std::endl;
+    throw;
+  }
+
+  return value;
 }
 
-ukfPrecisionType NrrdData::Interp3ScalarWM(const vec3_t &pos) const
+ukfPrecisionType NrrdData::ScalarWMValue(const vec3_t &pos) const
 {
   const int nx = static_cast<const int>(_dim[0]);
   const int ny = static_cast<const int>(_dim[1]);
   const int nz = static_cast<const int>(_dim[2]);
 
   unsigned int index;
-  ukfPrecisionType value;
 
-  ukfPrecisionType w_sum = 1e-16;
-  ukfPrecisionType s = ukfZero;
+  const int x = static_cast<const int>(round(pos[0]));
+  const int y = static_cast<const int>(round(pos[1]));
+  const int z = static_cast<const int>(round(pos[2]));
 
-  for (int xx = -1; xx <= 1; xx++)
+  if ((x < 0 || nx <= x) ||
+      (y < 0 || ny <= y) ||
+      (z < 0 || nz <= z))
   {
-    const int x = static_cast<const int>(round(pos[0]) + xx);
-    if (x < 0 || nx <= x)
-    {
-      continue;
-    }
-    ukfPrecisionType dx = (x - pos[0]) * _voxel[0];
-    ukfPrecisionType dxx = dx * dx;
-    for (int yy = -1; yy <= 1; yy++)
-    {
-      const int y = static_cast<const int>(round(pos[1]) + yy);
-      if (y < 0 || ny <= y)
-      {
-        continue;
-      }
-      ukfPrecisionType dy = (y - pos[1]) * _voxel[1];
-      ukfPrecisionType dyy = dy * dy;
-      for (int zz = -1; zz <= 1; zz++)
-      {
-        const int z = static_cast<const int>(round(pos[2]) + zz);
-        if (z < 0 || nz <= z)
-        {
-          continue;
-        }
-        ukfPrecisionType dz = (z - pos[2]) * _voxel[2];
-        ukfPrecisionType dzz = dz * dz;
-
-        index = nz * ny * x + nz * y + z;
-
-        // signed or unsigned doesn't make a difference since masks don't contain any negative values
-        value = static_cast<ukfPrecisionType *>(_wm_data)[index];
-
-        ukfPrecisionType w = std::exp(-(dxx + dyy + dzz) / _sigma_wm);
-        if (value)
-        {
-          s += w;
-        }
-
-        w_sum += w;
-      }
-    }
+    return ukfZero;
   }
 
-  return s / w_sum;
+  index = nz * ny * x + nz * y + z;
+
+  return static_cast<float *>(_wm_data)[index];
+}
+
+ukfPrecisionType NrrdData::ScalarCSFValue(const vec3_t &pos) const
+{
+  const int nx = static_cast<const int>(_dim[0]);
+  const int ny = static_cast<const int>(_dim[1]);
+  const int nz = static_cast<const int>(_dim[2]);
+
+  unsigned int index;
+
+  const int x = static_cast<const int>(round(pos[0]));
+  const int y = static_cast<const int>(round(pos[1]));
+  const int z = static_cast<const int>(round(pos[2]));
+
+  if ((x < 0 || nx <= x) ||
+      (y < 0 || ny <= y) ||
+      (z < 0 || nz <= z))
+  {
+    return ukfZero;
+  }
+
+  index = nz * ny * x + nz * y + z;
+
+  return static_cast<float *>(_csf_data)[index];
 }
 
 void NrrdData::GetSeeds(const std::vector<int> &labels,

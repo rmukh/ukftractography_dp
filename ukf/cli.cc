@@ -498,8 +498,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.p0 = P0;
     s.sigma_signal = SIGMA_SIGNAL;
     s.sigma_mask = SIGMA_MASK;
-    s.sigma_csf = SIGMA_CSF;
-    s.sigma_wm = SIGMA_WM;
     s.min_radius = MIN_RADIUS;
 
     s.output_file = tracts;

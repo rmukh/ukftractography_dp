@@ -10,11 +10,13 @@
 void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
                        const std::vector<UKFFiber> &raw_branch,
                        const std::vector<BranchingSeedAffiliation> &branching_seed_affiliation,
+                       const std::vector<unsigned char> &discarded_fibers,
                        const bool branches_only,
                        std::vector<UKFFiber> &fibers)
 {
   assert(fibers.empty());
   const int num_half_fibers = static_cast<int>(raw_primary.size());
+
   assert((num_half_fibers > 0) && (num_half_fibers % 2 == 0));
   // if Noddi model is used Kappa is stored in trace, Vic in fa and Viso in freewater
   const bool record_fa = !raw_primary[0].fa.empty();
@@ -66,7 +68,7 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
   int num_valid_branch = 0;
   for (int i = 0; i < num_primary_fibers; i++)
   {
-    if (num_points_on_primary_fiber[i] >= MINIMUM_NUM_POINTS_ON_FIBER)
+    if (num_points_on_primary_fiber[i] >= MINIMUM_NUM_POINTS_ON_FIBER && discarded_fibers[2 * i] != 1 && discarded_fibers[2 * i + 1] != 1)
     {
       num_valid_primary_fibers++;
     }
@@ -92,11 +94,8 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
   int counter = 0;
   for (int i = 0; i < num_primary_fibers; i++)
   {
-
-    if (num_points_on_primary_fiber[i] < MINIMUM_NUM_POINTS_ON_FIBER)
-    {
+    if (num_points_on_primary_fiber[i] < MINIMUM_NUM_POINTS_ON_FIBER || discarded_fibers[2 * i] == 1 || discarded_fibers[2 * i + 1] == 1)
       continue;
-    }
 
     const UKFFiber &first_half = raw_primary[2 * i];
     const UKFFiber &second_half = raw_primary[2 * i + 1];

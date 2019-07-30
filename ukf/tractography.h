@@ -28,8 +28,6 @@ class Tractography;
 
 // Internal constants
 const ukfPrecisionType SIGMA_MASK = 0.5;
-const ukfPrecisionType SIGMA_CSF = 0.5;
-const ukfPrecisionType SIGMA_WM = 0.5;
 const ukfPrecisionType P0 = 0.01;
 const ukfPrecisionType MIN_RADIUS = 0.87;
 const ukfPrecisionType FULL_BRAIN_MEAN_SIGNAL_MIN = 0.18;
@@ -83,8 +81,6 @@ struct UKFSettings
   ukfPrecisionType p0;
   ukfPrecisionType sigma_signal;
   ukfPrecisionType sigma_mask;
-  ukfPrecisionType sigma_csf;
-  ukfPrecisionType sigma_wm;
   ukfPrecisionType min_radius;
   ukfPrecisionType full_brain_mean_signal_min;
   size_t num_threads;
@@ -349,8 +345,7 @@ private:
   const ukfPrecisionType _p0;
   const ukfPrecisionType _sigma_signal;
   const ukfPrecisionType _sigma_mask;
-  const ukfPrecisionType _sigma_csf;
-  const ukfPrecisionType _sigma_wm;
+
   const ukfPrecisionType _min_radius;
 
   ukfVectorType weights_on_tensors;

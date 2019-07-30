@@ -72,8 +72,8 @@ struct BranchingSeedAffiliation
  * form complete primary fibers, and eliminates fibers that are too short. Besides, each branch is back traced to form a whole fiber
 */
 void PostProcessFibers(const std::vector<UKFFiber> &raw_primary, const std::vector<UKFFiber> &raw_branch,
-                       const std::vector<BranchingSeedAffiliation> &branching_seed_affiliation,
-                       const bool branches_only, std::vector<UKFFiber> &fibers);
+                       const std::vector<BranchingSeedAffiliation> &branching_seed_affiliation, 
+                       const std::vector<unsigned char> &discarded_fibers, const bool branches_only, std::vector<UKFFiber> &fibers);
 
 /** The minimum number of points on a fiber. UKFFiber with fewer points are rejected */
 const int MINIMUM_NUM_POINTS_ON_FIBER = 10;
