@@ -2233,10 +2233,10 @@ void Tractography::Follow3T(const int thread_id,
 
     const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = false;
-    if (_csf_provided)
-      in_csf = _signal_data->ScalarCSFValue(x) > 0.5; // consider CSF as a true only if pve value > 0.5
-    else
-      in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' from a signal
+    //if (_csf_provided)
+    //  in_csf = _signal_data->ScalarCSFValue(x) > 0.5; // consider CSF as a true only if pve value > 0.5
+    //else
+      //in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' which is basically GAF from a signal
 
     // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
@@ -2255,19 +2255,19 @@ void Tractography::Follow3T(const int thread_id,
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool in_rtop1 = rtop1 < _rtop1_min_stop;
 
-    if (_wm_provided)
-    {
-      if (_signal_data->ScalarWMValue(x) < 0.30 || in_rtop1 || !is_brain || dNormMSE_too_high || stepnr > _max_length)
-        break;
-    }
-    else
-    {
+   // if (_wm_provided)
+   // {
+    //  if (_signal_data->ScalarWMValue(x) < 0.30 || in_rtop1 || !is_brain || dNormMSE_too_high || stepnr > _max_length)
+    //    break;
+    //}
+    //else
+    //{
       bool is_high_fw = state(24) > 0.75;
       bool is_curving = curve_radius(fiber.position) < _min_radius;
 
       if (!is_brain || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
         break;
-    }
+    //}
 
     if (fiber_length >= fiber_size)
     {

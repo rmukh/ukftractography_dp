@@ -175,8 +175,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
 
   if (l_seedingThreshold == 0.0)
   {
-    ukf_setAndTell(l_seedingThreshold, FULL_BRAIN_MEAN_SIGNAL_MIN,
-                   "seedingThreshold"); // Used to default to 2 times the FA threshold.
+    ukf_setAndTell(l_seedingThreshold, FULL_BRAIN_MEAN_SIGNAL_MIN, "seedingThreshold"); // Used to default to 2 times the FA threshold.
   }
   else
   {
