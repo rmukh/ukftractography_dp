@@ -16,19 +16,18 @@
 #include "unscented_kalman_filter.h"
 
 /**
- * \struct FilterModel
+ * \struct SignalModel
  * \brief Interface for implementation of a signal model
- * \todo IMO rename to SignalModel, FilterModel is confusing.
  * A generic class that defines the transition function and the observation
  * model to be used in the Kalman filter.
 */
-class FilterModel
+class SignalModel
 {
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   /** Constructor */
-  FilterModel(const int local_state_dim, const ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained)
+  SignalModel(const int local_state_dim, const ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained)
       : _state_dim(local_state_dim),
         _rs(rs), _signal_dim(0), _signal_data(NULL), weights_on_tensors_(weights_on_tensors),
         _constrained(constrained), _ridgelets_used(false)
@@ -46,7 +45,7 @@ public:
     }
   }
 
-  FilterModel(const int local_state_dim, const ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, bool ridgelets_used)
+  SignalModel(const int local_state_dim, const ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, bool ridgelets_used)
       : _state_dim(local_state_dim),
         _rs(rs), _signal_dim(0), _signal_data(NULL), weights_on_tensors_(weights_on_tensors),
         _constrained(constrained), _ridgelets_used(ridgelets_used)
@@ -69,7 +68,7 @@ public:
   }
 
   /** Destructor */
-  virtual ~FilterModel()
+  virtual ~SignalModel()
   {
   }
 

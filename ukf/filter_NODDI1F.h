@@ -8,12 +8,12 @@
  *
  * Model describing 1-fiber tractography with the NODDI representation
 */
-class NODDI1F : public FilterModel
+class NODDI1F : public SignalModel
 {
 public:
   NODDI1F(ukfPrecisionType qs, ukfPrecisionType qkappa, ukfPrecisionType qvic, ukfPrecisionType rs,
           const ukfVectorType &weights_on_tensors, bool constrained)
-      : FilterModel(6, rs, weights_on_tensors, constrained), _lambda_min(100.0)
+      : SignalModel(6, rs, weights_on_tensors, constrained), _lambda_min(100.0)
   {
     _Q(0, 0) = _Q(1, 1) = _Q(2, 2) = qs;
     _Q(4, 4) = qkappa;

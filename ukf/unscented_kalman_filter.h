@@ -11,7 +11,7 @@
 #include <vector>
 #include "ukf_types.h"
 
-class FilterModel;
+class SignalModel;
 
 /**
  * \class UnscentedKalmanFilter
@@ -27,7 +27,7 @@ public:
    * \param filter_model The UKF is initialized with a filter model that defines the observation
    * and transition functions. Also required are the noise parameters.
   */
-  UnscentedKalmanFilter(FilterModel *filter_model);
+  UnscentedKalmanFilter(SignalModel *filter_model);
 
   /**
    * \brief Does the one filter step.
@@ -64,7 +64,7 @@ private:
   bool violatesContraints(ukfVectorType& x);
 
   /** Pointer to the filter model */
-  const FilterModel * const m_FilterModel;
+  const SignalModel * const m_FilterModel;
 
   /** state vector dimension */
   // HACK REMOVE int _state_dim;

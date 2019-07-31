@@ -15,10 +15,8 @@
 
 #include "QuadProg++_Eigen.h"
 using namespace QuadProgPP;
-//#include "LU_solver.h"
-//using namespace LU_Solver;
 
-UnscentedKalmanFilter::UnscentedKalmanFilter(FilterModel *filter_model)
+UnscentedKalmanFilter::UnscentedKalmanFilter(SignalModel *filter_model)
     : m_FilterModel(filter_model), m_SigmaPointSpread(0.01)
 {
   const unsigned int dim = m_FilterModel->state_dim();
@@ -136,7 +134,7 @@ void UnscentedKalmanFilter::Filter(const State &x,
                                    ukfPrecisionType &dNormMSE)
 {
   // Force a const version of the m_FilterModel to be used to ensure that it is not modified.
-  FilterModel const *const localConstFilterModel = m_FilterModel;
+  SignalModel const *const localConstFilterModel = m_FilterModel;
 
   assert(static_cast<int>(x.size()) == localConstFilterModel->state_dim());
   assert(static_cast<int>(z.size()) == localConstFilterModel->signal_dim());

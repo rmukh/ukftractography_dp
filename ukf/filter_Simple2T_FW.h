@@ -9,13 +9,13 @@
  * Model describing 2-tensor tractography with the simplified tensor representation (two minor eigenvalues are equal)
  * and free water estimation
 */
-class Simple2T_FW : public FilterModel
+class Simple2T_FW : public SignalModel
 {
 public:
   Simple2T_FW(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType qw, ukfPrecisionType rs,
               const ukfVectorType &weights_on_tensors,
               bool constrained, const ukfPrecisionType diff_fw)
-      : FilterModel(11, rs, weights_on_tensors, constrained), _lambda_min(100.0), m_D_iso(SetIdentityScaled(diff_fw))
+      : SignalModel(11, rs, weights_on_tensors, constrained), _lambda_min(100.0), m_D_iso(SetIdentityScaled(diff_fw))
   {
 #if 0
     m_D_iso << diff_fw, 0, 0,

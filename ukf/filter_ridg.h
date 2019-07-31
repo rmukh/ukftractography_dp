@@ -13,14 +13,14 @@
  * Model describing tractography with ridgelets with free water
 */
 
-class Ridg_BiExp_FW : public FilterModel
+class Ridg_BiExp_FW : public SignalModel
 {
 public:
     Ridg_BiExp_FW(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType qt, ukfPrecisionType qw, ukfPrecisionType qwiso,
                   ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, const ukfPrecisionType diff_fw,
                   ukfMatrixType &Aridg, ukfMatrixType &Qridg, ukfMatrixType &fcsridg, ukfMatrixType &nuridg,
                   vector<vector<unsigned>> &connridg, signalMaskType &sm, ukfPrecisionType fl, ukfPrecisionType mot)
-        : FilterModel(25, rs, weights_on_tensors, constrained, false), //true),
+        : SignalModel(25, rs, weights_on_tensors, constrained, false),
           _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000.0),
           _w_fast_diffusion(0.7), m_D_iso(SetIdentityScaled(diff_fw)), A(Aridg), Q(Qridg), fcs(fcsridg), nu(nuridg), conn(connridg),
           signal_mask(sm), fista_lambda(fl), max_odf_thresh(mot)
@@ -48,7 +48,6 @@ public:
         // N_constr constraints for the 25 dimensions of the state
         _D.resize(25, N_constr);
         _D.setConstant(ukfZero);
-
         _d.resize(N_constr);
 
         /* Setting the constraints according to D'*x >= -d */
@@ -135,8 +134,7 @@ public:
         _D(24, 31) = -1;
         _d(31) = 1; // wiso <= 1
 
-        // experimental!!!
-        // Equality constraint (w1 + w2 + w3 = 1)
+        // Equality constraints (w1 + w2 + w3 = 1)
         _E.resize(25, 1);
         _E.setConstant(ukfZero);
         _e.resize(1);
@@ -150,9 +148,9 @@ public:
     }
 
     virtual void F(ukfMatrixType & /* X */, ukfVectorType /* s */, const ukfMatrixType & /* &covMatrix */) const;
-    ukfPrecisionType cosine_similarity(vec3_t &First, vec3_t &Second) const;
     virtual void F(ukfMatrixType & /* X */) const;
     virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
+    ukfPrecisionType cosine_similarity(vec3_t &First, vec3_t &Second) const;
 
     virtual void State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3);
     virtual void State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &m2, vec3_t &m3);

@@ -7,12 +7,12 @@
  *
  * Model describing 3-tensor tractography with the simplified tensor representation (two minor eigenvalues are equal)
 */
-class Simple3T : public FilterModel
+class Simple3T : public SignalModel
 {
 public:
   Simple3T(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType rs, const ukfVectorType &weights_on_tensors,
            bool constrained)
-      : FilterModel(15, rs, weights_on_tensors, constrained), _lambda_min(100.0)
+      : SignalModel(15, rs, weights_on_tensors, constrained), _lambda_min(100.0)
   {
     _Q(0, 0) = _Q(1, 1) = _Q(2, 2) = qs;
     _Q(5, 5) = _Q(6, 6) = _Q(7, 7) = qs;

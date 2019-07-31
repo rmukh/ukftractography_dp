@@ -9,12 +9,12 @@
  * Model describing 3-tensor tractography with the full tensor representation
  * (3 angles, 3 eigenvalues).
 */
-class Full3T : public FilterModel
+class Full3T : public SignalModel
 {
 public:
   Full3T(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType rs, const ukfVectorType &weights_on_tensors,
          bool constrained)
-      : FilterModel(18, rs, weights_on_tensors, constrained), _lambda_min(100.0)
+      : SignalModel(18, rs, weights_on_tensors, constrained), _lambda_min(100.0)
   {
     _Q(0, 0) = _Q(1, 1) = _Q(2, 2) = qs;
     _Q(6, 6) = _Q(7, 7) = _Q(8, 8) = qs;

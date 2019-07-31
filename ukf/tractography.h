@@ -277,7 +277,7 @@ private:
   void PrintState(State &state);
 
   /** Non Linear Least Square Optimization of input parameters */
-  void NonLinearLeastSquareOptimization(State &state, ukfVectorType &signal, FilterModel *model);
+  void NonLinearLeastSquareOptimization(State &state, ukfVectorType &signal, SignalModel *model);
 
   /** Make the seed point in the other direction */
   void InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted);
@@ -400,7 +400,7 @@ private:
 
   // TODO smartpointer
   model_type _filter_model_type;
-  FilterModel *_model;
+  SignalModel *_model;
   signalMaskType signal_mask;
 
   bool debug;
@@ -464,7 +464,7 @@ public:
   }
 
   // Set the pointer to the model
-  void SetModel(FilterModel *model)
+  void SetModel(SignalModel *model)
   {
     _model = model;
   }
@@ -519,7 +519,7 @@ private:
   unsigned int _NumberOfValues;
   unsigned int _phase;
   ukfVectorType _signal;
-  FilterModel *_model;
+  SignalModel *_model;
   ukfVectorType _fixed_params;
 };
 } // end namespace itk

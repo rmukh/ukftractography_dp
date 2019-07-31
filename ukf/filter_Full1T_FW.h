@@ -9,13 +9,13 @@
  * Model describing 1-tensor tractography with the full tensor representation (3 angles, 3 eigenvalues)
  * and free water estimation.
 */
-class Full1T_FW : public FilterModel
+class Full1T_FW : public SignalModel
 {
 public:
   Full1T_FW(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType qw, ukfPrecisionType rs,
             const ukfVectorType &weights_on_tensors, bool constrained,
             const ukfPrecisionType diff_fw)
-      : FilterModel(7, rs, weights_on_tensors, constrained), _lambda_min(100.0), m_D_iso(SetIdentityScaled(diff_fw))
+      : SignalModel(7, rs, weights_on_tensors, constrained), _lambda_min(100.0), m_D_iso(SetIdentityScaled(diff_fw))
   {
 #if 0
     m_D_iso << diff_fw, 0, 0,

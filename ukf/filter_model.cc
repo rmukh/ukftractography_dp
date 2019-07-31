@@ -9,7 +9,7 @@
 #include <iostream>
 #include "utilities.h"
 
-ukfPrecisionType FilterModel::CheckZero(const ukfPrecisionType &local_d) const
+ukfPrecisionType SignalModel::CheckZero(const ukfPrecisionType &local_d) const
 {
   if (local_d < 0)
   {
@@ -26,8 +26,7 @@ ukfPrecisionType FilterModel::CheckZero(const ukfPrecisionType &local_d) const
   return local_d;
 }
 
-void createProtocol(const ukfVectorType &_b_values,
-                    ukfVectorType &_gradientStrength, ukfVectorType &_pulseSeparation)
+void createProtocol(const ukfVectorType &_b_values, ukfVectorType &_gradientStrength, ukfVectorType &_pulseSeparation)
 {
   static int count = 0;
   static ukfVectorType gradientStrength, pulseSeparation;

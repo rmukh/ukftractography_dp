@@ -1674,7 +1674,7 @@ void itk::DiffusionPropagatorCostFunction::GetDerivative(const ParametersType &p
   }
 }
 
-void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType &signal, FilterModel *model)
+void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType &signal, SignalModel *model)
 {
   typedef itk::LBFGSBOptimizer OptimizerType;
   typedef itk::DiffusionPropagatorCostFunction CostType;

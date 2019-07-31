@@ -7,12 +7,12 @@
 *
 * Model describing 2-tensor tractography with the simplified tensor representation (two minor eigenvalues are equal).
 */
-class NODDI2F : public FilterModel
+class NODDI2F : public SignalModel
 {
 public:
   NODDI2F(ukfPrecisionType qs, ukfPrecisionType qkappa, ukfPrecisionType qvic, ukfPrecisionType rs,
           const ukfVectorType &weights_on_tensors, bool constrained)
-      : FilterModel(11, rs, weights_on_tensors, constrained), _lambda_min(100.0)
+      : SignalModel(11, rs, weights_on_tensors, constrained), _lambda_min(100.0)
   {
     _Q(0, 0) = _Q(1, 1) = _Q(2, 2) = _Q(5, 5) = _Q(6, 6) = _Q(7, 7) = qs;
     _Q(4, 4) = _Q(9, 9) = qkappa;

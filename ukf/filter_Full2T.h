@@ -9,12 +9,12 @@
  * Model describing 2-tensor tractography with the full tensor representation
  * (3 angles, 3 eigenvalues).
 */
-class Full2T : public FilterModel
+class Full2T : public SignalModel
 {
 public:
   Full2T(ukfPrecisionType qs, ukfPrecisionType ql, ukfPrecisionType rs, const ukfVectorType &weights_on_tensors,
          bool constrained)
-      : FilterModel(12, rs, weights_on_tensors, constrained), _lambda_min(100.0)
+      : SignalModel(12, rs, weights_on_tensors, constrained), _lambda_min(100.0)
   {
     _Q(0, 0) = _Q(1, 1) = _Q(2, 2) = _Q(6, 6) = _Q(7, 7) = _Q(8, 8) = qs;
     _Q(3, 3) = _Q(4, 4) = _Q(5, 5) = _Q(9, 9) = _Q(10, 10) = _Q(11, 11) = ql;
