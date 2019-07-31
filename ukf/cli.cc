@@ -86,7 +86,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   ukfPrecisionType l_maxBranchingAngle = maxBranchingAngle;
   ukfPrecisionType l_minBranchingAngle = minBranchingAngle;
 
-  ukfPrecisionType l_minRTOPseed = minRTOPseed;
   ukfPrecisionType l_minRTOP1stop = minRTOP1stop;
   ukfPrecisionType l_maxNMSE = maxNMSE;
   ukfPrecisionType l_maxUKFIterations = maxUKFIterations;
@@ -277,15 +276,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     else
     {
       ukf_tell(l_Qt, "Qt");
-    }
-
-    if (l_minRTOPseed == 20.0)
-    {
-      ukf_setAndTell(l_minRTOPseed, 20.0, "minRTOPseed");
-    }
-    else
-    {
-      ukf_tell(l_minRTOPseed, "minRTOPseed");
     }
 
     if (l_minRTOP1stop == 500.0)
@@ -490,7 +480,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.Qvic = l_Qvic;
     s.Rs = l_Rs;
 
-    s.rtop_min_seed = l_minRTOPseed;
     s.rtop1_min_stop = l_minRTOP1stop;
     s.max_nmse = l_maxNMSE;
     s.maxUKFIterations = l_maxUKFIterations;

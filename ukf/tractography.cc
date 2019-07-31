@@ -82,7 +82,6 @@ Tractography::Tractography(UKFSettings s) : // begin initializer list
                                             _wm_provided(false),
                                             _noddi(s.noddi),
                                             _diffusion_propagator(s.diffusion_propagator),
-                                            _rtop_min_seed(s.rtop_min_seed),
                                             _rtop1_min_stop(s.rtop1_min_stop),
                                             _record_rtop(s.record_rtop),
                                             _max_nmse(s.max_nmse),
@@ -304,12 +303,6 @@ void Tractography::UpdateFilterModelType()
     throw;
   }
 
-  if (_rtop_min_seed != 0.0 && !_diffusion_propagator)
-  {
-    std::cout << "minRTOPseed parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
-    throw;
-  }
-
   if (_rtop1_min_stop != 0 && !_diffusion_propagator)
   {
     std::cout << "minRTOP1stop parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
@@ -441,6 +434,7 @@ void Tractography::UpdateFilterModelType()
     // Compute Q basis
     m.icosahedron(nu, fcs, lvl);
     ridg.QBasis(QRidg, nu); //Build a Q basis
+    ridg.QBasis(QRidgSignal, HighBGradDirss);
 
     // Compute connectivity
     m.FindConnectivity(conn, fcs, nu.rows());
@@ -923,166 +917,169 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
         slv.FISTA(C);
       }
 
-      // Now we can compute ODF
-      ukfVectorType ODF = QRidg * C;
+      ukfPrecisionType GFA = 0.0;
+      if (_full_brain)
+        GFA = s2ga(QRidgSignal * C);
 
-      // Let's find Maxima of ODF and values in that direction
-      ukfMatrixType exe_vol;
-      ukfMatrixType dir_vol;
-      ukfVectorType ODF_val_at_max(6, 1);
-      unsigned n_of_dirs;
-
-      m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
-
-      unsigned exe_vol_size = std::min(static_cast<unsigned>(exe_vol.size()), static_cast<unsigned>(6));
-      ODF_val_at_max.setZero();
-      for (unsigned j = 0; j < exe_vol_size; ++j)
+      if (GFA > 0.1 || !_full_brain)
       {
-        ODF_val_at_max(j) = ODF(exe_vol(j));
-      }
+        // Now we can compute ODF
+        ukfVectorType ODF = QRidg * C;
 
-      // STEP 1: Initialise the state based
-      mat33_t dir_init;
-      dir_init.setZero();
+        // Let's find Maxima of ODF and values in that direction
+        ukfMatrixType exe_vol;
+        ukfMatrixType dir_vol;
+        ukfVectorType ODF_val_at_max(6, 1);
+        unsigned n_of_dirs;
 
-      ukfPrecisionType w1_init = ODF_val_at_max(0);
-      dir_init.row(0) = dir_vol.row(0);
+        m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
 
-      ukfPrecisionType w2_init = 0;
-      ukfPrecisionType w3_init = 0;
-
-      //std::cout << "n_of_dirs " << n_of_dirs << std::endl;
-
-      if (n_of_dirs == 1)
-      {
-        vec3_t orthogonal;
-        orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], 0.0;
-        orthogonal = orthogonal / orthogonal.norm();
-        dir_init.row(1) = orthogonal;
-
-        vec3_t orthogonal2 = dir_init.row(0).cross(orthogonal);
-        orthogonal2 = orthogonal2 / orthogonal2.norm();
-        dir_init.row(2) = orthogonal2;
-
-        w1_init = 1.0;
-      }
-      else if (n_of_dirs > 1)
-      {
-        if (n_of_dirs == 2)
+        unsigned exe_vol_size = std::min(static_cast<unsigned>(exe_vol.size()), static_cast<unsigned>(6));
+        ODF_val_at_max.setZero();
+        for (unsigned j = 0; j < exe_vol_size; ++j)
         {
-          vec3_t v1 = dir_vol.row(0);
-          vec3_t v2 = dir_vol.row(2);
-          vec3_t orthogonal = v1.cross(v2);
+          ODF_val_at_max(j) = ODF(exe_vol(j));
+        }
+
+        // STEP 1: Initialise the state based
+        mat33_t dir_init;
+        dir_init.setZero();
+
+        ukfPrecisionType w1_init = ODF_val_at_max(0);
+        dir_init.row(0) = dir_vol.row(0);
+
+        ukfPrecisionType w2_init = 0;
+        ukfPrecisionType w3_init = 0;
+
+        //std::cout << "n_of_dirs " << n_of_dirs << std::endl;
+
+        if (n_of_dirs == 1)
+        {
+          vec3_t orthogonal;
+          orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], 0.0;
           orthogonal = orthogonal / orthogonal.norm();
+          dir_init.row(1) = orthogonal;
 
-          dir_init.row(1) = dir_vol.row(2);
-          dir_init.row(2) = orthogonal;
+          vec3_t orthogonal2 = dir_init.row(0).cross(orthogonal);
+          orthogonal2 = orthogonal2 / orthogonal2.norm();
+          dir_init.row(2) = orthogonal2;
 
-          w2_init = ODF_val_at_max(2);
-          ukfPrecisionType denom = w1_init + w2_init;
-          w1_init = w1_init / denom;
-          w2_init = w2_init / denom;
+          w1_init = 1.0;
         }
-        if (n_of_dirs > 2)
+        else if (n_of_dirs > 1)
         {
-          dir_init.row(1) = dir_vol.row(2);
-          dir_init.row(2) = dir_vol.row(4);
+          if (n_of_dirs == 2)
+          {
+            vec3_t v1 = dir_vol.row(0);
+            vec3_t v2 = dir_vol.row(2);
+            vec3_t orthogonal = v1.cross(v2);
+            orthogonal = orthogonal / orthogonal.norm();
 
-          w2_init = ODF_val_at_max(2);
-          w3_init = ODF_val_at_max(4);
-          ukfPrecisionType denom = w1_init + w2_init + w3_init;
-          w1_init = w1_init / denom;
-          w2_init = w2_init / denom;
-          w3_init = w3_init / denom;
+            dir_init.row(1) = dir_vol.row(2);
+            dir_init.row(2) = orthogonal;
+
+            w2_init = ODF_val_at_max(2);
+            ukfPrecisionType denom = w1_init + w2_init;
+            w1_init = w1_init / denom;
+            w2_init = w2_init / denom;
+          }
+          if (n_of_dirs > 2)
+          {
+            dir_init.row(1) = dir_vol.row(2);
+            dir_init.row(2) = dir_vol.row(4);
+
+            w2_init = ODF_val_at_max(2);
+            w3_init = ODF_val_at_max(4);
+            ukfPrecisionType denom = w1_init + w2_init + w3_init;
+            w1_init = w1_init / denom;
+            w2_init = w2_init / denom;
+            w3_init = w3_init / denom;
+          }
         }
-      }
 
-      // Diffusion directions, m1 = m2 = m3
-      tmp_info_state[0] = dir_init.row(0)[0];
-      tmp_info_state[1] = dir_init.row(0)[1];
-      tmp_info_state[2] = dir_init.row(0)[2];
+        // Diffusion directions, m1 = m2 = m3
+        tmp_info_state[0] = dir_init.row(0)[0];
+        tmp_info_state[1] = dir_init.row(0)[1];
+        tmp_info_state[2] = dir_init.row(0)[2];
 
-      tmp_info_state[7] = dir_init.row(1)[0];
-      tmp_info_state[8] = dir_init.row(1)[1];
-      tmp_info_state[9] = dir_init.row(1)[2];
+        tmp_info_state[7] = dir_init.row(1)[0];
+        tmp_info_state[8] = dir_init.row(1)[1];
+        tmp_info_state[9] = dir_init.row(1)[2];
 
-      tmp_info_state[14] = dir_init.row(2)[0];
-      tmp_info_state[15] = dir_init.row(2)[1];
-      tmp_info_state[16] = dir_init.row(2)[2];
+        tmp_info_state[14] = dir_init.row(2)[0];
+        tmp_info_state[15] = dir_init.row(2)[1];
+        tmp_info_state[16] = dir_init.row(2)[2];
 
-      // Fast diffusing component,  lambdas l11, l21 = l1 from the single tensor
-      //                            lambdas l12, l21 = (l2 + l3) /2
-      // from the single tensor (avg already calculated and stored in l2)
-      tmp_info_state[3] = tmp_info_state[10] = tmp_info_state[17] = param[6];
-      tmp_info_state[4] = tmp_info_state[11] = tmp_info_state[18] = param[7];
+        // Fast diffusing component,  lambdas l11, l21 = l1 from the single tensor
+        //                            lambdas l12, l21 = (l2 + l3) /2
+        // from the single tensor (avg already calculated and stored in l2)
+        tmp_info_state[3] = tmp_info_state[10] = tmp_info_state[17] = param[6];
+        tmp_info_state[4] = tmp_info_state[11] = tmp_info_state[18] = param[7];
 
-      // Slow diffusing component,  lambdas l13, l23, l33 = 0.2 * l1
-      //                            lambdas l14, l24, l34 = 0.2 * (l2 + l3) /2
-      tmp_info_state[5] = tmp_info_state[12] = tmp_info_state[19] = 0.7 * param[6];
-      tmp_info_state[6] = tmp_info_state[13] = tmp_info_state[20] = 0.7 * param[7];
+        // Slow diffusing component,  lambdas l13, l23, l33 = 0.2 * l1
+        //                            lambdas l14, l24, l34 = 0.2 * (l2 + l3) /2
+        tmp_info_state[5] = tmp_info_state[12] = tmp_info_state[19] = 0.7 * param[6];
+        tmp_info_state[6] = tmp_info_state[13] = tmp_info_state[20] = 0.7 * param[7];
 
-      tmp_info_state[21] = w1_init;
-      tmp_info_state[22] = w2_init;
-      tmp_info_state[23] = w3_init;
+        tmp_info_state[21] = w1_init;
+        tmp_info_state[22] = w2_init;
+        tmp_info_state[23] = w3_init;
 
-      // Free water volume fraction
-      tmp_info_state[24] = 0.05; // -> as an initial value
+        // Free water volume fraction
+        tmp_info_state[24] = 0.05; // -> as an initial value
 
-      // STEP 2.1: Use L-BFGS-B from ITK library at the same point in space.
-      // The UKF is an estimator, and we want to find the estimate with the smallest error through the iterations
+        // STEP 2.1: Use L-BFGS-B from ITK library at the same point in space.
+        // The UKF is an estimator, and we want to find the estimate with the smallest error through the iterations
 
-      // Set the covariance value
-      const int state_dim = tmp_info_state.size();
-      info.covariance.resize(state_dim, state_dim);
-      info_inv.covariance.resize(state_dim, state_dim);
+        // Set the covariance value
+        const int state_dim = tmp_info_state.size();
+        info.covariance.resize(state_dim, state_dim);
+        info_inv.covariance.resize(state_dim, state_dim);
 
-      // make sure covariances are really empty
-      info.covariance.setConstant(ukfZero);
-      info_inv.covariance.setConstant(ukfZero);
+        // make sure covariances are really empty
+        info.covariance.setConstant(ukfZero);
+        info_inv.covariance.setConstant(ukfZero);
 
-      // fill the diagonal of the covariance matrix with _p0 (zeros elsewhere)
-      for (int local_i = 0; local_i < state_dim; ++local_i)
-      {
-        info.covariance(local_i, local_i) = _p0;
-        info_inv.covariance(local_i, local_i) = _p0;
-      }
+        // fill the diagonal of the covariance matrix with _p0 (zeros elsewhere)
+        for (int local_i = 0; local_i < state_dim; ++local_i)
+        {
+          info.covariance(local_i, local_i) = _p0;
+          info_inv.covariance(local_i, local_i) = _p0;
+        }
 
-      // Input of the filter
-      State state = ConvertVector<stdVecState, State>(tmp_info_state);
-      ukfMatrixType p(info.covariance);
+        // Input of the filter
+        State state = ConvertVector<stdVecState, State>(tmp_info_state);
+        ukfMatrixType p(info.covariance);
 
-      // Estimate the initial state
-      // InitLoopUKF(state, p, signal_values[i], dNormMSE);
-      NonLinearLeastSquareOptimization(state, signal_values[i], _model);
+        // Estimate the initial state
+        // InitLoopUKF(state, p, signal_values[i], dNormMSE);
+        NonLinearLeastSquareOptimization(state, signal_values[i], _model);
 
-      // Output of the filter
-      tmp_info_state = ConvertVector<State, stdVecState>(state);
+        // Output of the filter
+        tmp_info_state = ConvertVector<State, stdVecState>(state);
 
-      ukfPrecisionType rtopModel = 0.0;
-      ukfPrecisionType rtop1 = 0.0;
-      ukfPrecisionType rtop2 = 0.0;
-      ukfPrecisionType rtop3 = 0.0;
-      ukfPrecisionType rtopSignal = 0.0;
+        ukfPrecisionType rtopModel = 0.0;
+        ukfPrecisionType rtop1 = 0.0;
+        ukfPrecisionType rtop2 = 0.0;
+        ukfPrecisionType rtop3 = 0.0;
+        ukfPrecisionType rtopSignal = 0.0;
 
-      computeRTOPfromState(state, rtopModel, rtop1, rtop2, rtop3);
-      computeRTOPfromSignal(rtopSignal, signal_values[i]);
+        computeRTOPfromState(state, rtopModel, rtop1, rtop2, rtop3);
+        computeRTOPfromSignal(rtopSignal, signal_values[i]);
 
-      // These values are stored so that: rtop1 -> fa; rtop2 -> fa2; rtop3 -> fa3; rtop -> trace; rtopSignal -> trace2
-      info.fa = rtop1;
-      info.fa2 = rtop2;
-      info.fa3 = rtop3;
-      info.trace = rtopModel;
-      info.trace2 = rtopSignal;
+        // These values are stored so that: rtop1 -> fa; rtop2 -> fa2; rtop3 -> fa3; rtop -> trace; rtopSignal -> trace2
+        info.fa = rtop1;
+        info.fa2 = rtop2;
+        info.fa3 = rtop3;
+        info.trace = rtopModel;
+        info.trace2 = rtopSignal;
 
-      info_inv.fa = rtop1;
-      info_inv.fa2 = rtop2;
-      info_inv.fa3 = rtop3;
-      info_inv.trace = rtopModel;
-      info_inv.trace2 = rtopSignal;
+        info_inv.fa = rtop1;
+        info_inv.fa2 = rtop2;
+        info_inv.fa3 = rtop3;
+        info_inv.trace = rtopModel;
+        info_inv.trace2 = rtopSignal;
 
-      if (rtopSignal >= _rtop_min_seed || !_full_brain)
-      {
-        //std::cout << "" << state.transpose() << std::endl;
         // Create the opposite seed
         InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
 
@@ -2236,7 +2233,7 @@ void Tractography::Follow3T(const int thread_id,
     //if (_csf_provided)
     //  in_csf = _signal_data->ScalarCSFValue(x) > 0.5; // consider CSF as a true only if pve value > 0.5
     //else
-      //in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' which is basically GAF from a signal
+    //in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' which is basically GAF from a signal
 
     // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
@@ -2255,18 +2252,18 @@ void Tractography::Follow3T(const int thread_id,
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool in_rtop1 = rtop1 < _rtop1_min_stop;
 
-   // if (_wm_provided)
-   // {
+    // if (_wm_provided)
+    // {
     //  if (_signal_data->ScalarWMValue(x) < 0.30 || in_rtop1 || !is_brain || dNormMSE_too_high || stepnr > _max_length)
     //    break;
     //}
     //else
     //{
-      bool is_high_fw = state(24) > 0.75;
-      bool is_curving = curve_radius(fiber.position) < _min_radius;
+    bool is_high_fw = state(24) > 0.75;
+    bool is_curving = curve_radius(fiber.position) < _min_radius;
 
-      if (!is_brain || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
-        break;
+    if (!is_brain || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
+      break;
     //}
 
     if (fiber_length >= fiber_size)

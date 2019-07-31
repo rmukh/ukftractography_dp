@@ -403,14 +403,6 @@
     </boolean>
 
     <double>
-      <name>minRTOPseed</name>
-      <longflag>minRTOPseed</longflag>
-      <label>Seed only if RTOP from signal higher than this value</label>
-      <description>Seeding criteria: RTOP values computed from the signal required to be considered as seeding voxel. Default: 20.0</description>
-      <default>20.0</default>
-    </double>
-
-    <double>
       <name>minRTOP1stop</name>
       <longflag>minRTOP1stop</longflag>
       <label>Terminate tracking if RTOP 1 goes below this threshold</label>

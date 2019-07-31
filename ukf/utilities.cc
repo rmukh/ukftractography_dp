@@ -51,13 +51,12 @@ ukfPrecisionType s2ga(const ukfMatrixType &signal)
 // mean signal function
 ukfPrecisionType s2adc(const ukfMatrixType &signal)
 {
-
-  int n = static_cast<int>(signal.rows());
+  unsigned n = static_cast<int>(signal.rows());
 
   assert(signal.cols() == 1);
 
   ukfPrecisionType mu = ukfZero;
-  for (int i = 0; i < n; ++i)
+  for (unsigned i = 0; i < n; ++i)
   {
     mu += signal(i, 0);
   }

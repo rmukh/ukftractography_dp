@@ -60,7 +60,6 @@ struct UKFSettings
   bool free_water;
   bool noddi;
   bool diffusion_propagator;
-  ukfPrecisionType rtop_min_seed;
   ukfPrecisionType rtop1_min_stop;
   bool record_rtop;
   ukfPrecisionType max_nmse;
@@ -361,7 +360,6 @@ private:
   ukfVectorType _gradientStrength, _pulseSeparation;
   /** Diffustion propagator parameters **/
   bool _diffusion_propagator;
-  ukfPrecisionType _rtop_min_seed;
   ukfPrecisionType _rtop1_min_stop;
   bool _record_rtop;
   const ukfPrecisionType _max_nmse;
@@ -410,6 +408,7 @@ private:
   // Spherical Ridgelets bases
   ukfMatrixType ARidg;
   ukfMatrixType QRidg;
+  ukfMatrixType QRidgSignal;
 
   // Sphereical Ridgelets helper matricies/vectors
   ukfMatrixType fcs;

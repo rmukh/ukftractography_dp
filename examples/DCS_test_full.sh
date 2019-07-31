@@ -31,7 +31,6 @@ eval $BINARY \
  --tracts $output_path \
  --seedsPerVoxel 0.01 \
  --diffusionPropagator \
- --minRTOPseed 20 \
  --recordNMSE \
  --recordWeights \
  --recordRTOP \
