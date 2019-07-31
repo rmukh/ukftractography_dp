@@ -51,10 +51,7 @@
 // TODO implement this switch
 //#include "config.h"
 
-Tractography::Tractography(UKFSettings s) :
-
-                                            // begin initializer list
-
+Tractography::Tractography(UKFSettings s) : // begin initializer list
                                             _ukf(0, NULL),
                                             _output_file(s.output_file),
                                             _output_file_with_second_tensor(s.output_file_with_second_tensor),
@@ -85,7 +82,8 @@ Tractography::Tractography(UKFSettings s) :
                                             _wm_provided(false),
                                             _noddi(s.noddi),
                                             _diffusion_propagator(s.diffusion_propagator),
-                                            _rtop_min(s.rtop_min),
+                                            _rtop_min_seed(s.rtop_min_seed),
+                                            _rtop1_min_stop(s.rtop1_min_stop),
                                             _record_rtop(s.record_rtop),
                                             _max_nmse(s.max_nmse),
                                             _maxUKFIterations(s.maxUKFIterations),
@@ -306,10 +304,15 @@ void Tractography::UpdateFilterModelType()
     throw;
   }
 
-  if (_rtop_min != 0.0 && !_diffusion_propagator)
+  if (_rtop_min_seed != 0.0 && !_diffusion_propagator)
   {
-    std::cout << "minRTOP parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
+    std::cout << "minRTOPseed parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
     throw;
+  }
+
+  if (_rtop1_min_stop != 0 && !_diffusion_propagator)
+  {
+    std::cout << "minRTOP1stop parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
   }
 
   if (_max_nmse != 0.0 && !_diffusion_propagator)
@@ -649,7 +652,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   stdVec_t rand_dirs;
 
   if ((seeds.size() == 1 && _seeds_per_voxel <= 1.0) || _seeds_per_voxel <= 1.0) // if there is only one seed don't use offset so fibers can be
-                                                                             // compared
+                                                                                 // compared
   {
     rand_dirs.push_back(vec3_t(0, 0, 0) /* make_vec(0, 0, 0) */); // in the test cases.
   }
@@ -685,7 +688,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   int tmp_counter = 1;
   unsigned every_n = 1;
 
-  if (_seeds_per_voxel < 1.0) {
+  if (_seeds_per_voxel < 1.0)
+  {
     every_n = static_cast<unsigned>(1.0 / _seeds_per_voxel); // will be rounded to the nearest int
     std::cout << "Seed every " << every_n << " point" << std::endl;
   }
@@ -1076,7 +1080,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       info_inv.trace = rtopModel;
       info_inv.trace2 = rtopSignal;
 
-      if (rtopSignal >= _rtop_min || !_full_brain)
+      if (rtopSignal >= _rtop_min_seed || !_full_brain)
       {
         //std::cout << "" << state.transpose() << std::endl;
         // Create the opposite seed
@@ -2235,7 +2239,6 @@ void Tractography::Follow3T(const int thread_id,
       in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' from a signal
 
     // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
-    // in_csf = rtopSignal < _rtop_min;
 
     //The trick is to discard fibers only when we have CSF mask?
     //Wonder why? Because we can't say if estimated from voxel 'CSF' is CSF.
@@ -2250,7 +2253,7 @@ void Tractography::Follow3T(const int thread_id,
     }
 
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
-    bool in_rtop1 = rtop1 < 500;
+    bool in_rtop1 = rtop1 < _rtop1_min_stop;
 
     if (_wm_provided)
     {
@@ -2260,10 +2263,9 @@ void Tractography::Follow3T(const int thread_id,
     else
     {
       bool is_high_fw = state(24) > 0.75;
-      bool in_rtop = rtopModel < 15000; // means 'in rtop' threshold
       bool is_curving = curve_radius(fiber.position) < _min_radius;
 
-      if (!is_brain || in_rtop || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
+      if (!is_brain || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
         break;
     }
 

@@ -86,7 +86,8 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   ukfPrecisionType l_maxBranchingAngle = maxBranchingAngle;
   ukfPrecisionType l_minBranchingAngle = minBranchingAngle;
 
-  ukfPrecisionType l_minRTOP = minRTOP;
+  ukfPrecisionType l_minRTOPseed = minRTOPseed;
+  ukfPrecisionType l_minRTOP1stop = minRTOP1stop;
   ukfPrecisionType l_maxNMSE = maxNMSE;
   ukfPrecisionType l_maxUKFIterations = maxUKFIterations;
 
@@ -278,23 +279,26 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     {
       ukf_tell(l_Qt, "Qt");
     }
-  }
 
-  if (diffusionPropagator)
-  {
-    if (l_minRTOP == 0.0)
+    if (l_minRTOPseed == 20.0)
     {
-      ukf_setAndTell(l_minRTOP, 60.0, "minRTOP");
+      ukf_setAndTell(l_minRTOPseed, 20.0, "minRTOPseed");
     }
     else
     {
-      ukf_tell(l_minRTOP, "minRTOP");
+      ukf_tell(l_minRTOPseed, "minRTOPseed");
     }
-  }
 
-  if (diffusionPropagator)
-  {
-    if (l_maxNMSE == 0.0)
+    if (l_minRTOP1stop == 500.0)
+    {
+      ukf_setAndTell(l_minRTOP1stop, 500.0, "minRTOP1stop");
+    }
+    else
+    {
+      ukf_tell(l_minRTOP1stop, "minRTOP1stop");
+    }
+
+    if (l_maxNMSE == 0.15)
     {
       ukf_setAndTell(l_maxNMSE, 0.15, "maxNMSE");
     }
@@ -302,10 +306,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     {
       ukf_tell(l_maxNMSE, "maxNMSE");
     }
-  }
 
-  if (diffusionPropagator)
-  {
     if (l_maxUKFIterations < 0.0)
     {
       std::cout << "Error: maxUKFIterations cannot be negative. Exiting" << std::endl;
@@ -490,7 +491,8 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.Qvic = l_Qvic;
     s.Rs = l_Rs;
 
-    s.rtop_min = l_minRTOP;
+    s.rtop_min_seed = l_minRTOPseed;
+    s.rtop1_min_stop = l_minRTOP1stop;
     s.max_nmse = l_maxNMSE;
     s.maxUKFIterations = l_maxUKFIterations;
 

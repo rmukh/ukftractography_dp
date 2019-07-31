@@ -403,19 +403,27 @@
     </boolean>
 
     <double>
-      <name>minRTOP</name>
-      <longflag>minRTOP</longflag>
-      <label>Stopping criteria: RTOP values computed from the signal below this minimum imply the termination of the fiber</label>
-      <description>Stopping criteria: RTOP values computed from the signal below this minimum implied the termination of the fiber. Default: 60.0</description>
-      <default>0.0</default>
+      <name>minRTOPseed</name>
+      <longflag>minRTOPseed</longflag>
+      <label>Seed only if RTOP from signal higher than this value</label>
+      <description>Seeding criteria: RTOP values computed from the signal required to be considered as seeding voxel. Default: 20.0</description>
+      <default>20.0</default>
+    </double>
+
+    <double>
+      <name>minRTOP1stop</name>
+      <longflag>minRTOP1stop</longflag>
+      <label>Terminate tracking if RTOP 1 goes below this threshold</label>
+      <description>Stopping criteria: RTOP 1 computed from the state vector. Termination of fiber tracking if value goes below this threshold. Default: 500</description>
+      <default>500.0</default>
     </double>
 
     <double>
       <name>maxNMSE</name>
       <longflag>maxNMSE</longflag>
       <label>Stopping criteria: maximum NMSE allowed when seeding and tracing fibers, in the case of the diffusion propagator model</label>
-      <description>Stopping criteria: maximum NMSE allowed when seeding and tracing fibers, in the case of the diffusion propagator model (default 0.2)</description>
-      <default>0.0</default>
+      <description>Stopping criteria: maximum NMSE allowed when seeding and tracing fibers, in the case of the diffusion propagator model. Default: 0.15</description>
+      <default>0.15</default>
     </double>
 
     <integer>

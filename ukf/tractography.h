@@ -60,7 +60,8 @@ struct UKFSettings
   bool free_water;
   bool noddi;
   bool diffusion_propagator;
-  ukfPrecisionType rtop_min;
+  ukfPrecisionType rtop_min_seed;
+  ukfPrecisionType rtop1_min_stop;
   bool record_rtop;
   ukfPrecisionType max_nmse;
   int maxUKFIterations;
@@ -360,7 +361,8 @@ private:
   ukfVectorType _gradientStrength, _pulseSeparation;
   /** Diffustion propagator parameters **/
   bool _diffusion_propagator;
-  ukfPrecisionType _rtop_min;
+  ukfPrecisionType _rtop_min_seed;
+  ukfPrecisionType _rtop1_min_stop;
   bool _record_rtop;
   const ukfPrecisionType _max_nmse;
   int _maxUKFIterations;

@@ -15,7 +15,7 @@ dwi_path="/home/rinat/Desktop/ukftests/dwi_0008_ed.nhdr"
 mask_path="/home/rinat/Desktop/ukftests/dwi_0008_ed_mask_edited.nhdr"
 
 # OUTPUT FIBER
-output_path='/home/rinat/Desktop/ukftests/dcs_full_post3.vtk'
+output_path='/home/rinat/Desktop/ukftests/dcs_full_post4.vtk'
 
 csf_path='/home/rinat/Desktop/ukftests/dwi_0008_CSF.nrrd'
 wm_path='/home/rinat/Desktop/ukftests/dwi_0008_WM.nrrd'
@@ -31,7 +31,7 @@ eval $BINARY \
  --tracts $output_path \
  --seedsPerVoxel 0.01 \
  --diffusionPropagator \
- --minRTOP 20 \
+ --minRTOPseed 20 \
  --recordNMSE \
  --recordWeights \
  --recordRTOP \

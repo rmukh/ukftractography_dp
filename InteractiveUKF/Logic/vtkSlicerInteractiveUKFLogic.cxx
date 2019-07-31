@@ -315,11 +315,11 @@ void vtkSlicerInteractiveUKFLogic::set_seedingThreshold(double val)
   g_tracto->_seeding_threshold = val;
 }
 
-void vtkSlicerInteractiveUKFLogic::set_rtopMin(double val)
+void vtkSlicerInteractiveUKFLogic::set_rtopMinSeed(double val)
 {
   if (!g_tracto)
     return;
-  g_tracto->_rtop_min = val;
+  g_tracto->_rtop_min_seed = val;
 }
 
 void vtkSlicerInteractiveUKFLogic::set_maxNMSE(double val)
