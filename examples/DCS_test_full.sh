@@ -27,7 +27,6 @@ eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --csfFile $csf_path \
- --wmFile $wm_path \
  --tracts $output_path \
  --seedsPerVoxel 0.01 \
  --diffusionPropagator \

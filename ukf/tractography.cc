@@ -516,12 +516,24 @@ bool Tractography::SetData(void *data, void *mask, void *csf, void *wm,
 
   if (!seed)
     _full_brain = true;
+  else
+    _is_seeds = true;
 
-  if (csf)
+  if (!csf)
+    _csf_provided = false;
+  else
     _csf_provided = true;
 
-  if (wm)
+  if (!wm)
+  {
+    _wm_provided = false;
+    _full_brain = true;
+  }
+  else
+  {
     _wm_provided = true;
+    _full_brain = false;
+  }
 
   _signal_data = new NrrdData(_sigma_signal, _sigma_mask);
   _signal_data->SetData((Nrrd *)data, (Nrrd *)mask, (Nrrd *)csf, (Nrrd *)wm, (Nrrd *)seed, normalizedDWIData);
@@ -552,6 +564,7 @@ bool Tractography::LoadFiles(const std::string &data_file,
   if (wm_file.empty())
   {
     _wm_provided = false;
+    _full_brain = true;
   }
   else
   {
@@ -718,17 +731,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
             ++num_invalid;
             break;
           }
-
-          // If we do full brain tractography we only want seed voxels where the
-          // GA is bigger than 0.18.
-          ukfMatrixType signal_tmp(signal_dim * 2, 1);
-          signal_tmp.col(0) = signal;
-          if (_full_brain && s2adc(signal_tmp) < _seeding_threshold)
-          {
-            keep = false;
-            ++num_mean_signal_too_low;
-            break;
-          }
         }
 
         // If all the criteria is met we keep that point and the signal data.
@@ -784,9 +786,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       fa3 = fa;
       trace2 = trace;
     }
-
-    if (_full_brain && fa <= _seeding_threshold)
-      continue;
 
     // Create seed info for both directions;
     SeedPointInfo info;
