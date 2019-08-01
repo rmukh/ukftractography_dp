@@ -126,7 +126,7 @@ VtkWriter::VtkWriter(const ISignalData *signal_data, Tractography::model_type fi
       i2r(2, 0) / voxel[2], i2r(2, 1) / voxel[1], i2r(2, 2) / voxel[0];
 }
 
-void VtkWriter ::PopulateFibersAndTensors(vtkPolyData *polyData,
+void VtkWriter::PopulateFibersAndTensors(vtkPolyData *polyData,
                                           const std::vector<UKFFiber> &fibers)
 {
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
@@ -214,7 +214,7 @@ void VtkWriter ::PopulateFibersAndTensors(vtkPolyData *polyData,
   }
 }
 
-void VtkWriter ::PopulateFibersDirs(vtkPolyData *polyData,
+void VtkWriter::PopulateFibersDirs(vtkPolyData *polyData,
                                     const std::vector<UKFFiber> &fibers)
 {
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
@@ -266,7 +266,7 @@ void VtkWriter ::PopulateFibersDirs(vtkPolyData *polyData,
   polyData->SetLines(lines);
 }
 
-void VtkWriter ::WritePolyData(vtkSmartPointer<vtkPolyData> pd, const char *filename) const
+void VtkWriter::WritePolyData(vtkSmartPointer<vtkPolyData> pd, const char *filename) const
 {
   // Add version information to polydata as vtkStringArray
   std::stringstream header_string;
@@ -327,7 +327,7 @@ void VtkWriter ::WritePolyData(vtkSmartPointer<vtkPolyData> pd, const char *file
   }
 }
 
-int VtkWriter ::Write(const std::string &file_name,
+int VtkWriter::Write(const std::string &file_name,
                       const std::string &tractsWithSecondTensor,
                       const std::vector<UKFFiber> &fibers,
                       bool write_state,
@@ -626,6 +626,186 @@ int VtkWriter ::Write(const std::string &file_name,
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
+  if (fibers[0].Fm1.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> Fm1 = vtkSmartPointer<vtkFloatArray>::New();
+    Fm1->SetNumberOfComponents(1);
+    Fm1->Allocate(num_points);
+    Fm1->SetName("Frob dir 1");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        Fm1->InsertNextValue(fibers[i].Fm1[j]);
+      }
+    }
+    int idx = pointData->AddArray(Fm1);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
+  if (fibers[0].lmd1.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> lmd1 = vtkSmartPointer<vtkFloatArray>::New();
+    lmd1->SetNumberOfComponents(1);
+    lmd1->Allocate(num_points);
+    lmd1->SetName("Frob lambda 1");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        lmd1->InsertNextValue(fibers[i].lmd1[j]);
+      }
+    }
+    int idx = pointData->AddArray(lmd1);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
+  if (fibers[0].Fm2.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> Fm2 = vtkSmartPointer<vtkFloatArray>::New();
+    Fm2->SetNumberOfComponents(1);
+    Fm2->Allocate(num_points);
+    Fm2->SetName("Frob dir 2");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        Fm2->InsertNextValue(fibers[i].Fm2[j]);
+      }
+    }
+    int idx = pointData->AddArray(Fm2);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
+  if (fibers[0].lmd2.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> lmd2 = vtkSmartPointer<vtkFloatArray>::New();
+    lmd2->SetNumberOfComponents(1);
+    lmd2->Allocate(num_points);
+    lmd2->SetName("Frob lambda 2");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        lmd2->InsertNextValue(fibers[i].lmd2[j]);
+      }
+    }
+    int idx = pointData->AddArray(lmd2);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
+  if (fibers[0].Fm3.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> Fm3 = vtkSmartPointer<vtkFloatArray>::New();
+    Fm3->SetNumberOfComponents(1);
+    Fm3->Allocate(num_points);
+    Fm3->SetName("Frob dir 3");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        Fm3->InsertNextValue(fibers[i].Fm3[j]);
+      }
+    }
+    int idx = pointData->AddArray(Fm3);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
+  if (fibers[0].lmd3.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> lmd3 = vtkSmartPointer<vtkFloatArray>::New();
+    lmd3->SetNumberOfComponents(1);
+    lmd3->Allocate(num_points);
+    lmd3->SetName("Frob lambda 2");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        lmd3->InsertNextValue(fibers[i].lmd3[j]);
+      }
+    }
+    int idx = pointData->AddArray(lmd3);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
+  if (fibers[0].varW1.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> varW1 = vtkSmartPointer<vtkFloatArray>::New();
+    varW1->SetNumberOfComponents(1);
+    varW1->Allocate(num_points);
+    varW1->SetName("var w1");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        varW1->InsertNextValue(fibers[i].varW1[j]);
+      }
+    }
+    int idx = pointData->AddArray(varW1);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
+  if (fibers[0].varW2.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> varW2 = vtkSmartPointer<vtkFloatArray>::New();
+    varW2->SetNumberOfComponents(1);
+    varW2->Allocate(num_points);
+    varW2->SetName("var w2");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        varW2->InsertNextValue(fibers[i].varW2[j]);
+      }
+    }
+    int idx = pointData->AddArray(varW2);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
+  if (fibers[0].varW3.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> varW3 = vtkSmartPointer<vtkFloatArray>::New();
+    varW3->SetNumberOfComponents(1);
+    varW3->Allocate(num_points);
+    varW3->SetName("var w3");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        varW3->InsertNextValue(fibers[i].varW3[j]);
+      }
+    }
+    int idx = pointData->AddArray(varW3);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
+  if (fibers[0].varWiso.size() > 0)
+  {
+    vtkSmartPointer<vtkFloatArray> varWiso = vtkSmartPointer<vtkFloatArray>::New();
+    varWiso->SetNumberOfComponents(1);
+    varWiso->Allocate(num_points);
+    varWiso->SetName("var wiso");
+    for (int i = 0; i < num_fibers; ++i)
+    {
+      int fiber_size = fibers[i].position.size();
+      for (int j = 0; j < fiber_size; ++j)
+      {
+        varWiso->InsertNextValue(fibers[i].varWiso[j]);
+      }
+    }
+    int idx = pointData->AddArray(varWiso);
+    pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
+  }
+
   if (fibers[0].normMSE.size() > 0)
   {
     ukfPrecisionType nmse_sum(0);
@@ -722,7 +902,7 @@ int VtkWriter ::Write(const std::string &file_name,
   return EXIT_SUCCESS;
 }
 
-int VtkWriter ::WriteWeight(const std::string &file_name, const std::vector<UKFFiber> &fibers)
+int VtkWriter::WriteWeight(const std::string &file_name, const std::vector<UKFFiber> &fibers)
 {
   if (fibers.size() == 0)
   {

@@ -46,6 +46,7 @@ struct UKFSettings
   bool record_kappa;
   bool record_Viso;
   bool record_weights;
+  bool record_uncertainties;
   bool transform_position;
   bool store_glyphs;
   bool branches_only;
@@ -259,6 +260,15 @@ private:
    * Saves one point along the fiber so that everything can be written to a
    * file at the end.
   */
+
+  // BiExp version only
+  void Record(const vec3_t &x, const ukfPrecisionType fa, const ukfPrecisionType fa2, const ukfPrecisionType fa3, const ukfPrecisionType Fm1,
+              const ukfPrecisionType lmd1, const ukfPrecisionType Fm2, const ukfPrecisionType lmd2, const ukfPrecisionType Fm3,
+              const ukfPrecisionType lmd3, const ukfPrecisionType varW1, const ukfPrecisionType varW2, const ukfPrecisionType varW3,
+              const ukfPrecisionType varWiso, const State &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
+              const ukfPrecisionType trace, const ukfPrecisionType trace2);
+
+  // Other models version
   void Record(const vec3_t &x, const ukfPrecisionType fa, const ukfPrecisionType fa2, const ukfPrecisionType fa3,
               const State &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
               const ukfPrecisionType trace, const ukfPrecisionType trace2);
@@ -342,6 +352,7 @@ private:
    * Wheather to transform the points back to RAS-space before writing the VTK or not.
   */
   const bool _record_weights;
+  const bool _record_uncertainties;
   const bool _transform_position;
   /** Attach the glyphs to the VTK file */
   const bool _store_glyphs;

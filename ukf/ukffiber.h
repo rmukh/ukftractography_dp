@@ -51,6 +51,17 @@ struct UKFFiber
   /** Angles (diffussion propagator, bi-exponential) */
   std::vector<ukfPrecisionType> w1w2angle;
   std::vector<ukfPrecisionType> w1w3angle;
+  /** Uncertanity characteristics */
+  std::vector<ukfPrecisionType> Fm1;
+  std::vector<ukfPrecisionType> lmd1;
+  std::vector<ukfPrecisionType> Fm2;
+  std::vector<ukfPrecisionType> lmd2;
+  std::vector<ukfPrecisionType> Fm3;
+  std::vector<ukfPrecisionType> lmd3;
+  std::vector<ukfPrecisionType> varW1;
+  std::vector<ukfPrecisionType> varW2;
+  std::vector<ukfPrecisionType> varW3;
+  std::vector<ukfPrecisionType> varWiso;
 };
 
 /**
@@ -72,7 +83,7 @@ struct BranchingSeedAffiliation
  * form complete primary fibers, and eliminates fibers that are too short. Besides, each branch is back traced to form a whole fiber
 */
 void PostProcessFibers(const std::vector<UKFFiber> &raw_primary, const std::vector<UKFFiber> &raw_branch,
-                       const std::vector<BranchingSeedAffiliation> &branching_seed_affiliation, 
+                       const std::vector<BranchingSeedAffiliation> &branching_seed_affiliation,
                        const std::vector<unsigned char> &discarded_fibers, const bool branches_only, std::vector<UKFFiber> &fibers);
 
 /** The minimum number of points on a fiber. UKFFiber with fewer points are rejected */

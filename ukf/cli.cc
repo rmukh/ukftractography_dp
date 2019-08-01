@@ -448,6 +448,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.record_tensors = recordTensors;
     s.record_Vic = recordVic;
     s.record_weights = recordWeights;
+    s.record_uncertainties = recordUncertainties;
     s.record_kappa = recordKappa;
     s.record_Viso = recordViso;
     s.record_rtop = recordRTOP;

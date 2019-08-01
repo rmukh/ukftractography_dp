@@ -402,6 +402,14 @@
       <default>false</default>
     </boolean>
 
+    <boolean>
+      <name>recordUncertainties</name>
+      <longflag>recordUncertainties</longflag>
+      <label>Record Fm1, lambdas1, Fm2, lambdas2, Fm3, lambdas3, var w1, var w2, var w3, var iso</label>
+      <description>Record Frobenius norms of covariance matrix for all directions, their lambdas and variance for all weights</description>
+      <default>false</default>
+    </boolean>
+
     <double>
       <name>minRTOP1stop</name>
       <longflag>minRTOP1stop</longflag>

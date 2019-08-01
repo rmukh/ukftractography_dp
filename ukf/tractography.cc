@@ -67,6 +67,7 @@ Tractography::Tractography(UKFSettings s) : // begin initializer list
                                             _record_Viso(s.record_Viso),
                                             _record_tensors(s.record_tensors),
                                             _record_weights(s.record_weights),
+                                            _record_uncertainties(s.record_uncertainties),
                                             _transform_position(s.transform_position),
                                             _store_glyphs(s.store_glyphs),
                                             _branches_only(s.branches_only),
@@ -293,7 +294,12 @@ void Tractography::UpdateFilterModelType()
 
   if (_record_weights && !_diffusion_propagator)
   {
-    std::cout << "record_weights parameterscan only be used with Diffusion Propagator Biexponential model\n";
+    std::cout << "recordWeights parameter can only be used with Diffusion Propagator Biexponential model" << std::endl;
+    throw;
+  }
+
+  if (_record_uncertainties && !_diffusion_propagator) {
+    std::cout << "recordUncertainties parameter can only be used with Diffustion Propagator Biexponential model" << std::endl;
     throw;
   }
 
@@ -2228,7 +2234,7 @@ void Tractography::Follow3T(const int thread_id,
   FiberReserve(fiber, fiber_size);
 
   // Record start point.
-  Record(x, rtop1, rtop2, rtop3, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
+  Record(x, rtop1, rtop2, rtop3, Fm1, lmd1, Fm2, lmd2, Fm3, lmd3, varW1, varW2, varW3, varWiso, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
 
   vec3_t m1 = fiberStartSeed.start_dir;
   vec3_t m2, m3;
@@ -2277,7 +2283,9 @@ void Tractography::Follow3T(const int thread_id,
     }
 
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
+    bool is_curving = curve_radius(fiber.position) < _min_radius;
     bool in_rtop1 = rtop1 < _rtop1_min_stop;
+    bool is_high_fw = state(24) > 0.75;
 
     // if (_wm_provided)
     // {
@@ -2286,9 +2294,7 @@ void Tractography::Follow3T(const int thread_id,
     //}
     //else
     //{
-    bool is_high_fw = state(24) > 0.75;
-    bool is_curving = curve_radius(fiber.position) < _min_radius;
-
+    
     if (!is_brain || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
       break;
     //}
@@ -2303,7 +2309,7 @@ void Tractography::Follow3T(const int thread_id,
     if ((stepnr + 1) % _steps_per_record == 0)
     {
       fiber_length++;
-      Record(x, rtop1, rtop2, rtop3, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
+      Record(x, rtop1, rtop2, rtop3, Fm1, lmd1, Fm2, lmd2, Fm3, lmd3, varW1, varW2, varW3, varWiso, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
     }
   }
   FiberReserve(fiber, fiber_length);
@@ -2356,7 +2362,7 @@ void Tractography::Follow3T(const int thread_id,
   FiberReserveWeightTrack(fiber3, fiber_weight_size);
 
   // Record start point
-  Record(x, rtop1, rtop2, rtop3, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
+  Record(x, rtop1, rtop2, rtop3, Fm1, lmd1, Fm2, lmd2, Fm3, lmd3, varW1, varW2, varW3, varWiso, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
   RecordWeightTrack(x, fiber1, state(0), state(1), state(2));
   RecordWeightTrack(x, fiber2, state(7), state(8), state(9));
   RecordWeightTrack(x, fiber3, state(14), state(15), state(16));
@@ -2419,7 +2425,7 @@ void Tractography::Follow3T(const int thread_id,
     if ((stepnr + 1) % _steps_per_record == 0)
     {
       fiber_length++;
-      Record(x, rtop1, rtop2, rtop3, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
+      Record(x, rtop1, rtop2, rtop3, Fm1, lmd1, Fm2, lmd2, Fm3, lmd3, varW1, varW2, varW3, varWiso, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
       if ((stepnr + 1) % 3 == 0)
       {
         RecordWeightTrack(x, fiber1, state(0), state(1), state(2));
@@ -3426,11 +3432,11 @@ void Tractography::SwapState3T_BiExp(State &state,
 
   if (ishift == 1)
   {
-    covariance.block<2,1>(twoshift, tshift) = tmp.block<2,1>(twoshift, oneshift);
-    covariance.block<2,1>(twoshift, oneshift) = tmp.block<2,1>(twoshift, tshift);
+    covariance.block<2, 1>(twoshift, tshift) = tmp.block<2, 1>(twoshift, oneshift);
+    covariance.block<2, 1>(twoshift, oneshift) = tmp.block<2, 1>(twoshift, tshift);
 
-    covariance.block<1,2>(tshift, twoshift) = tmp.block<1,2>(oneshift, twoshift);
-    covariance.block<1,2>(oneshift, twoshift) = tmp.block<1,2>(tshift, twoshift);
+    covariance.block<1, 2>(tshift, twoshift) = tmp.block<1, 2>(oneshift, twoshift);
+    covariance.block<1, 2>(oneshift, twoshift) = tmp.block<1, 2>(tshift, twoshift);
   }
   else if (ishift == 2)
   {
@@ -3503,6 +3509,197 @@ void Tractography::SwapState2T(State &state,
   const ukfVectorType tmp_vec = state;
   state.segment(state_dim, state_dim) = tmp_vec.segment(0, state_dim);
   state.segment(0, state_dim) = tmp_vec.segment(state_dim, state_dim);
+}
+
+void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfPrecisionType fa2, const ukfPrecisionType fa3, const ukfPrecisionType Fm1,
+                          const ukfPrecisionType lmd1, const ukfPrecisionType Fm2, const ukfPrecisionType lmd2, const ukfPrecisionType Fm3,
+                          const ukfPrecisionType lmd3, const ukfPrecisionType varW1, const ukfPrecisionType varW2, const ukfPrecisionType varW3,
+                          const ukfPrecisionType varWiso, const State &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
+                          const ukfPrecisionType trace, const ukfPrecisionType trace2)
+{
+  // if Noddi model is used Kappa is stored in trace, Vic in fa and Viso in freewater
+  assert(_model->state_dim() == static_cast<int>(state.size()));
+  assert(p.rows() == static_cast<unsigned int>(state.size()) &&
+         p.cols() == static_cast<unsigned int>(state.size()));
+
+  // std::cout << "x: " << x[0] << " " << x[1] << " " << x[2] << std::endl;
+  fiber.position.push_back(x);
+  fiber.norm.push_back(p.norm());
+
+  if (_record_nmse)
+  {
+    fiber.normMSE.push_back(dNormMSE);
+  }
+
+  if ((_record_trace || _record_kappa) && !_record_rtop && !_diffusion_propagator)
+  {
+    fiber.trace.push_back(2 * (atan(1 / trace) / 3.14));
+    if (_num_tensors >= 2)
+    {
+      fiber.trace2.push_back(2 * (atan(1 / trace2) / 3.14));
+    }
+  }
+
+  if (_record_rtop)
+  {
+    fiber.trace.push_back(trace);
+    fiber.trace2.push_back(trace2);
+  }
+
+  if (_record_fa || _record_Vic || _record_rtop)
+  {
+    fiber.fa.push_back(fa);
+    if (_num_tensors >= 2)
+    {
+      fiber.fa2.push_back(fa2);
+    }
+    if (_num_tensors == 3)
+    {
+      fiber.fa3.push_back(fa3);
+    }
+  }
+
+  if (_record_weights)
+  {
+    ukfPrecisionType w1 = state[21];
+    ukfPrecisionType w2 = state[22];
+    ukfPrecisionType w3 = state[23];
+    ukfPrecisionType wiso = state[24];
+
+    fiber.w1.push_back(w1);
+    fiber.w2.push_back(w2);
+    fiber.w3.push_back(w3);
+    fiber.free_water.push_back(wiso);
+
+    /* Angles */
+    State store_state(state);
+    vec3_t dir1;
+    initNormalized(dir1, store_state[0], store_state[1], store_state[2]);
+    vec3_t dir2;
+    initNormalized(dir2, store_state[7], store_state[8], store_state[9]);
+    vec3_t dir3;
+    initNormalized(dir3, store_state[14], store_state[15], store_state[16]);
+
+    ukfPrecisionType d1d2 = std::min(RadToDeg(std::acos(dir1.dot(dir2))), RadToDeg(std::acos(dir1.dot(-dir2))));
+    ukfPrecisionType d1d3 = std::min(RadToDeg(std::acos(dir1.dot(dir3))), RadToDeg(std::acos(dir1.dot(-dir3))));
+
+    fiber.w1w2angle.push_back(d1d2);
+    fiber.w1w3angle.push_back(d1d3);
+  }
+
+  if (_record_Viso)
+  {
+    ukfPrecisionType viso = state[_nPosFreeWater];
+    if (viso < 0)
+    {
+      if (viso >= -1.0e-4) // for small errors just round it to 0
+      {
+        viso = 0;
+      }
+      else // for too big errors exit with exception.
+      {
+        std::cout << "Error: program produced negative free water.\n";
+        throw;
+      }
+    }
+    fiber.free_water.push_back(viso);
+  }
+
+  if (_record_free_water)
+  {
+    ukfPrecisionType fw = 1 - state[_nPosFreeWater];
+    // sometimes QP produces slightly negative results due to numerical errors in Quadratic Programming, the weight is
+    // clipped in F() and H() but its still possible that
+    // a slightly negative weight gets here, because the filter ends with a constrain step.
+    if (fw < 0)
+    {
+      if (fw >= -1.0e-4) // for small errors just round it to 0
+      {
+        fw = 0;
+      }
+      else // for too big errors exit with exception.
+      {
+        std::cout << "Error: program produced negative free water.\n";
+        throw;
+      }
+    }
+    fiber.free_water.push_back(fw);
+  }
+
+  // Record the state
+  if ((state.size() == 5 || state.size() == 10 || state.size() == 15) && !_diffusion_propagator) // i.e. simple model
+  {                                                                                              // Normalize direction before storing it;
+    State store_state(state);
+    vec3_t dir;
+    initNormalized(dir, store_state[0], store_state[1], store_state[2]);
+    store_state[0] = dir[0];
+    store_state[1] = dir[1];
+    store_state[2] = dir[2];
+
+    if (state.size() == 10)
+    {
+      initNormalized(dir, store_state[5], store_state[6], store_state[7]);
+      store_state[5] = dir[0];
+      store_state[6] = dir[1];
+      store_state[7] = dir[2];
+    }
+    if (state.size() == 15)
+    {
+      initNormalized(dir, store_state[10], store_state[11], store_state[12]);
+      store_state[10] = dir[0];
+      store_state[11] = dir[1];
+      store_state[12] = dir[2];
+    }
+    fiber.state.push_back(store_state);
+  }
+  else if (_diffusion_propagator)
+  {
+    State store_state(state);
+    vec3_t dir;
+
+    // normalize m1
+    initNormalized(dir, store_state[0], store_state[1], store_state[2]);
+    store_state[0] = dir[0];
+    store_state[1] = dir[1];
+    store_state[2] = dir[2];
+
+    // normalize m2
+    initNormalized(dir, store_state[7], store_state[8], store_state[9]);
+    store_state[7] = dir[0];
+    store_state[8] = dir[1];
+    store_state[9] = dir[2];
+
+    // normalize m2
+    initNormalized(dir, store_state[14], store_state[15], store_state[16]);
+    store_state[14] = dir[0];
+    store_state[15] = dir[1];
+    store_state[16] = dir[2];
+
+    fiber.state.push_back(store_state);
+  }
+  else
+  {
+    // Normal state
+    fiber.state.push_back(state);
+  }
+
+  if(_record_uncertainties) {
+    fiber.Fm1.push_back(Fm1);
+    fiber.lmd1.push_back(lmd1);
+    fiber.Fm2.push_back(Fm2);
+    fiber.lmd2.push_back(lmd2);
+    fiber.Fm3.push_back(Fm3);
+    fiber.lmd3.push_back(lmd3);
+    fiber.varW1.push_back(varW1);
+    fiber.varW2.push_back(varW2);
+    fiber.varW3.push_back(varW3);
+    fiber.varWiso.push_back(varWiso);
+  }
+
+  if (_record_cov)
+  {
+    fiber.covariance.push_back(p);
+  }
 }
 
 void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfPrecisionType fa2, const ukfPrecisionType fa3, const State &state,
@@ -3619,7 +3816,7 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
 
   // Record the state
   if ((state.size() == 5 || state.size() == 10 || state.size() == 15) && !_diffusion_propagator) // i.e. simple model
-  {                                                                                              // Normalize direction before storing it;
+  {                                                                                         // Normalize direction before storing it;
     State store_state(state);
     vec3_t dir;
     initNormalized(dir, store_state[0], store_state[1], store_state[2]);

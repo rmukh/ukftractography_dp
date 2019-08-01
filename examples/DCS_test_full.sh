@@ -15,7 +15,7 @@ dwi_path="/home/rinat/Desktop/ukftests/dwi_0008_ed.nhdr"
 mask_path="/home/rinat/Desktop/ukftests/dwi_0008_ed_mask_edited.nhdr"
 
 # OUTPUT FIBER
-output_path='/home/rinat/Desktop/ukftests/dcs_full_post4.vtk'
+output_path='/home/rinat/Desktop/ukftests/dcs_full_5.vtk'
 
 csf_path='/home/rinat/Desktop/ukftests/dwi_0008_CSF.nrrd'
 wm_path='/home/rinat/Desktop/ukftests/dwi_0008_WM.nrrd'
@@ -33,6 +33,7 @@ eval $BINARY \
  --recordNMSE \
  --recordWeights \
  --recordRTOP \
+ --recordUncertainties \
  --seedingThreshold 0.3 \
  --numTensor 3 | tee $logFile
  end=`date +%s`
