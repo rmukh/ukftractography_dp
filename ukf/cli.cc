@@ -350,22 +350,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
 
   if (l_stepLength == 0.3)
   {
-    if (diffusionPropagator)
-    {
-      ukf_setAndTell(l_stepLength, 0.5, "stepLength");
-    }
-    else if (numTensor == 1)
-    {
       ukf_setAndTell(l_stepLength, 0.3, "stepLength");
-    }
-    else if (numTensor == 2)
-    {
-      ukf_setAndTell(l_stepLength, 0.3, "stepLength"); //was 0.2 for old Interp3Signal
-    }
-    else
-    { // 3T
-      ukf_setAndTell(l_stepLength, 0.15, "stepLength");
-    }
   }
   else
   {

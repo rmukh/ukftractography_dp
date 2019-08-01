@@ -29,8 +29,10 @@ eval $BINARY \
  --csfFile $csf_path \
  --tracts $output_path \
  --seedsPerVoxel 0.001 \
+ --maxODFthresh 0.5 \
  --diffusionPropagator \
  --recordNMSE \
+ --stepLength 0.2 \
  --recordWeights \
  --recordRTOP \
  --recordUncertainties \
