@@ -350,7 +350,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
 
   if (l_stepLength == 0.3)
   {
-      ukf_setAndTell(l_stepLength, 0.3, "stepLength");
+    ukf_setAndTell(l_stepLength, 0.3, "stepLength");
   }
   else
   {
