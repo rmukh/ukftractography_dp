@@ -1445,6 +1445,30 @@ void Tractography::computeRTOPfromSignal(ukfPrecisionType &rtopSignal, ukfVector
   }
 }
 
+void Tractography::computeUncertaintiesCharacteristics(ukfMatrixType &cov,
+                                                       ukfPrecisionType &Fm1,
+                                                       ukfPrecisionType &lmd1,
+                                                       ukfPrecisionType &Fm2,
+                                                       ukfPrecisionType &lmd2,
+                                                       ukfPrecisionType &Fm3,
+                                                       ukfPrecisionType &lmd3,
+                                                       ukfPrecisionType &varW1,
+                                                       ukfPrecisionType &varW2,
+                                                       ukfPrecisionType &varW3,
+                                                       ukfPrecisionType &varWiso)
+{
+  Fm1 = (cov.block<3, 3>(0, 0)).norm();
+  lmd1 = (cov.block<4, 4>(3, 3)).norm();
+  Fm2 = (cov.block<3, 3>(7, 7)).norm();
+  lmd2 = (cov.block<4, 4>(10, 10)).norm();
+  Fm3 = (cov.block<3, 3>(14, 14)).norm();
+  lmd3 = (cov.block<4, 4>(17, 17)).norm();
+  varW1 = cov(21, 21);
+  varW2 = cov(22, 22);
+  varW3 = cov(23, 23);
+  varWiso = cov(24, 24);
+}
+
 void Tractography::computeRTOPfromState(State &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3)
 {
   state[3] = std::max(state[3], 1.0);
@@ -2183,8 +2207,10 @@ void Tractography::Follow3T(const int thread_id,
   and also, to avoid making new variables which are used only in Bi-exp model.
   I think think the idea of creating more new variables just for one model
   is a pure redundancy. 
+
+  TODO: Rename this variables in case if only BiExp DP models remains and other deleted
   
-  To simplify code 'reading' and understanding I make a local rtop variables
+  To simplify code 'readability' and understanding I make a local rtop variables
   in Follow3T and Step3T functions.
   */
   ukfPrecisionType rtop1 = fiberStartSeed.fa;
@@ -2192,8 +2218,10 @@ void Tractography::Follow3T(const int thread_id,
   ukfPrecisionType rtop3 = fiberStartSeed.fa3;
   ukfPrecisionType rtopModel = fiberStartSeed.trace;
   ukfPrecisionType rtopSignal = fiberStartSeed.trace2;
-
   ukfPrecisionType dNormMSE = 0; // no error at the fiberStartSeed
+
+  ukfPrecisionType Fm1, lmd1, Fm2, lmd2, Fm3, lmd3, varW1, varW2, varW3, varWiso;
+  computeUncertaintiesCharacteristics(p, Fm1, lmd1, Fm2, lmd2, Fm3, lmd3, varW1, varW2, varW3, varWiso);
 
   //std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
 
@@ -2216,7 +2244,8 @@ void Tractography::Follow3T(const int thread_id,
     ++stepnr;
 
     // That's one small step for a propagator, one giant leap for tractography...
-    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
+    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, Fm1, lmd1,
+           Fm2, lmd2, Fm3, lmd3, varW1, varW2, varW3, varWiso, rtopModel, rtopSignal);
 
     // Check if we should abort following this fiber. We abort if we reach the
     // CSF, if FA or GA get too small, if the curvature get's too high or if
@@ -2315,8 +2344,10 @@ void Tractography::Follow3T(const int thread_id,
   ukfPrecisionType rtop3 = fiberStartSeed.fa3;
   ukfPrecisionType rtopModel = fiberStartSeed.trace;
   ukfPrecisionType rtopSignal = fiberStartSeed.trace2;
-
   ukfPrecisionType dNormMSE = 0; // no error at the fiberStartSeed
+
+  ukfPrecisionType Fm1, lmd1, Fm2, lmd2, Fm3, lmd3, varW1, varW2, varW3, varWiso;
+  computeUncertaintiesCharacteristics(p, Fm1, lmd1, Fm2, lmd2, Fm3, lmd3, varW1, varW2, varW3, varWiso);
   //std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
 
   // Reserving fiber array memory so as to avoid resizing at every step
@@ -2344,7 +2375,8 @@ void Tractography::Follow3T(const int thread_id,
     // std::cout << "step " << stepnr << std::endl;
     ++stepnr;
 
-    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
+    Step3T(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, Fm1, lmd1,
+           Fm2, lmd2, Fm3, lmd3, varW1, varW2, varW3, varWiso, rtopModel, rtopSignal);
 
     // cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
     // Check if we should abort following this fiber. We abort if we reach the
@@ -2823,6 +2855,16 @@ void Tractography::Step3T(const int thread_id,
                           ukfPrecisionType &rtop1,
                           ukfPrecisionType &rtop2,
                           ukfPrecisionType &rtop3,
+                          ukfPrecisionType &Fm1,
+                          ukfPrecisionType &lmd1,
+                          ukfPrecisionType &Fm2,
+                          ukfPrecisionType &lmd2,
+                          ukfPrecisionType &Fm3,
+                          ukfPrecisionType &lmd3,
+                          ukfPrecisionType &varW1,
+                          ukfPrecisionType &varW2,
+                          ukfPrecisionType &varW3,
+                          ukfPrecisionType &varWiso,
                           ukfPrecisionType &rtopModel,
                           ukfPrecisionType &rtopSignal)
 {
@@ -2858,16 +2900,28 @@ void Tractography::Step3T(const int thread_id,
   // cout << "m1 state " << state(0) << " " << state(1) << " " << state(2) << endl;
   // cout << "m1 " << m1.transpose() << endl;
 
-  ukfPrecisionType _rtop1, _rtop2, _rtop3, _rtopModel, _rtopSignal;
+  ukfPrecisionType _rtop1, _rtop2, _rtop3, _rtopModel, _rtopSignal, _Fm1, _lmd1, _Fm2, _lmd2, _Fm3, _lmd3, _varW1, _varW2, _varW3, _varWiso;
 
   computeRTOPfromState(state, _rtopModel, _rtop1, _rtop2, _rtop3);
   computeRTOPfromSignal(_rtopSignal, signal);
+  computeUncertaintiesCharacteristics(covariance, _Fm1, _lmd1, _Fm2, _lmd2, _Fm3, _lmd3, _varW1, _varW2, _varW3, _varWiso);
 
   rtop1 = _rtop1;
   rtop2 = _rtop2;
   rtop3 = _rtop3;
   rtopModel = _rtopModel;
   rtopSignal = _rtopSignal;
+
+  Fm1 = _Fm1;
+  lmd1 = _lmd1;
+  Fm2 = _Fm2;
+  lmd2 = _lmd2;
+  Fm3 = _Fm3;
+  lmd3 = _lmd3;
+  varW1 = _varW1;
+  varW2 = _varW2;
+  varW3 = _varW3;
+  varWiso = _varWiso;
 
   // BELOW is a huge pile of the code which might be useful in future for
   // debugging or not... ¯\_(ツ)_/¯
@@ -3269,18 +3323,14 @@ void Tractography::Step1T(const int thread_id,
   x = x + dx * _stepLength;
 }
 
-void Tractography::SwapState3T(stdVecState &state,
-                               ukfMatrixType &covariance,
-                               int i)
+void Tractography::SwapState3T(stdVecState &state, ukfMatrixType &covariance, int i)
 {
   State tmp_state = ConvertVector<stdVecState, State>(state);
   SwapState3T(tmp_state, covariance, i);
   state = ConvertVector<State, stdVecState>(tmp_state);
 }
 
-void Tractography::SwapState3T(State &state,
-                               ukfMatrixType &covariance,
-                               int i)
+void Tractography::SwapState3T(State &state, ukfMatrixType &covariance, int i)
 {
   // This function is only for 3T. No free water
   assert(i == 2 || i == 3);

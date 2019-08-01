@@ -28,7 +28,7 @@ eval $BINARY \
  --maskFile $mask_path \
  --csfFile $csf_path \
  --tracts $output_path \
- --seedsPerVoxel 0.01 \
+ --seedsPerVoxel 0.001 \
  --diffusionPropagator \
  --recordNMSE \
  --recordWeights \

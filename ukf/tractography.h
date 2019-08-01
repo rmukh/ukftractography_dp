@@ -220,13 +220,16 @@ private:
   void createProtocol(const ukfVectorType &b, ukfVectorType &gradientStrength, ukfVectorType &pulseSeparation);
 
   /** One step along the fiber for the 3-tensor case. */
-  void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3,
-              ukfPrecisionType &fa, ukfPrecisionType &fa2, ukfPrecisionType &fa3, State &state, ukfMatrixType &covariance,
-              ukfPrecisionType &dNormMSE, ukfPrecisionType &trace, ukfPrecisionType &trace2);
+  void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3, ukfPrecisionType &fa,
+              ukfPrecisionType &fa2, ukfPrecisionType &fa3, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE,
+              ukfPrecisionType &trace, ukfPrecisionType &trace2);
 
   /** One step for ridgelets bi-exp case */
-  void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &m2, vec3_t &m3, State &state, ukfMatrixType &covariance,
-              ukfPrecisionType &dNormMSE, ukfPrecisionType &fa, ukfPrecisionType &fa2, ukfPrecisionType &fa3, ukfPrecisionType &trace, ukfPrecisionType &trace2);
+  void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &m2, vec3_t &m3, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE,
+              ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3, ukfPrecisionType &Fm1, ukfPrecisionType &lmd1,
+              ukfPrecisionType &Fm2, ukfPrecisionType &lmd2, ukfPrecisionType &Fm3, ukfPrecisionType &lmd3, ukfPrecisionType &varW1,
+              ukfPrecisionType &varW2, ukfPrecisionType &varW3, ukfPrecisionType &varWiso, ukfPrecisionType &rtopModel,
+              ukfPrecisionType &rtopSignal);
 
   /** One step along the fiber for the 2-tensor case. */
   void Step2T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, ukfPrecisionType &fa, ukfPrecisionType &fa2,
@@ -272,6 +275,11 @@ private:
 
   /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the interpolated signal */
   void computeRTOPfromSignal(ukfPrecisionType &rtopSignal, ukfVectorType &signal);
+
+  /** Compute uncertanties characteristics */
+  void computeUncertaintiesCharacteristics(ukfMatrixType &cov, ukfPrecisionType &Fm1, ukfPrecisionType &lmd1, ukfPrecisionType &Fm2, ukfPrecisionType &lmd2,
+                                           ukfPrecisionType &Fm3, ukfPrecisionType &lmd3, ukfPrecisionType &varW1, ukfPrecisionType &varW2,
+                                           ukfPrecisionType &varW3, ukfPrecisionType &varWiso);
 
   /** Print the State on the standard output in the case of the diffusion propagator model */
   void PrintState(State &state);
@@ -352,10 +360,10 @@ private:
 
   /** Maximal number of points in the tract */
   const int _max_length;
-  bool _full_brain; // is full brain?
-  bool _is_seeds; // check if seeds file provided?
+  bool _full_brain;   // is full brain?
+  bool _is_seeds;     // check if seeds file provided?
   bool _csf_provided; // check if CSF file provided?
-  bool _wm_provided; // check if WM file provided?
+  bool _wm_provided;  // check if WM file provided?
   bool _noddi;
   ukfVectorType _gradientStrength, _pulseSeparation;
   /** Diffustion propagator parameters **/
