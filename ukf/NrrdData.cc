@@ -667,7 +667,7 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
 
   // Transform gradients.
   ukfMatrixType R(3, 3);
-  R = _i2r.block(0, 0, 3, 3);
+  R = _i2r.block<3, 3>(0, 0);
 
   // The gradient should not be affected by voxel size, so factor out the voxel sizes
   // This is equivalent to normalizing the space directions

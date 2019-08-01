@@ -690,7 +690,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
   int num_less_than_zero = 0;
   int num_invalid = 0;
-  int num_mean_signal_too_low = 0;
 
   int tmp_counter = 1;
   unsigned every_n = 1;
@@ -2256,7 +2255,7 @@ void Tractography::Follow3T(const int thread_id,
 
     _model->H(state_tmp, signal_tmp);
 
-    const ukfPrecisionType mean_signal = s2adc(signal_tmp);
+    //const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = false;
     //if (_csf_provided)
     //  in_csf = _signal_data->ScalarCSFValue(x) > 0.5; // consider CSF as a true only if pve value > 0.5
@@ -3427,11 +3426,11 @@ void Tractography::SwapState3T_BiExp(State &state,
 
   if (ishift == 1)
   {
-    covariance.block(twoshift, tshift, 2, 1) = tmp.block(twoshift, oneshift, 2, 1);
-    covariance.block(twoshift, oneshift, 2, 1) = tmp.block(twoshift, tshift, 2, 1);
+    covariance.block<2,1>(twoshift, tshift) = tmp.block<2,1>(twoshift, oneshift);
+    covariance.block<2,1>(twoshift, oneshift) = tmp.block<2,1>(twoshift, tshift);
 
-    covariance.block(tshift, twoshift, 1, 2) = tmp.block(oneshift, twoshift, 1, 2);
-    covariance.block(oneshift, twoshift, 1, 2) = tmp.block(tshift, twoshift, 1, 2);
+    covariance.block<1,2>(tshift, twoshift) = tmp.block<1,2>(oneshift, twoshift);
+    covariance.block<1,2>(oneshift, twoshift) = tmp.block<1,2>(tshift, twoshift);
   }
   else if (ishift == 2)
   {
