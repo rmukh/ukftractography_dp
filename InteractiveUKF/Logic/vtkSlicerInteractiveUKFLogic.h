@@ -71,9 +71,10 @@ public:
   void set_recordLength(double val);
   void set_noddi(bool val);
   void set_freeWater(bool val);
-  void set_rtopMin(double val);
+  void set_rtop1MinStop(double val);
   void set_maxNMSE(double val);
   void set_maxUKFIterations(double val);
+  void set_maxODFthresh(dobule val);
 
 protected:
   vtkSlicerInteractiveUKFLogic();

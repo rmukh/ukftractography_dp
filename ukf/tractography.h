@@ -65,6 +65,7 @@ struct UKFSettings
   bool record_rtop;
   ukfPrecisionType max_nmse;
   int maxUKFIterations;
+  ukfPrecisionType max_odf_threshold;
   ukfPrecisionType stepLength;
   ukfPrecisionType recordLength;
   ukfPrecisionType maxHalfFiberLength;

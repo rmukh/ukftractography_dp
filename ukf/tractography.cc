@@ -122,7 +122,7 @@ Tractography::Tractography(UKFSettings s) : // begin initializer list
                                             sph_J(2),
                                             fista_lambda(0.01),
                                             lvl(4),
-                                            max_odf_thresh(0.7)
+                                            max_odf_thresh(s.max_odf_threshold)
 // end initializer list
 {
 }
@@ -326,6 +326,10 @@ void Tractography::UpdateFilterModelType()
     throw;
   }
 
+  if(max_odf_thresh != 0.0 && !_diffusion_propagator) {
+    std::cout << "maxODFthresh parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
+  }
+
   // Double check branching.
   _is_branching = _num_tensors > 1 && _cos_theta_max < ukfOne; // The branching is enabled when the maximum branching
                                                                // angle is not 0
@@ -497,6 +501,7 @@ void Tractography::UpdateFilterModelType()
   }
   else if (this->_filter_model_type == _3T_BIEXP_RIDG)
   {
+    std::cout << "max_odf_thresh " << max_odf_thresh << std::endl;
     _model = new Ridg_BiExp_FW(Qm, Ql, Qt, Qw, Qwiso, Rs, this->weights_on_tensors, this->_free_water,
                                D_ISO, ARidg, QRidg, fcs, nu, conn, signal_mask, fista_lambda,
                                max_odf_thresh);
@@ -2285,7 +2290,7 @@ void Tractography::Follow3T(const int thread_id,
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
     bool in_rtop1 = rtop1 < _rtop1_min_stop;
-    bool is_high_fw = state(24) > 0.75;
+    bool is_high_fw = state(24) > 0.65;
 
     // if (_wm_provided)
     // {

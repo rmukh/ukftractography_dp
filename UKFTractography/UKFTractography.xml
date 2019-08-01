@@ -433,6 +433,19 @@
       <description>Maximum number of iterations of the Kalman filter at a given position when following a fiber (default is 5)</description>
       <default>5</default>
     </integer>
+
+    <double>
+      <name>maxODFthresh</name>
+      <longflag>maxODFthresh</longflag>
+      <label>Threshold to compute ODF maxima directions</label>
+      <description>Maximum ODF threshold which used for spherical ridgelets package maximum ODF computation function</description>
+      <default>0.7</default>
+      <constraints>
+        <minimum>0.1</minimum>
+        <maximum>0.9</maximum>
+        <step>0.1</step>
+      </constraints>
+    </double>
   </parameters>
 
   <parameters advanced="true">

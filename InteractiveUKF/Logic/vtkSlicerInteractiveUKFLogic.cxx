@@ -333,7 +333,14 @@ void vtkSlicerInteractiveUKFLogic::set_maxUKFIterations(double val)
 {
   if (!g_tracto)
     return;
-  g_tracto->_maxUKFIterations = val;
+  g_tracto->_max_odf_thresh = val;
+}
+
+void vtkSlicerInteractiveUKFLogic::set_maxODFthresh(double val)
+{
+  if (!g_tracto)
+    return;
+  g_tracto->
 }
 
 void vtkSlicerInteractiveUKFLogic::set_stoppingThreshold(double val)
