@@ -3,22 +3,23 @@ start=`date +%s`
 SRC="../UKFTractography"
 
 #logFile Name
-logFile="output/log1.txt"
+logFile="log.txt"
 
 # BINARY
 BINARY='../build/UKFTractography-build/UKFTractography/bin/UKFTractography'
 
 # VOLUME
-dwi_path="/data/pnl/home/rz892/HCP/100307-dwi.nhdr"
+dwi_path="/home/rinat/Desktop/HCP_subj/100307-dwi.nhdr"
 
 # MASK
-mask_path="/data/pnl/home/rz892/HCP/nodif_brain_mask.nrrd"
+mask_path="/home/rinat/Desktop/HCP_subj/nodif_brain_mask.nrrd"
 
 # OUTPUT FIBER
-output_path="/data/pnl/home/rz892/HCP/results/NO_wm_mask_NO_csf_mask_rtop1_500_sl_0.3_qm_0.005_FW_0.65_GA_0.1_odf_0.3.vtk"
+output_path="/home/rinat/Desktop/ukftests/HCP-test-no-FW.vtk"
 
 #csf_path="/data/pnl/home/rz892/HCP/spm/csf_mask.nrrd"
 #wm_path="/data/pnl/home/rz892/HCP/spm/wm_mask.nrrd"
+seeds_path="/home/rinat/Desktop/HCP_subj/seeds_spinal.nrrd"
 echo "Start time $(date)" | tee $logFile
 
 # --seedsFile $seeds_path \
@@ -26,11 +27,12 @@ eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --tracts $output_path \
+ --seedsFile $seeds_path \
  --seedsPerVoxel 1 \
  --diffusionPropagator \
  --Qm 0.005 \
- --stepLength 0.3 \
- --maxODFthresh 0.3 \
+ --stepLength 0.5 \
+ --maxODFthresh 0.7 \
  --recordNMSE \
  --recordWeights \
  --recordRTOP \

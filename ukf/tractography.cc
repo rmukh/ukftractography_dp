@@ -87,6 +87,7 @@ Tractography::Tractography(UKFSettings s) : // begin initializer list
                                             _record_rtop(s.record_rtop),
                                             _max_nmse(s.max_nmse),
                                             _maxUKFIterations(s.maxUKFIterations),
+                                            _fw_thresh(s.fw_thresh),
                                             _fa_min(s.fa_min),
                                             _mean_signal_min(s.mean_signal_min),
                                             _seeding_threshold(s.seeding_threshold),
@@ -298,7 +299,8 @@ void Tractography::UpdateFilterModelType()
     throw;
   }
 
-  if (_record_uncertainties && !_diffusion_propagator) {
+  if (_record_uncertainties && !_diffusion_propagator)
+  {
     std::cout << "recordUncertainties parameter can only be used with Diffustion Propagator Biexponential model" << std::endl;
     throw;
   }
@@ -326,8 +328,14 @@ void Tractography::UpdateFilterModelType()
     throw;
   }
 
-  if(max_odf_thresh != 0.0 && !_diffusion_propagator) {
+  if (max_odf_thresh != 0.0 && !_diffusion_propagator)
+  {
     std::cout << "maxODFthresh parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
+  }
+
+  if (_fw_thresh != 0.0 && !_diffusion_propagator)
+  {
+    std::cout << "FWthresh parameter cannot be set with any other models than the diffusionPropagator model" << std::endl;
   }
 
   // Double check branching.
@@ -501,7 +509,6 @@ void Tractography::UpdateFilterModelType()
   }
   else if (this->_filter_model_type == _3T_BIEXP_RIDG)
   {
-    std::cout << "max_odf_thresh " << max_odf_thresh << std::endl;
     _model = new Ridg_BiExp_FW(Qm, Ql, Qt, Qw, Qwiso, Rs, this->weights_on_tensors, this->_free_water,
                                D_ISO, ARidg, QRidg, fcs, nu, conn, signal_mask, fista_lambda,
                                max_odf_thresh);
@@ -631,12 +638,10 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   }
   else if (_is_seeds)
   {
-    std::cout << "USE SEED POINTS FILE" << std::endl;
     _signal_data->GetSeeds(_labels, seeds);
   }
   else if (_wm_provided)
   {
-    std::cout << "USE WM AS SEED POINTS" << std::endl;
     _signal_data->GetWMSeeds(seeds);
   }
   else
@@ -930,7 +935,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       if (_full_brain)
         GFA = s2ga(QRidgSignal * C);
 
-      if (GFA > 0.1 || !_full_brain)
+      if (GFA > 0.1 || !_full_brain || _is_seeds)
       {
         // Now we can compute ODF
         ukfVectorType ODF = QRidg * C;
@@ -1115,6 +1120,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
           info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
           info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
           seed_infos.push_back(info_inv);
+
           if (n_of_dirs > 2)
           {
             SwapState3T_BiExp(tmp_info_state, p, 3);
@@ -2290,7 +2296,7 @@ void Tractography::Follow3T(const int thread_id,
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
     bool in_rtop1 = rtop1 < _rtop1_min_stop;
-    bool is_high_fw = state(24) > 0.65;
+    bool is_high_fw = state(24) > _fw_thresh;
 
     // if (_wm_provided)
     // {
@@ -2299,7 +2305,7 @@ void Tractography::Follow3T(const int thread_id,
     //}
     //else
     //{
-    
+
     if (!is_brain || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
       break;
     //}
@@ -3688,7 +3694,8 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
     fiber.state.push_back(state);
   }
 
-  if(_record_uncertainties) {
+  if (_record_uncertainties)
+  {
     fiber.Fm1.push_back(Fm1);
     fiber.lmd1.push_back(lmd1);
     fiber.Fm2.push_back(Fm2);
@@ -3821,7 +3828,7 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
 
   // Record the state
   if ((state.size() == 5 || state.size() == 10 || state.size() == 15) && !_diffusion_propagator) // i.e. simple model
-  {                                                                                         // Normalize direction before storing it;
+  {                                                                                              // Normalize direction before storing it;
     State store_state(state);
     vec3_t dir;
     initNormalized(dir, store_state[0], store_state[1], store_state[2]);

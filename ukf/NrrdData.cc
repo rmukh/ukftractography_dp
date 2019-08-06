@@ -594,14 +594,14 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
     //http://www.na-mic.org/Wiki/index.php/NAMIC_Wiki:DTI:Nrrd_format
     //It is after this magnitude rescaling that the nominal bValue (given via "DWMRI_b-value:=bValue") applies.
 
-    if (effectiveBvalue <= 50)
+    if (effectiveBvalue <= 50.0)
       _b_values[i] = 0;
     else
       _b_values[i] = effectiveBvalue;
 
     _gradients[i].normalize();
   }
-
+  
   // Voxel spacing.
   double space_dir[NRRD_SPACE_DIM_MAX];
   double spacing1, spacing2, spacing3;

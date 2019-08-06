@@ -90,6 +90,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   ukfPrecisionType l_maxNMSE = maxNMSE;
   ukfPrecisionType l_maxUKFIterations = maxUKFIterations;
   ukfPrecisionType l_maxODFthresh = maxODFthresh;
+  ukfPrecisionType l_FWthresh = FWthresh;
 
   // If sigmaSignal is not set minimum of voxel size is used for interpolation
   ukfPrecisionType SIGMA_SIGNAL = sigmaSignal;
@@ -319,6 +320,15 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     {
       ukf_tell(l_maxODFthresh, "maxODFthresh");
     }
+
+    if (l_FWthresh == 0.65)
+    {
+      ukf_setAndTell(l_FWthresh, 0.65, "FWthresh");
+    }
+    else
+    {
+      ukf_tell(l_FWthresh, "FWthresh");
+    }
   }
 
   if (l_Rs == 0.0)
@@ -480,6 +490,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.max_nmse = l_maxNMSE;
     s.maxUKFIterations = l_maxUKFIterations;
     s.max_odf_threshold = l_maxODFthresh;
+    s.fw_thresh = l_FWthresh;
 
     // TODO these should be header-initialized once we use C++11
     s.p0 = P0;

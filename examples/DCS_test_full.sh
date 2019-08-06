@@ -32,6 +32,7 @@ eval $BINARY \
  --maxODFthresh 0.5 \
  --diffusionPropagator \
  --recordNMSE \
+ --FWthresh 0.3 \
  --stepLength 0.2 \
  --recordWeights \
  --recordRTOP \
