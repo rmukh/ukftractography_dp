@@ -2272,12 +2272,12 @@ void Tractography::Follow3T(const int thread_id,
 
     _model->H(state_tmp, signal_tmp);
 
-    //const ukfPrecisionType mean_signal = s2adc(signal_tmp);
+    const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = false;
-    //if (_csf_provided)
-    //  in_csf = _signal_data->ScalarCSFValue(x) > 0.5; // consider CSF as a true only if pve value > 0.5
+    if (_csf_provided)
+      in_csf = _signal_data->ScalarCSFValue(x) > 0.5; // consider CSF as a true only if pve value > 0.5
     //else
-    //in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' which is basically GAF from a signal
+      //in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' which is basically GAF from a signal
 
     // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
@@ -2298,6 +2298,7 @@ void Tractography::Follow3T(const int thread_id,
     bool in_rtop1 = rtop1 < _rtop1_min_stop;
     bool is_high_fw = state(24) > _fw_thresh;
 
+    // Code for stop tracing with WM mask
     // if (_wm_provided)
     // {
     //  if (_signal_data->ScalarWMValue(x) < 0.30 || in_rtop1 || !is_brain || dNormMSE_too_high || stepnr > _max_length)
