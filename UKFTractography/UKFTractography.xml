@@ -96,7 +96,7 @@
       <name>seedingThreshold</name>
       <longflag deprecatedalias="seedFALimit">seedingThreshold</longflag>
       <label>Seeding: Minimum seed FA</label>
-      <description>Tractography parameter used in all models. Seed points whose fractional anisotropy (FA) or mean signal are below this value are excluded. Default: 0.18. Range: 0-1.</description>
+      <description>Tractography parameter used in all models. Seed points whose fractional anisotropy (FA) or mean signal are below this value are excluded. For DP it is a Generalized FA. Default: 0.18. Range: 0-1.</description>
       <default>0.18</default>
       <constraints>
         <minimum>0</minimum>

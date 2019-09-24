@@ -995,7 +995,7 @@ void Tractography::ProcessStartingPointsBiExp(const int thread_id,
     if (_full_brain)
       GFA = s2ga(QRidgSignal * C);
 
-    if (GFA > 0.1 || !_full_brain || _is_seeds)
+    if (GFA > _seeding_threshold || !_full_brain || _is_seeds)
     {
       // Now we can compute ODF
       ukfVectorType ODF = QRidg * C;
