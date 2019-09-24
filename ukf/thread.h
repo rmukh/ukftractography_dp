@@ -59,4 +59,22 @@ extern itk::ITK_THREAD_RETURN_TYPE ThreadCallback(int id_, thread_struct *str);
 extern ITK_THREAD_RETURN_TYPE ThreadCallback(void *arg);
 #endif
 
+struct seed_init_thread_struct
+{
+  Tractography *tractography_;
+  WorkDistribution *work_distribution;
+
+  std::vector<SeedPointInfo> *seed_infos_;
+  stdVec_t *starting_points_;
+  stdEigVec_t *signal_values_;
+  stdEigVec_t *starting_params_;
+};
+
+#if ITK_VERSION_MAJOR >= 5
+extern itk::ITK_THREAD_RETURN_TYPE SeedInitThreadCallback(int id_, seed_init_thread_struct *str);
+#else
+extern ITK_THREAD_RETURN_TYPE SeedInitThreadCallback(void *arg);
+#endif
+
+
 #endif

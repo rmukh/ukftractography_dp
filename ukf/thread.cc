@@ -117,3 +117,35 @@ ITK_THREAD_RETURN_TYPE ThreadCallback(void *arg)
   return ITK_THREAD_RETURN_VALUE;
 #endif
 }
+
+#if ITK_VERSION_MAJOR >= 5
+itk::ITK_THREAD_RETURN_TYPE SeedInitThreadCallback(int id_, seed_init_thread_struct *str)
+#else
+ITK_THREAD_RETURN_TYPE SeedInitThreadCallback(void *arg)
+#endif
+{
+#if ITK_VERSION_MAJOR >= 5
+#else
+  int id_ =
+      ((itk::MultiThreader::ThreadInfoStruct *)(arg))->ThreadID;
+  seed_init_thread_struct *str =
+      (seed_init_thread_struct *)(((itk::MultiThreader::ThreadInfoStruct *)(arg))->UserData);
+#endif
+  WorkDistribution work_distribution = *str->work_distribution;
+  WorkList &work_list_ = work_distribution[id_];
+
+  std::vector<SeedPointInfo> &seed_infos_ = *str->seed_infos_;
+  stdVec_t &starting_points_ = *str->starting_points_;
+  stdEigVec_t &signal_values_ = *str->signal_values_;
+  stdEigVec_t &starting_params_ = *str->starting_params_;
+
+  for (WorkList::const_iterator it = work_list_.begin(); it != work_list_.end(); it++)
+  {
+    str->tractography_->ProcessStartingPointsBiExp(id_, seed_infos_, starting_points_[*it], signal_values_[*it], starting_params_[*it]);
+  }
+#if ITK_VERSION_MAJOR >= 5
+  return itk::ITK_THREAD_RETURN_DEFAULT_VALUE;
+#else
+  return ITK_THREAD_RETURN_VALUE;
+#endif
+}

@@ -123,7 +123,8 @@ Tractography::Tractography(UKFSettings s) : // begin initializer list
                                             sph_J(2),
                                             fista_lambda(0.01),
                                             lvl(4),
-                                            max_odf_thresh(s.max_odf_threshold)
+                                            max_odf_thresh(s.max_odf_threshold),
+                                            _lbfgsb(0, NULL)
 // end initializer list
 {
 }
@@ -776,340 +777,413 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
     }
   }
 
-  // Pack information for each seed point.
-  std::cout << "Processing " << starting_points.size() << " starting points" << std::endl;
+  const int num_of_threads = std::min(_num_threads, static_cast<int>(starting_points.size()));
+  assert(num_of_threads > 0);
 
-  for (size_t i = 0; i < starting_points.size(); ++i)
+  // Create separate model for each thread
+  _lbfgsb.reserve(num_of_threads); //Allocate, but do not assign
+  for (int i = 0; i < num_of_threads; i++)
   {
-    const ukfVectorType &param = starting_params[i];
-    //   cout << "i " << i << endl;
-    // cout << "start dir " << param[0] << " " << param[1] << " " << param[2] << endl;
-    // cout << "start dir inv" << -param[0] << " " << -param[1] << " " << -param[2] << endl;
+    _lbfgsb.push_back(new LFBGSB(_model));
+  }
 
-    //assert(param.size() == 9);
+  std::cout << "Processing " << starting_points.size() << " starting points with " << _lbfgsb.size() << " threads" << std::endl;
+  {
+    WorkDistribution work_distribution = GenerateWorkDistribution(num_of_threads, static_cast<int>(starting_points.size()));
 
-    // Filter out seeds whose FA is too low.
-    ukfPrecisionType fa = l2fa(param[6], param[7], param[8]);
-    ukfPrecisionType trace = param[6] + param[7] + param[8];
-    ukfPrecisionType fa2 = -1;
-    ukfPrecisionType fa3 = -1;
-    ukfPrecisionType trace2 = -1;
+#if ITK_VERSION_MAJOR >= 5
+    itk::PlatformMultiThreader::Pointer threader = itk::PlatformMultiThreader::New();
+    threader->SetNumberOfWorkUnits(num_of_threads);
+    std::vector<std::thread> vectorOfThreads;
+    vectorOfThreads.reserve(num_of_threads);
+#else
+    itk::MultiThreader::Pointer threader = itk::MultiThreader::New();
+    threader->SetNumberOfThreads(num_of_threads);
+#endif
+    seed_init_thread_struct str;
+    str.tractography_ = this;
+    str.work_distribution = &work_distribution;
 
-    if (_num_tensors >= 2)
+    str.seed_infos_ = &seed_infos;
+    str.starting_points_ = &starting_points;
+    str.signal_values_ = &signal_values;
+    str.starting_params_ = &starting_params;
+
+    for (int i = 0; i < num_of_threads; i++)
     {
-      fa2 = fa;
-      fa3 = fa;
-      trace2 = trace;
+#if ITK_VERSION_MAJOR >= 5
+      vectorOfThreads.push_back(std::thread(SeedInitThreadCallback, i, &str));
+#else
+      threader->SetMultipleMethod(i, SeedInitThreadCallback, &str);
+#endif
     }
+#if ITK_VERSION_MAJOR < 5
+    threader->SetGlobalDefaultNumberOfThreads(num_of_threads);
+#else
+    itk::MultiThreaderBase::SetGlobalDefaultNumberOfThreads(num_of_threads);
+#endif
 
-    // Create seed info for both directions;
-    SeedPointInfo info;
-    stdVecState tmp_info_state;
-    stdVecState tmp_info_inv_state;
-    SeedPointInfo info_inv;
-
-    info.point = starting_points[i];
-    info.start_dir << param[0], param[1], param[2];
-    info.fa = fa;
-    info.fa2 = fa2;
-    info.fa3 = fa3;
-    info.trace = trace;
-    info.trace2 = trace2;
-    info_inv.point = starting_points[i];
-    info_inv.start_dir << -param[0], -param[1], -param[2];
-    info_inv.fa = fa;
-    info_inv.fa2 = fa2;
-    info_inv.fa3 = fa3;
-    info_inv.trace = trace;
-    info_inv.trace2 = trace2;
-
-    if (_is_full_model)
+#if ITK_VERSION_MAJOR >= 5
+    for (auto &li : vectorOfThreads)
     {
-      tmp_info_state.resize(6);
-      tmp_info_inv_state.resize(6);
-      tmp_info_state[0] = param[3];     // Theta
-      tmp_info_state[1] = param[4];     // Phi
-      tmp_info_state[2] = param[5];     // Psi
-      tmp_info_state[5] = param[8];     // l3
-      tmp_info_inv_state[0] = param[3]; // Theta
-      tmp_info_inv_state[1] = param[4]; // Phi
-      // Switch psi angle.
-      tmp_info_inv_state[2] = (param[5] < ukfZero ? param[5] + UKF_PI : param[5] - UKF_PI);
-      tmp_info_inv_state[5] = param[8]; // l3
+      if (li.joinable())
+      {
+        li.join();
+      }
     }
-    else if (_diffusion_propagator)
-    {
-      tmp_info_state.resize(25);
-      tmp_info_inv_state.resize(25);
-    }
-    else // i.e. simple model
-    {    // Starting direction.
-      tmp_info_state.resize(5);
-      tmp_info_inv_state.resize(5);
-      tmp_info_state[0] = info.start_dir[0];
-      tmp_info_state[1] = info.start_dir[1];
-      tmp_info_state[2] = info.start_dir[2];
-      tmp_info_inv_state[0] = info_inv.start_dir[0];
-      tmp_info_inv_state[1] = info_inv.start_dir[1];
-      tmp_info_inv_state[2] = info_inv.start_dir[2];
-    }
+#else
+    threader->MultipleMethodExecute();
+#endif
+  }
 
-    ukfPrecisionType Viso;
-    if (_noddi)
-    {
-      ukfPrecisionType minnmse, nmse;
-      State state(_model->state_dim());
-      minnmse = 99999;
-      _signal_data->Interp3Signal(info.point, signal); // here and in every step
+  cout << "Final seeds vector size " << seed_infos.size() << std::endl;
+}
 
-      ukfPrecisionType dPar, dIso;
-      int n = 5;
-      dPar = 0.0000000017;
-      dIso = 0.000000003;
-      createProtocol(_signal_data->GetBValues(), _gradientStrength, _pulseSeparation);
-      double kappas[5] = {0.5, 1, 2, 4, 8};
-      double Vic[5] = {0, 0.25, 0.5, 0.75, 1};
-      double Visoperm[5] = {0, 0.25, 0.5, 0.75, 1};
-      for (int a = 0; a < n; ++a)
-        for (int b = 0; b < n; ++b)
-          for (int c = 0; c < n; ++c)
+void Tractography::ProcessStartingPointsBiExp(const int thread_id,
+                                              std::vector<SeedPointInfo> &seed_infos,
+                                              const vec3_t &starting_points,
+                                              const ukfVectorType &signal_values,
+                                              const ukfVectorType &starting_params)
+{
+  // Filter out seeds whose FA is too low.
+  ukfPrecisionType fa = l2fa(starting_params[6], starting_params[7], starting_params[8]);
+  ukfPrecisionType trace = starting_params[6] + starting_params[7] + starting_params[8];
+  ukfPrecisionType fa2 = -1;
+  ukfPrecisionType fa3 = -1;
+  ukfPrecisionType trace2 = -1;
+
+  if (_num_tensors >= 2)
+  {
+    fa2 = fa;
+    fa3 = fa;
+    trace2 = trace;
+  }
+
+  // Create seed info for both directions;
+  SeedPointInfo info;
+  stdVecState tmp_info_state;
+  stdVecState tmp_info_inv_state;
+  SeedPointInfo info_inv;
+
+  info.point = starting_points;
+  info.start_dir << starting_params[0], starting_params[1], starting_params[2];
+  info.fa = fa;
+  info.fa2 = fa2;
+  info.fa3 = fa3;
+  info.trace = trace;
+  info.trace2 = trace2;
+  info_inv.point = starting_points;
+  info_inv.start_dir << -starting_params[0], -starting_params[1], -starting_params[2];
+  info_inv.fa = fa;
+  info_inv.fa2 = fa2;
+  info_inv.fa3 = fa3;
+  info_inv.trace = trace;
+  info_inv.trace2 = trace2;
+
+  if (_is_full_model)
+  {
+    tmp_info_state.resize(6);
+    tmp_info_inv_state.resize(6);
+    tmp_info_state[0] = starting_params[3];     // Theta
+    tmp_info_state[1] = starting_params[4];     // Phi
+    tmp_info_state[2] = starting_params[5];     // Psi
+    tmp_info_state[5] = starting_params[8];     // l3
+    tmp_info_inv_state[0] = starting_params[3]; // Theta
+    tmp_info_inv_state[1] = starting_params[4]; // Phi
+    // Switch psi angle.
+    tmp_info_inv_state[2] = (starting_params[5] < ukfZero ? starting_params[5] + UKF_PI : starting_params[5] - UKF_PI);
+    tmp_info_inv_state[5] = starting_params[8]; // l3
+  }
+  else if (_diffusion_propagator)
+  {
+    tmp_info_state.resize(25);
+    tmp_info_inv_state.resize(25);
+  }
+  else // i.e. simple model
+  {    // Starting direction.
+    tmp_info_state.resize(5);
+    tmp_info_inv_state.resize(5);
+    tmp_info_state[0] = info.start_dir[0];
+    tmp_info_state[1] = info.start_dir[1];
+    tmp_info_state[2] = info.start_dir[2];
+    tmp_info_inv_state[0] = info_inv.start_dir[0];
+    tmp_info_inv_state[1] = info_inv.start_dir[1];
+    tmp_info_inv_state[2] = info_inv.start_dir[2];
+  }
+
+    int signal_dim = _signal_data->GetSignalDimension();
+  ukfVectorType signal(signal_dim * 2);
+
+  ukfPrecisionType Viso;
+  if (_noddi)
+  {
+    ukfPrecisionType minnmse, nmse;
+    State state(_model->state_dim());
+    minnmse = 99999;
+    _signal_data->Interp3Signal(info.point, signal); // here and in every step
+
+    ukfPrecisionType dPar, dIso;
+    int n = 5;
+    dPar = 0.0000000017;
+    dIso = 0.000000003;
+    createProtocol(_signal_data->GetBValues(), _gradientStrength, _pulseSeparation);
+    double kappas[5] = {0.5, 1, 2, 4, 8};
+    double Vic[5] = {0, 0.25, 0.5, 0.75, 1};
+    double Visoperm[5] = {0, 0.25, 0.5, 0.75, 1};
+    for (int a = 0; a < n; ++a)
+      for (int b = 0; b < n; ++b)
+        for (int c = 0; c < n; ++c)
+        {
+          ukfVectorType Eec, Eic, Eiso, E;
+          ExtraCelluarModel(dPar, Vic[b], kappas[a], _gradientStrength,
+                            _pulseSeparation, _signal_data->gradients(), info.start_dir, Eec);
+          IntraCelluarModel(dPar, kappas[a], _gradientStrength, _pulseSeparation,
+                            _signal_data->gradients(), info.start_dir, Eic);
+          IsoModel(dIso, _gradientStrength, _pulseSeparation, Eiso);
+
+          E.resize(Eic.size());
+          E = Visoperm[c] * Eiso + (1 - Visoperm[c]) * (Vic[b] * Eic + (1 - Vic[b]) * Eec);
+
+          nmse = (E - signal).squaredNorm() / signal.squaredNorm();
+
+          if (nmse < minnmse)
           {
-            ukfVectorType Eec, Eic, Eiso, E;
-            ExtraCelluarModel(dPar, Vic[b], kappas[a], _gradientStrength,
-                              _pulseSeparation, _signal_data->gradients(), info.start_dir, Eec);
-            IntraCelluarModel(dPar, kappas[a], _gradientStrength, _pulseSeparation,
-                              _signal_data->gradients(), info.start_dir, Eic);
-            IsoModel(dIso, _gradientStrength, _pulseSeparation, Eiso);
-
-            E.resize(Eic.size());
-            E = Visoperm[c] * Eiso + (1 - Visoperm[c]) * (Vic[b] * Eic + (1 - Vic[b]) * Eec);
-
-            nmse = (E - signal).squaredNorm() / signal.squaredNorm();
-
-            if (nmse < minnmse)
-            {
-              minnmse = nmse;
-              Viso = Visoperm[c];
-              tmp_info_state[3] = Vic[b];        // Vic
-              tmp_info_state[4] = kappas[a];     // Kappa
-              tmp_info_inv_state[3] = Vic[b];    // Vic
-              tmp_info_inv_state[4] = kappas[a]; // Kappa
-            }
+            minnmse = nmse;
+            Viso = Visoperm[c];
+            tmp_info_state[3] = Vic[b];        // Vic
+            tmp_info_state[4] = kappas[a];     // Kappa
+            tmp_info_inv_state[3] = Vic[b];    // Vic
+            tmp_info_inv_state[4] = kappas[a]; // Kappa
           }
-      // xstd::cout <<"nmse of initialization "<< minnmse << "\n";
-      if (_num_tensors > 1)
-      {
-        tmp_info_state.resize(10);
-        tmp_info_inv_state.resize(10);
-        tmp_info_state[5] = info.start_dir[0];
-        tmp_info_state[6] = info.start_dir[1];
-        tmp_info_state[7] = info.start_dir[2];
-        tmp_info_inv_state[5] = info_inv.start_dir[0];
-        tmp_info_inv_state[6] = info_inv.start_dir[1];
-        tmp_info_inv_state[7] = info_inv.start_dir[2];
-        tmp_info_state[8] = tmp_info_state[3];         // Vic
-        tmp_info_state[9] = tmp_info_state[4];         // Kappa
-        tmp_info_inv_state[8] = tmp_info_inv_state[3]; // Vic
-        tmp_info_inv_state[9] = tmp_info_inv_state[4]; //kappa
-      }
-    }
-    else if (_diffusion_propagator)
-    {
-      // STEP 0: Find number of branches in one voxel.
-
-      // Compute number of branches at the seed point using spherical ridgelets
-      UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
-
-      ukfVectorType HighBSignalValues(signal_mask.size());
-      for (int indx = 0; indx < signal_mask.size(); ++indx)
-        HighBSignalValues(indx) = signal_values[i](signal_mask(indx));
-
-      // We can compute ridegelets coefficients
-      ukfVectorType C;
-      {
-        SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(ARidg, HighBSignalValues, fista_lambda);
-        slv.FISTA(C);
-      }
-
-      ukfPrecisionType GFA = 0.0;
-      if (_full_brain)
-        GFA = s2ga(QRidgSignal * C);
-
-      if (GFA > 0.1 || !_full_brain || _is_seeds)
-      {
-        // Now we can compute ODF
-        ukfVectorType ODF = QRidg * C;
-
-        // Let's find Maxima of ODF and values in that direction
-        ukfMatrixType exe_vol;
-        ukfMatrixType dir_vol;
-        ukfVectorType ODF_val_at_max(6, 1);
-        unsigned n_of_dirs;
-
-        m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
-
-        unsigned exe_vol_size = std::min(static_cast<unsigned>(exe_vol.size()), static_cast<unsigned>(6));
-        ODF_val_at_max.setZero();
-        for (unsigned j = 0; j < exe_vol_size; ++j)
-        {
-          ODF_val_at_max(j) = ODF(exe_vol(j));
         }
+    // xstd::cout <<"nmse of initialization "<< minnmse << "\n";
+    if (_num_tensors > 1)
+    {
+      tmp_info_state.resize(10);
+      tmp_info_inv_state.resize(10);
+      tmp_info_state[5] = info.start_dir[0];
+      tmp_info_state[6] = info.start_dir[1];
+      tmp_info_state[7] = info.start_dir[2];
+      tmp_info_inv_state[5] = info_inv.start_dir[0];
+      tmp_info_inv_state[6] = info_inv.start_dir[1];
+      tmp_info_inv_state[7] = info_inv.start_dir[2];
+      tmp_info_state[8] = tmp_info_state[3];         // Vic
+      tmp_info_state[9] = tmp_info_state[4];         // Kappa
+      tmp_info_inv_state[8] = tmp_info_inv_state[3]; // Vic
+      tmp_info_inv_state[9] = tmp_info_inv_state[4]; //kappa
+    }
+  }
+  else if (_diffusion_propagator)
+  {
+    // STEP 0: Find number of branches in one voxel.
 
-        // STEP 1: Initialise the state based
-        mat33_t dir_init;
-        dir_init.setZero();
+    // Compute number of branches at the seed point using spherical ridgelets
+    UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
 
-        ukfPrecisionType w1_init = ODF_val_at_max(0);
-        dir_init.row(0) = dir_vol.row(0);
+    ukfVectorType HighBSignalValues(signal_mask.size());
+    for (int indx = 0; indx < signal_mask.size(); ++indx)
+      HighBSignalValues(indx) = signal_values(signal_mask(indx));
 
-        ukfPrecisionType w2_init = 0;
-        ukfPrecisionType w3_init = 0;
+    // We can compute ridegelets coefficients
+    ukfVectorType C;
+    {
+      SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(ARidg, HighBSignalValues, fista_lambda);
+      slv.FISTA(C);
+    }
 
-        //std::cout << "n_of_dirs " << n_of_dirs << std::endl;
+    ukfPrecisionType GFA = 0.0;
+    if (_full_brain)
+      GFA = s2ga(QRidgSignal * C);
 
-        if (n_of_dirs == 1)
+    if (GFA > 0.1 || !_full_brain || _is_seeds)
+    {
+      // Now we can compute ODF
+      ukfVectorType ODF = QRidg * C;
+
+      // Let's find Maxima of ODF and values in that direction
+      ukfMatrixType exe_vol;
+      ukfMatrixType dir_vol;
+      ukfVectorType ODF_val_at_max(6, 1);
+      unsigned n_of_dirs;
+
+      m.FindODFMaxima(exe_vol, dir_vol, ODF, conn, nu, max_odf_thresh, n_of_dirs);
+
+      unsigned exe_vol_size = std::min(static_cast<unsigned>(exe_vol.size()), static_cast<unsigned>(6));
+      ODF_val_at_max.setZero();
+      for (unsigned j = 0; j < exe_vol_size; ++j)
+      {
+        ODF_val_at_max(j) = ODF(exe_vol(j));
+      }
+
+      // STEP 1: Initialise the state based
+      mat33_t dir_init;
+      dir_init.setZero();
+
+      ukfPrecisionType w1_init = ODF_val_at_max(0);
+      dir_init.row(0) = dir_vol.row(0);
+
+      ukfPrecisionType w2_init = 0;
+      ukfPrecisionType w3_init = 0;
+
+      //std::cout << "n_of_dirs " << n_of_dirs << std::endl;
+
+      if (n_of_dirs == 1)
+      {
+        vec3_t orthogonal;
+        orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], 0.0;
+        orthogonal = orthogonal / orthogonal.norm();
+        dir_init.row(1) = orthogonal;
+
+        vec3_t orthogonal2 = dir_init.row(0).cross(orthogonal);
+        orthogonal2 = orthogonal2 / orthogonal2.norm();
+        dir_init.row(2) = orthogonal2;
+
+        w1_init = 1.0;
+      }
+      else if (n_of_dirs > 1)
+      {
+        if (n_of_dirs == 2)
         {
-          vec3_t orthogonal;
-          orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], 0.0;
+          vec3_t v1 = dir_vol.row(0);
+          vec3_t v2 = dir_vol.row(2);
+          vec3_t orthogonal = v1.cross(v2);
           orthogonal = orthogonal / orthogonal.norm();
-          dir_init.row(1) = orthogonal;
 
-          vec3_t orthogonal2 = dir_init.row(0).cross(orthogonal);
-          orthogonal2 = orthogonal2 / orthogonal2.norm();
-          dir_init.row(2) = orthogonal2;
+          dir_init.row(1) = dir_vol.row(2);
+          dir_init.row(2) = orthogonal;
 
-          w1_init = 1.0;
+          w2_init = ODF_val_at_max(2);
+          ukfPrecisionType denom = w1_init + w2_init;
+          w1_init = w1_init / denom;
+          w2_init = w2_init / denom;
         }
-        else if (n_of_dirs > 1)
+        if (n_of_dirs > 2)
         {
-          if (n_of_dirs == 2)
-          {
-            vec3_t v1 = dir_vol.row(0);
-            vec3_t v2 = dir_vol.row(2);
-            vec3_t orthogonal = v1.cross(v2);
-            orthogonal = orthogonal / orthogonal.norm();
+          dir_init.row(1) = dir_vol.row(2);
+          dir_init.row(2) = dir_vol.row(4);
 
-            dir_init.row(1) = dir_vol.row(2);
-            dir_init.row(2) = orthogonal;
-
-            w2_init = ODF_val_at_max(2);
-            ukfPrecisionType denom = w1_init + w2_init;
-            w1_init = w1_init / denom;
-            w2_init = w2_init / denom;
-          }
-          if (n_of_dirs > 2)
-          {
-            dir_init.row(1) = dir_vol.row(2);
-            dir_init.row(2) = dir_vol.row(4);
-
-            w2_init = ODF_val_at_max(2);
-            w3_init = ODF_val_at_max(4);
-            ukfPrecisionType denom = w1_init + w2_init + w3_init;
-            w1_init = w1_init / denom;
-            w2_init = w2_init / denom;
-            w3_init = w3_init / denom;
-          }
+          w2_init = ODF_val_at_max(2);
+          w3_init = ODF_val_at_max(4);
+          ukfPrecisionType denom = w1_init + w2_init + w3_init;
+          w1_init = w1_init / denom;
+          w2_init = w2_init / denom;
+          w3_init = w3_init / denom;
         }
+      }
 
-        // Diffusion directions, m1 = m2 = m3
-        tmp_info_state[0] = dir_init.row(0)[0];
-        tmp_info_state[1] = dir_init.row(0)[1];
-        tmp_info_state[2] = dir_init.row(0)[2];
+      // Diffusion directions, m1 = m2 = m3
+      tmp_info_state[0] = dir_init.row(0)[0];
+      tmp_info_state[1] = dir_init.row(0)[1];
+      tmp_info_state[2] = dir_init.row(0)[2];
 
-        tmp_info_state[7] = dir_init.row(1)[0];
-        tmp_info_state[8] = dir_init.row(1)[1];
-        tmp_info_state[9] = dir_init.row(1)[2];
+      tmp_info_state[7] = dir_init.row(1)[0];
+      tmp_info_state[8] = dir_init.row(1)[1];
+      tmp_info_state[9] = dir_init.row(1)[2];
 
-        tmp_info_state[14] = dir_init.row(2)[0];
-        tmp_info_state[15] = dir_init.row(2)[1];
-        tmp_info_state[16] = dir_init.row(2)[2];
+      tmp_info_state[14] = dir_init.row(2)[0];
+      tmp_info_state[15] = dir_init.row(2)[1];
+      tmp_info_state[16] = dir_init.row(2)[2];
 
-        // Fast diffusing component,  lambdas l11, l21 = l1 from the single tensor
-        //                            lambdas l12, l21 = (l2 + l3) /2
-        // from the single tensor (avg already calculated and stored in l2)
-        tmp_info_state[3] = tmp_info_state[10] = tmp_info_state[17] = param[6];
-        tmp_info_state[4] = tmp_info_state[11] = tmp_info_state[18] = param[7];
+      // Fast diffusing component,  lambdas l11, l21 = l1 from the single tensor
+      //                            lambdas l12, l21 = (l2 + l3) /2
+      // from the single tensor (avg already calculated and stored in l2)
+      tmp_info_state[3] = tmp_info_state[10] = tmp_info_state[17] = starting_params[6];
+      tmp_info_state[4] = tmp_info_state[11] = tmp_info_state[18] = starting_params[7];
 
-        // Slow diffusing component,  lambdas l13, l23, l33 = 0.2 * l1
-        //                            lambdas l14, l24, l34 = 0.2 * (l2 + l3) /2
-        tmp_info_state[5] = tmp_info_state[12] = tmp_info_state[19] = 0.7 * param[6];
-        tmp_info_state[6] = tmp_info_state[13] = tmp_info_state[20] = 0.7 * param[7];
+      // Slow diffusing component,  lambdas l13, l23, l33 = 0.2 * l1
+      //                            lambdas l14, l24, l34 = 0.2 * (l2 + l3) /2
+      tmp_info_state[5] = tmp_info_state[12] = tmp_info_state[19] = 0.7 * starting_params[6];
+      tmp_info_state[6] = tmp_info_state[13] = tmp_info_state[20] = 0.7 * starting_params[7];
 
-        tmp_info_state[21] = w1_init;
-        tmp_info_state[22] = w2_init;
-        tmp_info_state[23] = w3_init;
+      tmp_info_state[21] = w1_init;
+      tmp_info_state[22] = w2_init;
+      tmp_info_state[23] = w3_init;
 
-        // Free water volume fraction
-        tmp_info_state[24] = 0.05; // -> as an initial value
+      // Free water volume fraction
+      tmp_info_state[24] = 0.05; // -> as an initial value
 
-        // STEP 2.1: Use L-BFGS-B from ITK library at the same point in space.
-        // The UKF is an estimator, and we want to find the estimate with the smallest error through the iterations
+      // STEP 2.1: Use L-BFGS-B from ITK library at the same point in space.
+      // The UKF is an estimator, and we want to find the estimate with the smallest error through the iterations
 
-        // Set the covariance value
-        const int state_dim = tmp_info_state.size();
-        info.covariance.resize(state_dim, state_dim);
-        info_inv.covariance.resize(state_dim, state_dim);
+      // Set the covariance value
+      const int state_dim = tmp_info_state.size();
+      info.covariance.resize(state_dim, state_dim);
+      info_inv.covariance.resize(state_dim, state_dim);
 
-        // make sure covariances are really empty
-        info.covariance.setConstant(ukfZero);
-        info_inv.covariance.setConstant(ukfZero);
+      // make sure covariances are really empty
+      info.covariance.setConstant(ukfZero);
+      info_inv.covariance.setConstant(ukfZero);
 
-        // fill the diagonal of the covariance matrix with _p0 (zeros elsewhere)
-        for (int local_i = 0; local_i < state_dim; ++local_i)
-        {
-          info.covariance(local_i, local_i) = _p0;
-          info_inv.covariance(local_i, local_i) = _p0;
-        }
+      // fill the diagonal of the covariance matrix with _p0 (zeros elsewhere)
+      for (int local_i = 0; local_i < state_dim; ++local_i)
+      {
+        info.covariance(local_i, local_i) = _p0;
+        info_inv.covariance(local_i, local_i) = _p0;
+      }
 
-        // Input of the filter
-        State state = ConvertVector<stdVecState, State>(tmp_info_state);
-        ukfMatrixType p(info.covariance);
+      // Input of the filter
+      State state = ConvertVector<stdVecState, State>(tmp_info_state);
+      ukfMatrixType p(info.covariance);
 
-        // Estimate the initial state
-        // InitLoopUKF(state, p, signal_values[i], dNormMSE);
-        NonLinearLeastSquareOptimization(state, signal_values[i], _model);
+      // Estimate the initial state
+      // InitLoopUKF(state, p, signal_values[i], dNormMSE);
+      NonLinearLeastSquareOptimization(thread_id, state, signal_values);
 
-        // Output of the filter
-        tmp_info_state = ConvertVector<State, stdVecState>(state);
+      // Output of the filter
+      tmp_info_state = ConvertVector<State, stdVecState>(state);
 
-        ukfPrecisionType rtopModel = 0.0;
-        ukfPrecisionType rtop1 = 0.0;
-        ukfPrecisionType rtop2 = 0.0;
-        ukfPrecisionType rtop3 = 0.0;
-        ukfPrecisionType rtopSignal = 0.0;
+      ukfPrecisionType rtopModel = 0.0;
+      ukfPrecisionType rtop1 = 0.0;
+      ukfPrecisionType rtop2 = 0.0;
+      ukfPrecisionType rtop3 = 0.0;
+      ukfPrecisionType rtopSignal = 0.0;
 
-        computeRTOPfromState(state, rtopModel, rtop1, rtop2, rtop3);
-        computeRTOPfromSignal(rtopSignal, signal_values[i]);
+      computeRTOPfromState(state, rtopModel, rtop1, rtop2, rtop3);
+      computeRTOPfromSignal(rtopSignal, signal_values);
 
-        // These values are stored so that: rtop1 -> fa; rtop2 -> fa2; rtop3 -> fa3; rtop -> trace; rtopSignal -> trace2
-        info.fa = rtop1;
-        info.fa2 = rtop2;
-        info.fa3 = rtop3;
-        info.trace = rtopModel;
-        info.trace2 = rtopSignal;
+      // These values are stored so that: rtop1 -> fa; rtop2 -> fa2; rtop3 -> fa3; rtop -> trace; rtopSignal -> trace2
+      info.fa = rtop1;
+      info.fa2 = rtop2;
+      info.fa3 = rtop3;
+      info.trace = rtopModel;
+      info.trace2 = rtopSignal;
 
-        info_inv.fa = rtop1;
-        info_inv.fa2 = rtop2;
-        info_inv.fa3 = rtop3;
-        info_inv.trace = rtopModel;
-        info_inv.trace2 = rtopSignal;
+      info_inv.fa = rtop1;
+      info_inv.fa2 = rtop2;
+      info_inv.fa3 = rtop3;
+      info_inv.trace = rtopModel;
+      info_inv.trace2 = rtopSignal;
 
-        // Create the opposite seed
+      // Create the opposite seed
+      InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
+
+      // Update the original directions
+      info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
+      info_inv.start_dir << -tmp_info_state[0], -tmp_info_state[1], -tmp_info_state[2];
+
+      // Add the primary seeds to the vector
+      info.state = ConvertVector<stdVecState, State>(tmp_info_state);
+      info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
+      seed_infos.push_back(info);
+      seed_infos.push_back(info_inv);
+
+      if (n_of_dirs > 1)
+      {
+        SwapState3T_BiExp(tmp_info_state, p, 2);
+        info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
+        info.state = ConvertVector<stdVecState, State>(tmp_info_state);
+        seed_infos.push_back(info);
+
+        // Create the seed for the opposite direction, keep the other parameters as set for the first direction
         InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
 
-        // Update the original directions
-        info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
-        info_inv.start_dir << -tmp_info_state[0], -tmp_info_state[1], -tmp_info_state[2];
-
-        // Add the primary seeds to the vector
-        info.state = ConvertVector<stdVecState, State>(tmp_info_state);
         info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
-        seed_infos.push_back(info);
+        info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
         seed_infos.push_back(info_inv);
 
-        if (n_of_dirs > 1)
+        if (n_of_dirs > 2)
         {
-          SwapState3T_BiExp(tmp_info_state, p, 2);
+          SwapState3T_BiExp(tmp_info_state, p, 3);
           info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
           info.state = ConvertVector<stdVecState, State>(tmp_info_state);
           seed_infos.push_back(info);
@@ -1120,91 +1194,71 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
           info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
           info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
           seed_infos.push_back(info_inv);
-
-          if (n_of_dirs > 2)
-          {
-            SwapState3T_BiExp(tmp_info_state, p, 3);
-            info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
-            info.state = ConvertVector<stdVecState, State>(tmp_info_state);
-            seed_infos.push_back(info);
-
-            // Create the seed for the opposite direction, keep the other parameters as set for the first direction
-            InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
-
-            info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
-            info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
-            seed_infos.push_back(info_inv);
-          }
         }
       }
     }
-    else
-    {
-      tmp_info_state[3] = param[6];     // l1
-      tmp_info_state[4] = param[7];     // l2
-      tmp_info_inv_state[3] = param[6]; // l1
-      tmp_info_inv_state[4] = param[7]; // l2
-    }
+  }
+  else
+  {
+    tmp_info_state[3] = starting_params[6];     // l1
+    tmp_info_state[4] = starting_params[7];     // l2
+    tmp_info_inv_state[3] = starting_params[6]; // l1
+    tmp_info_inv_state[4] = starting_params[7]; // l2
+  }
 
-    // Duplicate/tripple states if we have several tensors.
-    if (_num_tensors > 1 && !_noddi && !_diffusion_propagator)
+  // Duplicate/tripple states if we have several tensors.
+  if (_num_tensors > 1 && !_noddi && !_diffusion_propagator)
+  {
+    size_t size = tmp_info_state.size();
+    for (size_t j = 0; j < size; ++j)
     {
-      size_t size = tmp_info_state.size();
+      tmp_info_state.push_back(tmp_info_state[j]);
+      tmp_info_inv_state.push_back(tmp_info_state[j]);
+    }
+    if (_num_tensors > 2)
+    {
       for (size_t j = 0; j < size; ++j)
       {
         tmp_info_state.push_back(tmp_info_state[j]);
         tmp_info_inv_state.push_back(tmp_info_state[j]);
       }
-      if (_num_tensors > 2)
-      {
-        for (size_t j = 0; j < size; ++j)
-        {
-          tmp_info_state.push_back(tmp_info_state[j]);
-          tmp_info_inv_state.push_back(tmp_info_state[j]);
-        }
-      }
     }
-    if (_noddi)
+  }
+  if (_noddi)
+  {
+    tmp_info_state.push_back(Viso);
+    tmp_info_inv_state.push_back(Viso); // add the weight to the state (well was sich rhymt das stiimt)
+  }
+  else
+  {
+    if (_free_water && !_diffusion_propagator)
     {
-      tmp_info_state.push_back(Viso);
-      tmp_info_inv_state.push_back(Viso); // add the weight to the state (well was sich rhymt das stiimt)
+      tmp_info_state.push_back(1);
+      tmp_info_inv_state.push_back(1); // add the weight to the state (well was sich rhymt das stiimt)
     }
-    else
-    {
-      if (_free_water && !_diffusion_propagator)
-      {
-        tmp_info_state.push_back(1);
-        tmp_info_inv_state.push_back(1); // add the weight to the state (well was sich rhymt das stiimt)
-      }
-    }
-
-    if (!_diffusion_propagator)
-    {
-      const int state_dim = tmp_info_state.size();
-
-      info.covariance.resize(state_dim, state_dim);
-      info_inv.covariance.resize(state_dim, state_dim);
-
-      // make sure covariances are really empty
-      info.covariance.setConstant(ukfZero);
-      info_inv.covariance.setConstant(ukfZero);
-      for (int local_i = 0; local_i < state_dim; ++local_i)
-      {
-        info.covariance(local_i, local_i) = _p0;
-        info_inv.covariance(local_i, local_i) = _p0;
-      }
-      info.state = ConvertVector<stdVecState, State>(tmp_info_state);
-      info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
-      seed_infos.push_back(info);
-      seed_infos.push_back(info_inv); // NOTE that the seed in reverse direction is put directly after the seed in
-                                      // original direction
-    }
-
-    //if (seed_infos.size() > 1)
-    //break;
   }
 
-  cout << "Final seeds vector size " << seed_infos.size() << std::endl;
+  if (!_diffusion_propagator)
+  {
+    const int state_dim = tmp_info_state.size();
+
+    info.covariance.resize(state_dim, state_dim);
+    info_inv.covariance.resize(state_dim, state_dim);
+
+    // make sure covariances are really empty
+    info.covariance.setConstant(ukfZero);
+    info_inv.covariance.setConstant(ukfZero);
+    for (int local_i = 0; local_i < state_dim; ++local_i)
+    {
+      info.covariance(local_i, local_i) = _p0;
+      info_inv.covariance(local_i, local_i) = _p0;
+    }
+    info.state = ConvertVector<stdVecState, State>(tmp_info_state);
+    info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
+    seed_infos.push_back(info);
+    seed_infos.push_back(info_inv); // NOTE that the seed in reverse direction is put directly after the seed in
+                                    // original direction
+  }
 }
 
 bool Tractography::Run()
@@ -1440,7 +1494,7 @@ bool Tractography::Run()
   return writeStatus;
 }
 
-void Tractography::computeRTOPfromSignal(ukfPrecisionType &rtopSignal, ukfVectorType &signal)
+void Tractography::computeRTOPfromSignal(ukfPrecisionType &rtopSignal, const ukfVectorType &signal)
 {
   assert(signal.size() > 0);
 
@@ -1584,167 +1638,27 @@ void Tractography::PrintState(State &state)
   std::cout << " --- " << std::endl;
 }
 
-itk::SingleValuedCostFunction::MeasureType itk::DiffusionPropagatorCostFunction::GetValue(const ParametersType &parameters) const
+void Tractography::NonLinearLeastSquareOptimization(const int thread_id, State &state, const ukfVectorType &signal)
 {
-  MeasureType residual = 0.0;
-
-  //assert(this->GetNumberOfParameters() == 16);
-
-  // Convert the parameter to the ukfMtarixType
-  ukfMatrixType localState(this->GetNumberOfParameters() + this->GetNumberOfFixed(), 1);
-  if (this->_phase == 1)
-  {
-    localState(0, 0) = _fixed_params(0);
-    localState(1, 0) = _fixed_params(1);
-    localState(2, 0) = _fixed_params(2);
-    localState(7, 0) = _fixed_params(3);
-    localState(8, 0) = _fixed_params(4);
-    localState(9, 0) = _fixed_params(5);
-    localState(14, 0) = _fixed_params(6);
-    localState(15, 0) = _fixed_params(7);
-    localState(16, 0) = _fixed_params(8);
-    localState(21, 0) = _fixed_params(9);
-    localState(22, 0) = _fixed_params(10);
-    localState(23, 0) = _fixed_params(11);
-
-    localState(3, 0) = parameters[0];
-    localState(4, 0) = parameters[1];
-    localState(5, 0) = parameters[2];
-    localState(6, 0) = parameters[3];
-    localState(10, 0) = parameters[4];
-    localState(11, 0) = parameters[5];
-    localState(12, 0) = parameters[6];
-    localState(13, 0) = parameters[7];
-    localState(17, 0) = parameters[8];
-    localState(18, 0) = parameters[9];
-    localState(19, 0) = parameters[10];
-    localState(20, 0) = parameters[11];
-    localState(24, 0) = parameters[12];
-  }
-  else if (this->_phase == 2)
-  {
-    localState(0, 0) = _fixed_params(0);
-    localState(1, 0) = _fixed_params(1);
-    localState(2, 0) = _fixed_params(2);
-    localState(3, 0) = _fixed_params(3);
-    localState(4, 0) = _fixed_params(4);
-    localState(5, 0) = _fixed_params(5);
-    localState(6, 0) = _fixed_params(6);
-    localState(7, 0) = _fixed_params(7);
-    localState(8, 0) = _fixed_params(8);
-    localState(9, 0) = _fixed_params(9);
-    localState(10, 0) = _fixed_params(10);
-    localState(11, 0) = _fixed_params(11);
-    localState(12, 0) = _fixed_params(12);
-    localState(13, 0) = _fixed_params(13);
-    localState(14, 0) = _fixed_params(14);
-    localState(15, 0) = _fixed_params(15);
-    localState(16, 0) = _fixed_params(16);
-    localState(17, 0) = _fixed_params(17);
-    localState(18, 0) = _fixed_params(18);
-    localState(19, 0) = _fixed_params(19);
-    localState(20, 0) = _fixed_params(20);
-    localState(24, 0) = _fixed_params(21);
-
-    localState(21, 0) = parameters[0];
-    localState(22, 0) = parameters[1];
-    localState(23, 0) = parameters[2];
-  }
-  else
-  {
-    std::cout << "You have not specified the phase!";
-    throw;
-  }
-
-  // Estimate the signal
-  ukfMatrixType estimatedSignal(this->GetNumberOfValues(), 1);
-
-  //_model->F(localState);
-  _model->H(localState, estimatedSignal);
-
-  // Compute the error between the estimated signal and the acquired one
-  ukfPrecisionType err = 0.0;
-  this->computeError(estimatedSignal, _signal, err);
-
-  // Return the result
-  residual = err;
-  return residual;
-}
-
-void itk::DiffusionPropagatorCostFunction::GetDerivative(const ParametersType &parameters, DerivativeType &derivative) const
-{
-  // We use numerical derivative
-  // slope = [f(x+h) - f(x-h)] / (2h)
-
-  ParametersType p_h(this->GetNumberOfParameters());  // for f(x+h)
-  ParametersType p_hh(this->GetNumberOfParameters()); // for f(x-h)
-
-  // The size of the derivative is not set by default,
-  // so we have to do it manually
-  derivative.SetSize(this->GetNumberOfParameters());
-
-  // Set parameters
-  for (unsigned int it = 0; it < this->GetNumberOfParameters(); ++it)
-  {
-    p_h[it] = parameters[it];
-    p_hh[it] = parameters[it];
-  }
-
-  // Calculate derivative for each parameter (reference to the wikipedia page: Numerical Differentiation)
-  for (unsigned int it = 0; it < this->GetNumberOfParameters(); ++it)
-  {
-    // Optimal h is sqrt(epsilon machine) * x
-    double h = std::sqrt(2.2204e-16) * std::max(std::abs(parameters[it]), 1e-7);
-
-    // Volatile, otherwise compiler will optimize the value for dx
-    volatile double xph = parameters[it] + h;
-
-    // For taking into account the rounding error
-    double dx = xph - parameters[it];
-
-    // Compute the slope
-    p_h[it] = xph;
-
-    //p_hh[it] = parameters[it] - h;
-    derivative[it] = (this->GetValue(p_h) - this->GetValue(p_hh)) / dx;
-
-    // Set parameters back for next iteration
-    p_h[it] = parameters[it];
-    p_hh[it] = parameters[it];
-  }
-}
-
-void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType &signal, SignalModel *model)
-{
-  typedef itk::LBFGSBOptimizer OptimizerType;
-  typedef itk::DiffusionPropagatorCostFunction CostType;
-
-  CostType::Pointer cost = CostType::New();
-  OptimizerType::Pointer optimizer = OptimizerType::New();
-
   // Fill in array of parameters we are not intented to optimized
   // We still need to pass this parameters to optimizer because we need to compute
   // estimated signal during optimization and it requireds full state
-  ukfVectorType fixed;
-  fixed.resize(12);
-  fixed(0) = state(0);
-  fixed(1) = state(1);
-  fixed(2) = state(2);
-  fixed(3) = state(7);
-  fixed(4) = state(8);
-  fixed(5) = state(9);
-  fixed(6) = state(14);
-  fixed(7) = state(15);
-  fixed(8) = state(16);
+  ukfVectorType fixed_params(12);
+  fixed_params(0) = state(0);
+  fixed_params(1) = state(1);
+  fixed_params(2) = state(2);
+  fixed_params(3) = state(7);
+  fixed_params(4) = state(8);
+  fixed_params(5) = state(9);
+  fixed_params(6) = state(14);
+  fixed_params(7) = state(15);
+  fixed_params(8) = state(16);
 
-  fixed(9) = state(21);
-  fixed(10) = state(22);
-  fixed(11) = state(23);
+  fixed_params(9) = state(21);
+  fixed_params(10) = state(22);
+  fixed_params(11) = state(23);
 
-  // std::cout << "state before\n " << state << std::endl;
-
-  ukfVectorType state_temp;
-  state_temp.resize(13);
+  ukfVectorType state_temp(13);
   state_temp(0) = state(3);
   state_temp(1) = state(4);
   state_temp(2) = state(5);
@@ -1760,40 +1674,8 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
 
   state_temp(12) = state(24);
 
-  cost->SetNumberOfParameters(state_temp.size());
-  cost->SetNumberOfFixed(fixed.size());
-  cost->SetNumberOfValues(signal.size());
-  cost->SetSignalValues(signal);
-  cost->SetModel(model);
-  cost->SetFixed(fixed);
-  cost->SetPhase(1);
-
-  optimizer->SetCostFunction(cost);
-
-  CostType::ParametersType p(cost->GetNumberOfParameters());
-
-  // Fill p
-  for (int it = 0; it < state_temp.size(); ++it)
-    p[it] = state_temp[it];
-
-  optimizer->SetInitialPosition(p);
-  optimizer->SetProjectedGradientTolerance(1e-12);
-  optimizer->SetMaximumNumberOfIterations(500);
-  optimizer->SetMaximumNumberOfEvaluations(500);
-  optimizer->SetMaximumNumberOfCorrections(10);     // The number of corrections to approximate the inverse hessian matrix
-  optimizer->SetCostFunctionConvergenceFactor(1e1); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
-  optimizer->SetTrace(false);                       // Print debug info
-
-  // Set bounds
-  OptimizerType::BoundSelectionType boundSelect(cost->GetNumberOfParameters());
-  OptimizerType::BoundValueType upperBound(cost->GetNumberOfParameters());
-  OptimizerType::BoundValueType lowerBound(cost->GetNumberOfParameters());
-
-  boundSelect.Fill(2); // BOTHBOUNDED = 2
-  lowerBound.Fill(0.0);
-  upperBound.Fill(3000.0);
-
   // Lower bound
+  ukfVectorType lowerBound(13);
   // First bi-exponential parameters
   lowerBound[0] = lowerBound[1] = 1.0;
   lowerBound[2] = lowerBound[3] = 0.1;
@@ -1813,6 +1695,7 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   lowerBound[12] = 0.0;
 
   // Upper bound
+  ukfVectorType upperBound(13);
   // First bi-exponential
   upperBound[0] = upperBound[1] = upperBound[2] = upperBound[3] = 3000.0;
 
@@ -1826,31 +1709,35 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   //upperBound[15] = 1.0;
   upperBound[12] = 1.0;
 
-  optimizer->SetBoundSelection(boundSelect);
-  optimizer->SetUpperBound(upperBound);
-  optimizer->SetLowerBound(lowerBound);
-  optimizer->StartOptimization();
+  // init solver with bounds
+  _lbfgsb[thread_id]->setSignal(signal);
+  _lbfgsb[thread_id]->setFixed(fixed_params);
+  _lbfgsb[thread_id]->setLowerBound(lowerBound);
+  _lbfgsb[thread_id]->setUpperBound(upperBound);
+  _lbfgsb[thread_id]->setPhase(1);
+  // Run solver
+  _lbfgsb[thread_id]->Solve(state_temp);
 
-  p = optimizer->GetCurrentPosition();
+  state_temp = _lbfgsb[thread_id]->XOpt;
+  //cout << "after " << state_temp.transpose() << endl << endl;
+  //exit(0);
 
-  // Write back the state
-  for (int it = 0; it < state_temp.size(); ++it)
-    state_temp[it] = p[it];
+  //MySolver.XOpt;
 
   // Fill back the state tensor to return it the callee
-  state(0) = fixed(0);
-  state(1) = fixed(1);
-  state(2) = fixed(2);
-  state(7) = fixed(3);
-  state(8) = fixed(4);
-  state(9) = fixed(5);
-  state(14) = fixed(6);
-  state(15) = fixed(7);
-  state(16) = fixed(8);
+  state(0) = fixed_params(0);
+  state(1) = fixed_params(1);
+  state(2) = fixed_params(2);
+  state(7) = fixed_params(3);
+  state(8) = fixed_params(4);
+  state(9) = fixed_params(5);
+  state(14) = fixed_params(6);
+  state(15) = fixed_params(7);
+  state(16) = fixed_params(8);
 
-  state(21) = fixed(9);
-  state(22) = fixed(10);
-  state(23) = fixed(11);
+  state(21) = fixed_params(9);
+  state(22) = fixed_params(10);
+  state(23) = fixed_params(11);
 
   state(3) = state_temp(0);
   state(4) = state_temp(1);
@@ -1869,75 +1756,42 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   // Second phase of optimization (optional)
   // In this phase only w1, w2, w3 are optimizing
 
-  CostType::Pointer cost2 = CostType::New();
-  OptimizerType::Pointer optimizer2 = OptimizerType::New();
-
   // Fill in array of parameters we are not intented to optimized
   // We still need to pass this parameters to optimizer because we need to compute
   // estimated signal during optimization and it requireds full state
-  fixed.resize(22);
-  fixed(0) = state(0);
-  fixed(1) = state(1);
-  fixed(2) = state(2);
-  fixed(3) = state(3);
-  fixed(4) = state(4);
-  fixed(5) = state(5);
-  fixed(6) = state(6);
-  fixed(7) = state(7);
-  fixed(8) = state(8);
-  fixed(9) = state(9);
-  fixed(10) = state(10);
-  fixed(11) = state(11);
-  fixed(12) = state(12);
-  fixed(13) = state(13);
-  fixed(14) = state(14);
-  fixed(15) = state(15);
-  fixed(16) = state(16);
-  fixed(17) = state(17);
-  fixed(18) = state(18);
-  fixed(19) = state(19);
-  fixed(20) = state(20);
-  fixed(21) = state(24);
-
-  // std::cout << "state before\n " << state << std::endl;
+  fixed_params.resize(22);
+  fixed_params(0) = state(0);
+  fixed_params(1) = state(1);
+  fixed_params(2) = state(2);
+  fixed_params(3) = state(3);
+  fixed_params(4) = state(4);
+  fixed_params(5) = state(5);
+  fixed_params(6) = state(6);
+  fixed_params(7) = state(7);
+  fixed_params(8) = state(8);
+  fixed_params(9) = state(9);
+  fixed_params(10) = state(10);
+  fixed_params(11) = state(11);
+  fixed_params(12) = state(12);
+  fixed_params(13) = state(13);
+  fixed_params(14) = state(14);
+  fixed_params(15) = state(15);
+  fixed_params(16) = state(16);
+  fixed_params(17) = state(17);
+  fixed_params(18) = state(18);
+  fixed_params(19) = state(19);
+  fixed_params(20) = state(20);
+  fixed_params(21) = state(24);
 
   state_temp.resize(3);
   state_temp(0) = state(21);
   state_temp(1) = state(22);
   state_temp(2) = state(23);
 
-  cost2->SetNumberOfParameters(state_temp.size());
-  cost2->SetNumberOfFixed(fixed.size());
-  cost2->SetNumberOfValues(signal.size());
-  cost2->SetSignalValues(signal);
-  cost2->SetModel(model);
-  cost2->SetFixed(fixed);
-  cost2->SetPhase(2);
+  //std::cout << "before\n " << state_temp.transpose() << std::endl;
 
-  optimizer2->SetCostFunction(cost2);
-
-  CostType::ParametersType p2(cost2->GetNumberOfParameters());
-
-  // Fill p
-  for (int it = 0; it < state_temp.size(); ++it)
-    p2[it] = state_temp[it];
-
-  optimizer2->SetInitialPosition(p2);
-  optimizer2->SetProjectedGradientTolerance(1e-12);
-  optimizer2->SetMaximumNumberOfIterations(500);
-  optimizer2->SetMaximumNumberOfEvaluations(500);
-  optimizer2->SetMaximumNumberOfCorrections(10);     // The number of corrections to approximate the inverse hessian matrix
-  optimizer2->SetCostFunctionConvergenceFactor(1e1); // Precision of the solution: 1e+12 for low accuracy; 1e+7 for moderate accuracy and 1e+1 for extremely high accuracy.
-  optimizer2->SetTrace(false);                       // Print debug info
-
-  // Set bounds
-  OptimizerType::BoundSelectionType boundSelect2(cost2->GetNumberOfParameters());
-  OptimizerType::BoundValueType upperBound2(cost2->GetNumberOfParameters());
-  OptimizerType::BoundValueType lowerBound2(cost2->GetNumberOfParameters());
-
-  boundSelect2.Fill(2); // BOTHBOUNDED = 2
-  lowerBound2.Fill(0.0);
-  upperBound2.Fill(1.0);
+  ukfVectorType lowerBound2(3);
+  ukfVectorType upperBound2(3);
 
   // Lower bound
   lowerBound2[0] = lowerBound2[1] = lowerBound2[2] = 0.0;
@@ -1945,46 +1799,47 @@ void Tractography::NonLinearLeastSquareOptimization(State &state, ukfVectorType 
   // Upper bound
   upperBound2[0] = upperBound2[1] = upperBound2[2] = 1.0;
 
-  optimizer2->SetBoundSelection(boundSelect2);
-  optimizer2->SetUpperBound(upperBound2);
-  optimizer2->SetLowerBound(lowerBound2);
-  optimizer2->StartOptimization();
+  // init solver with bounds
+  _lbfgsb[thread_id]->setSignal(signal);
+  _lbfgsb[thread_id]->setFixed(fixed_params);
+  _lbfgsb[thread_id]->setLowerBound(lowerBound2);
+  _lbfgsb[thread_id]->setUpperBound(upperBound2);
+  _lbfgsb[thread_id]->setPhase(2);
+  // Run solver
+  _lbfgsb[thread_id]->Solve(state_temp);
 
-  p2 = optimizer2->GetCurrentPosition();
-  // Write back the state
-  for (int it = 0; it < state_temp.size(); ++it)
-    state_temp[it] = p2[it];
+  state_temp = _lbfgsb[thread_id]->XOpt;
+  //cout << "after " << state_temp.transpose() << endl;
 
   // Fill back the state tensor to return it the callee
-  state(0) = fixed(0);
-  state(1) = fixed(1);
-  state(2) = fixed(2);
-  state(3) = fixed(3);
-  state(4) = fixed(4);
-  state(5) = fixed(5);
-  state(6) = fixed(6);
-  state(7) = fixed(7);
-  state(8) = fixed(8);
-  state(9) = fixed(9);
-  state(10) = fixed(10);
-  state(11) = fixed(11);
-  state(12) = fixed(12);
-  state(13) = fixed(13);
-  state(14) = fixed(14);
-  state(15) = fixed(15);
-  state(16) = fixed(16);
-  state(17) = fixed(17);
-  state(18) = fixed(18);
-  state(19) = fixed(19);
-  state(20) = fixed(20);
-  state(24) = fixed(21);
+  state(0) = fixed_params(0);
+  state(1) = fixed_params(1);
+  state(2) = fixed_params(2);
+  state(3) = fixed_params(3);
+  state(4) = fixed_params(4);
+  state(5) = fixed_params(5);
+  state(6) = fixed_params(6);
+  state(7) = fixed_params(7);
+  state(8) = fixed_params(8);
+  state(9) = fixed_params(9);
+  state(10) = fixed_params(10);
+  state(11) = fixed_params(11);
+  state(12) = fixed_params(12);
+  state(13) = fixed_params(13);
+  state(14) = fixed_params(14);
+  state(15) = fixed_params(15);
+  state(16) = fixed_params(16);
+  state(17) = fixed_params(17);
+  state(18) = fixed_params(18);
+  state(19) = fixed_params(19);
+  state(20) = fixed_params(20);
+  state(24) = fixed_params(21);
 
   state(21) = state_temp(0);
   state(22) = state_temp(1);
   state(23) = state_temp(2);
 
-  // std::cout << "state after \n"
-  //           << state << std::endl;
+  //std::cout << "state after \n" << state << std::endl;
 }
 
 void Tractography::InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted)
@@ -2272,12 +2127,12 @@ void Tractography::Follow3T(const int thread_id,
 
     _model->H(state_tmp, signal_tmp);
 
-    const ukfPrecisionType mean_signal = s2adc(signal_tmp);
+    //const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = false;
     if (_csf_provided)
       in_csf = _signal_data->ScalarCSFValue(x) > 0.5; // consider CSF as a true only if pve value > 0.5
     //else
-      //in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' which is basically GAF from a signal
+    //in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' which is basically GAF from a signal
 
     // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
