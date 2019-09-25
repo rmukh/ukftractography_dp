@@ -911,7 +911,7 @@ void Tractography::ProcessStartingPointsBiExp(const int thread_id,
     tmp_info_inv_state[2] = info_inv.start_dir[2];
   }
 
-    int signal_dim = _signal_data->GetSignalDimension();
+  int signal_dim = _signal_data->GetSignalDimension();
   ukfVectorType signal(signal_dim * 2);
 
   ukfPrecisionType Viso;
@@ -1496,7 +1496,7 @@ bool Tractography::Run()
 
 void Tractography::computeRTOPfromSignal(ukfPrecisionType &rtopSignal, const ukfVectorType &signal)
 {
-  assert(signal.size() > 0);
+  //assert(signal.size() > 0);
 
   rtopSignal = 0.0;
 
@@ -1582,7 +1582,7 @@ void Tractography::computeRTOPfromState(State &state, ukfPrecisionType &rtop, uk
   state[24] = std::min(state[24], 1.0);
 
   // Control input: state should have 25 rows
-  assert(state.size() == 25);
+  //assert(state.size() == 25);
 
   ukfPrecisionType l11 = state[3] * 1e-6;
   ukfPrecisionType l12 = state[4] * 1e-6;
@@ -1844,8 +1844,8 @@ void Tractography::NonLinearLeastSquareOptimization(const int thread_id, State &
 
 void Tractography::InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted)
 {
-  assert(reference.size() == 25);
-  assert(inverted.size() == 25);
+  //assert(reference.size() == 25);
+  //assert(inverted.size() == 25);
 
   for (unsigned int it = 0; it < reference.size(); ++it)
   {
@@ -1858,7 +1858,7 @@ void Tractography::InverseStateDiffusionPropagator(stdVecState &reference, stdVe
 
 void Tractography::StateToMatrix(State &state, ukfMatrixType &matrix)
 {
-  assert(state.size() > 0);
+  //assert(state.size() > 0);
 
   matrix.resize(state.size(), 1);
 
@@ -1868,8 +1868,8 @@ void Tractography::StateToMatrix(State &state, ukfMatrixType &matrix)
 
 void Tractography::MatrixToState(ukfMatrixType &matrix, State &state)
 {
-  assert(matrix.cols() == 1);
-  assert(matrix.rows() > 0);
+  //assert(matrix.cols() == 1);
+  //assert(matrix.rows() > 0);
 
   state.resize(matrix.rows());
 
@@ -1950,7 +1950,7 @@ void Tractography::UnpackTensor(const ukfVectorType &b, // b - bValues
   // for (int i=0; i<b.size();++i) {
   //   std::cout << b[i] << ", ";
   // }
-  assert(ret.size() == s.size());
+  //assert(ret.size() == s.size());
 
   // Build B matrix.
   const int signal_dim = _signal_data->GetSignalDimension();
@@ -2023,11 +2023,11 @@ void Tractography::UnpackTensor(const ukfVectorType &b, // b - bValues
     mat33_t Q = svd_decomp.matrixU();
     vec3_t sigma = svd_decomp.singularValues(); // diagonal() returns elements of a diag matrix as a vector.
 
-    assert(sigma[0] >= sigma[1] && sigma[1] >= sigma[2]);
+    //assert(sigma[0] >= sigma[1] && sigma[1] >= sigma[2]);
     if (Q.determinant() < ukfZero)
       Q = Q * (-ukfOne);
 
-    assert(Q.determinant() > ukfZero);
+    //assert(Q.determinant() > ukfZero);
 
     // Extract the three Euler Angles from the rotation matrix.
     ukfPrecisionType phi, psi;
@@ -2741,9 +2741,11 @@ void Tractography::Step3T(const int thread_id,
                           ukfPrecisionType &rtopSignal)
 {
   // For ridgelets bi-exp model
+  /*
   assert(static_cast<int>(covariance.cols()) == _model->state_dim() &&
          static_cast<int>(covariance.rows()) == _model->state_dim());
   assert(static_cast<int>(state.size()) == _model->state_dim());
+  */
   State state_new(_model->state_dim());
   State state_prev(_model->state_dim());
   state_prev = state;
@@ -2887,9 +2889,11 @@ void Tractography::Step3T(const int thread_id,
                           ukfPrecisionType &trace,
                           ukfPrecisionType &trace2)
 {
+  /*
   assert(static_cast<int>(covariance.cols()) == _model->state_dim() &&
          static_cast<int>(covariance.rows()) == _model->state_dim());
   assert(static_cast<int>(state.size()) == _model->state_dim());
+  */
   State state_new(_model->state_dim());
 
   ukfMatrixType covariance_new(_model->state_dim(), _model->state_dim());
@@ -3384,11 +3388,12 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
                           const ukfPrecisionType varWiso, const State &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
                           const ukfPrecisionType trace, const ukfPrecisionType trace2)
 {
+  /*
   // if Noddi model is used Kappa is stored in trace, Vic in fa and Viso in freewater
   assert(_model->state_dim() == static_cast<int>(state.size()));
   assert(p.rows() == static_cast<unsigned int>(state.size()) &&
          p.cols() == static_cast<unsigned int>(state.size()));
-
+*/
   // std::cout << "x: " << x[0] << " " << x[1] << " " << x[2] << std::endl;
   fiber.position.push_back(x);
   fiber.norm.push_back(p.norm());
@@ -3574,10 +3579,11 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType fa, const ukfP
                           const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE, const ukfPrecisionType trace, const ukfPrecisionType trace2)
 {
   // if Noddi model is used Kappa is stored in trace, Vic in fa and Viso in freewater
+  /*
   assert(_model->state_dim() == static_cast<int>(state.size()));
   assert(p.rows() == static_cast<unsigned int>(state.size()) &&
          p.cols() == static_cast<unsigned int>(state.size()));
-
+*/
   // std::cout << "x: " << x[0] << " " << x[1] << " " << x[2] << std::endl;
   fiber.position.push_back(x);
   fiber.norm.push_back(p.norm());

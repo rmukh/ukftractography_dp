@@ -4,11 +4,12 @@
 // Functions for 3-tensor bi-exponential simple model.
 void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &covMatrix) const
 {
+	/*
 	assert(_signal_dim > 0);
 	assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
 		   (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
 			X.cols() == 1));
-
+*/
 	UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
 
 	ukfVectorType HighBSignalValues(signal_mask.size());
@@ -317,10 +318,12 @@ ukfPrecisionType Ridg_BiExp_FW::cosine_similarity(vec3_t &First, vec3_t &Second)
 void Ridg_BiExp_FW::F(ukfMatrixType &X) const
 {
 	// Identity version of state-transition function
+	/*
 	assert(_signal_dim > 0);
 	assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
 		   (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
 			X.cols() == 1));
+			*/
 	for (unsigned int i = 0; i < X.cols(); ++i)
 	{
 		// Directions
@@ -399,6 +402,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X) const
 
 void Ridg_BiExp_FW::H(const ukfMatrixType &X, ukfMatrixType &Y) const
 {
+	/*
 	assert(_signal_dim > 0);
 	assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
 		   (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
@@ -407,7 +411,7 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X, ukfMatrixType &Y) const
 		   (Y.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
 			Y.cols() == 1));
 	assert(_signal_data);
-
+*/
 	const stdVec_t &gradients = _signal_data->gradients();
 	const ukfVectorType &b = _signal_data->GetBValues();
 
