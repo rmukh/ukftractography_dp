@@ -66,7 +66,7 @@ inline mat33_t diffusion_euler(const ukfPrecisionType theta, const ukfPrecisionT
 /** Make a diffusion tensor matrix from one principal direction, and major and minor EV */
 inline mat33_t diffusion(const vec3_t &m, const diagmat3_t & lambdas)
 {
-  mat33_t  R;
+  mat33_t R;
   R << m[0], m[1], m[2],
     m[1], m[1] * m[1] / (1 + m[0]) - 1, m[1] * m[2] / (1 + m[0]),
     m[2], m[1] * m[2] / (1 + m[0]), m[2] * m[2] / (1 + m[0]) - 1;

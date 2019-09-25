@@ -623,7 +623,8 @@ public:
 
     void JacobAdjust(ukfVectorType &x, ukfVectorType &output)
     {
-        output = x.array().exp() * (ub - lb).array() / (x.array().exp() + 1).pow(2);
+        Eigen::Array<ukfPrecisionType, Dynamic,1> x_exp = x.array().exp();
+        output = x_exp * (ub - lb).array() / (x_exp + 1).pow(2);
     }
 
     void transform(ukfVectorType &in, ukfVectorType &out)
@@ -656,7 +657,8 @@ public:
             }
             else
             {
-                out(i) = (lb(i) + EPS + (ub(i) - EPS) * std::exp(in(i))) / (1.0 + std::exp(in(i)));
+                ukfPrecisionType in_exp = std::exp(in(i));
+                out(i) = (lb(i) + EPS + (ub(i) - EPS) * in_exp) / (1.0 + in_exp);
 
                 if (!std::isfinite(out(i)))
                 {
