@@ -332,7 +332,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X) const
 		norm_inv += X(1, i) * X(1, i);
 		norm_inv += X(2, i) * X(2, i);
 
-		norm_inv = ukfOne / sqrt(norm_inv);
+		norm_inv = ukfOne / std::sqrt(norm_inv);
 		X(0, i) *= norm_inv;
 		X(1, i) *= norm_inv;
 		X(2, i) *= norm_inv;
@@ -342,7 +342,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X) const
 		norm_inv += X(8, i) * X(8, i);
 		norm_inv += X(9, i) * X(9, i);
 
-		norm_inv = ukfOne / sqrt(norm_inv);
+		norm_inv = ukfOne / std::sqrt(norm_inv);
 		X(7, i) *= norm_inv;
 		X(8, i) *= norm_inv;
 		X(9, i) *= norm_inv;
@@ -352,43 +352,28 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X) const
 		norm_inv += X(15, i) * X(15, i);
 		norm_inv += X(16, i) * X(16, i);
 
-		norm_inv = ukfOne / sqrt(norm_inv);
+		norm_inv = ukfOne / std::sqrt(norm_inv);
 		X(14, i) *= norm_inv;
 		X(15, i) *= norm_inv;
 		X(16, i) *= norm_inv;
 
 		// Lambdas
-		X(3, i) = std::max(X(3, i), _lambda_min_fast_diffusion);
-		X(4, i) = std::max(X(4, i), _lambda_min_fast_diffusion);
-		X(5, i) = std::max(X(5, i), _lambda_min_slow_diffusion);
-		X(6, i) = std::max(X(6, i), _lambda_min_slow_diffusion);
-
-		X(3, i) = std::min(X(3, i), _lambda_max_diffusion);
-		X(4, i) = std::min(X(4, i), _lambda_max_diffusion);
-		X(5, i) = std::min(X(5, i), _lambda_max_diffusion);
-		X(6, i) = std::min(X(6, i), _lambda_max_diffusion);
+		X(3, i) = std::min(std::max(X(3, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		X(4, i) = std::min(std::max(X(4, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		X(5, i) = std::min(std::max(X(5, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
+		X(6, i) = std::min(std::max(X(6, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
 
 		// Tensor 2
-		X(10, i) = std::max(X(10, i), _lambda_min_fast_diffusion);
-		X(11, i) = std::max(X(11, i), _lambda_min_fast_diffusion);
-		X(12, i) = std::max(X(12, i), _lambda_min_slow_diffusion);
-		X(13, i) = std::max(X(13, i), _lambda_min_slow_diffusion);
-
-		X(10, i) = std::min(X(10, i), _lambda_max_diffusion);
-		X(11, i) = std::min(X(11, i), _lambda_max_diffusion);
-		X(12, i) = std::min(X(12, i), _lambda_max_diffusion);
-		X(13, i) = std::min(X(13, i), _lambda_max_diffusion);
+		X(10, i) = std::min(std::max(X(10, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		X(11, i) = std::min(std::max(X(11, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		X(12, i) = std::min(std::max(X(12, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
+		X(13, i) = std::min(std::max(X(13, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
 
 		// Tensor 3
-		X(17, i) = std::max(X(17, i), _lambda_min_fast_diffusion);
-		X(18, i) = std::max(X(18, i), _lambda_min_fast_diffusion);
-		X(19, i) = std::max(X(19, i), _lambda_min_slow_diffusion);
-		X(20, i) = std::max(X(20, i), _lambda_min_slow_diffusion);
-
-		X(17, i) = std::min(X(17, i), _lambda_max_diffusion);
-		X(18, i) = std::min(X(18, i), _lambda_max_diffusion);
-		X(19, i) = std::min(X(19, i), _lambda_max_diffusion);
-		X(20, i) = std::min(X(20, i), _lambda_max_diffusion);
+		X(17, i) = std::min(std::max(X(17, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		X(18, i) = std::min(std::max(X(18, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		X(19, i) = std::min(std::max(X(19, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
+		X(20, i) = std::min(std::max(X(20, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
 
 		// Weights
 		X(21, i) = CheckZero(X(21, i));
@@ -426,37 +411,22 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X, ukfMatrixType &Y) const
 		initNormalized(m3, X(14, i), X(15, i), X(16, i));
 
 		// Tensor 1 lambdas
-		ukfPrecisionType l11 = std::max(X(3, i), _lambda_min_fast_diffusion);
-		ukfPrecisionType l12 = std::max(X(4, i), _lambda_min_fast_diffusion);
-		ukfPrecisionType l13 = std::max(X(5, i), _lambda_min_slow_diffusion);
-		ukfPrecisionType l14 = std::max(X(6, i), _lambda_min_slow_diffusion);
-
-		l11 = std::min(l11, _lambda_max_diffusion);
-		l12 = std::min(l12, _lambda_max_diffusion);
-		l13 = std::min(l13, _lambda_max_diffusion);
-		l14 = std::min(l14, _lambda_max_diffusion);
+		ukfPrecisionType l11 = std::min(std::max(X(3, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		ukfPrecisionType l12 = std::min(std::max(X(4, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		ukfPrecisionType l13 = std::min(std::max(X(5, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
+		ukfPrecisionType l14 = std::min(std::max(X(6, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
 
 		// Tensor 2 lambdas
-		ukfPrecisionType l21 = std::max(X(10, i), _lambda_min_fast_diffusion);
-		ukfPrecisionType l22 = std::max(X(11, i), _lambda_min_fast_diffusion);
-		ukfPrecisionType l23 = std::max(X(12, i), _lambda_min_slow_diffusion);
-		ukfPrecisionType l24 = std::max(X(13, i), _lambda_min_slow_diffusion);
-
-		l21 = std::min(l21, _lambda_max_diffusion);
-		l22 = std::min(l22, _lambda_max_diffusion);
-		l23 = std::min(l23, _lambda_max_diffusion);
-		l24 = std::min(l24, _lambda_max_diffusion);
+		ukfPrecisionType l21 = std::min(std::max(X(10, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		ukfPrecisionType l22 = std::min(std::max(X(11, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		ukfPrecisionType l23 = std::min(std::max(X(12, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
+		ukfPrecisionType l24 = std::min(std::max(X(13, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
 
 		// Tensor 3 lambdas
-		ukfPrecisionType l31 = std::max(X(17, i), _lambda_min_fast_diffusion);
-		ukfPrecisionType l32 = std::max(X(18, i), _lambda_min_fast_diffusion);
-		ukfPrecisionType l33 = std::max(X(19, i), _lambda_min_slow_diffusion);
-		ukfPrecisionType l34 = std::max(X(20, i), _lambda_min_slow_diffusion);
-
-		l31 = std::min(l31, _lambda_max_diffusion);
-		l32 = std::min(l32, _lambda_max_diffusion);
-		l33 = std::min(l33, _lambda_max_diffusion);
-		l34 = std::min(l34, _lambda_max_diffusion);
+		ukfPrecisionType l31 = std::min(std::max(X(17, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		ukfPrecisionType l32 = std::min(std::max(X(18, i), _lambda_min_fast_diffusion), _lambda_max_diffusion);
+		ukfPrecisionType l33 = std::min(std::max(X(19, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
+		ukfPrecisionType l34 = std::min(std::max(X(20, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
 
 		// Flip if necessary.
 		// if (m1[0] < 0)
