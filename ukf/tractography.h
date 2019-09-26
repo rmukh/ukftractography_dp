@@ -21,6 +21,8 @@
 //L-BFGS-B solver
 #include "lfbgsb.hpp"
 
+#include "itkSimpleFastMutexLock.h"
+
 class NrrdData;
 class vtkPolyData;
 class Tractography;
@@ -448,6 +450,7 @@ private:
   ukfPrecisionType max_odf_thresh;
 
   std::vector<LFBGSB *> _lbfgsb;
+  itk::SimpleMutexLock mtx;
 };
 
 #endif // TRACTOGRAPHY_H_

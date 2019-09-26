@@ -124,7 +124,8 @@ Tractography::Tractography(UKFSettings s) : // begin initializer list
                                             fista_lambda(0.01),
                                             lvl(4),
                                             max_odf_thresh(s.max_odf_threshold),
-                                            _lbfgsb(0, NULL)
+                                            _lbfgsb(0, NULL),
+                                            mtx{}
 // end initializer list
 {
 }
@@ -1164,36 +1165,42 @@ void Tractography::ProcessStartingPointsBiExp(const int thread_id,
       // Add the primary seeds to the vector
       info.state = ConvertVector<stdVecState, State>(tmp_info_state);
       info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
+      mtx.Lock();
       seed_infos.push_back(info);
       seed_infos.push_back(info_inv);
+      mtx.Unlock();
 
       if (n_of_dirs > 1)
       {
         SwapState3T_BiExp(tmp_info_state, p, 2);
         info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
         info.state = ConvertVector<stdVecState, State>(tmp_info_state);
-        seed_infos.push_back(info);
 
         // Create the seed for the opposite direction, keep the other parameters as set for the first direction
         InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
 
         info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
         info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
+        mtx.Lock();
+        seed_infos.push_back(info);
         seed_infos.push_back(info_inv);
+        mtx.Unlock();
 
         if (n_of_dirs > 2)
         {
           SwapState3T_BiExp(tmp_info_state, p, 3);
           info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
           info.state = ConvertVector<stdVecState, State>(tmp_info_state);
-          seed_infos.push_back(info);
 
           // Create the seed for the opposite direction, keep the other parameters as set for the first direction
           InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
 
           info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
           info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
+          mtx.Lock();
+          seed_infos.push_back(info);
           seed_infos.push_back(info_inv);
+          mtx.Unlock();
         }
       }
     }
