@@ -67,10 +67,9 @@ public:
 
     ukfVectorType _fixed_params;
     ukfVectorType _signal;
-    const ukfPrecisionType EPS = 2.2204e-16;
     ukfVectorType lb, ub;
 
-    LFBGSB(SignalModel *model) : tol(1e-12), maxIter(2000), m(10), wolfe1(1e-04), wolfe2(0.9), local_model(model) {}
+    LFBGSB(SignalModel *model) : tol(1e-12), maxIter(2000), m(10), wolfe1(1e-04), wolfe2(0.9), local_model(model), EPS(2.2204e-16) {}
 
     /* helper functions */
 
@@ -103,9 +102,9 @@ public:
     std::vector<int> sort_indexes(const std::vector<std::pair<int, ukfPrecisionType>> &v)
     {
         std::vector<int> idx(v.size());
-        for (size_t i = 0; i != idx.size(); ++i)
+        for (unsigned long i = 0; i != idx.size(); ++i)
             idx[i] = v[i].first;
-        sort(idx.begin(), idx.end(), [&v](size_t i1, size_t i2) { return v[i1].second < v[i2].second; });
+        sort(idx.begin(), idx.end(), [&v](unsigned long i1, unsigned long i2) { return v[i1].second < v[i2].second; });
         return idx;
     }
 
@@ -623,7 +622,7 @@ public:
 
     void JacobAdjust(ukfVectorType &x, ukfVectorType &output)
     {
-        Eigen::Array<ukfPrecisionType, Dynamic,1> x_exp = x.array().exp();
+        Eigen::Array<ukfPrecisionType, Dynamic, 1> x_exp = x.array().exp();
         output = x_exp * (ub - lb).array() / (x_exp + 1).pow(2);
     }
 
@@ -795,6 +794,7 @@ private:
     ukfPrecisionType wolfe1;
     ukfPrecisionType wolfe2;
     const SignalModel *const local_model;
+    ukfPrecisionType EPS;
     unsigned phase;
 };
 
