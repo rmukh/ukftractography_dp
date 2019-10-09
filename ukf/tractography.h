@@ -12,6 +12,9 @@
 #include "seed.h"
 #include "ukf_types.h"
 #include "ukf_exports.h"
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 // Spherical ridgelets
 #include "SOLVERS.h"
@@ -168,10 +171,6 @@ public:
   */
   void Init(std::vector<SeedPointInfo> &seed_infos);
 
-  void ProcessStartingPointsBiExp(const int thread_id, std::vector<SeedPointInfo> &seed_infos,
-                                  const vec3_t &starting_points,const ukfVectorType &signal_values,
-                                  const ukfVectorType &starting_params);
-
   /** \breif Performs the tractography
       \return true if files written successfully, else false
   */
@@ -302,7 +301,7 @@ private:
   void PrintState(State &state);
 
   /** Non Linear Least Square Optimization of input parameters */
-  void NonLinearLeastSquareOptimization(const int thread_id, State &state, const ukfVectorType &signal);
+  void NonLinearLeastSquareOptimization(State &state, const ukfVectorType &signal);
 
   /** Make the seed point in the other direction */
   void InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted);
@@ -448,9 +447,6 @@ private:
   ukfPrecisionType fista_lambda;
   unsigned int lvl;
   ukfPrecisionType max_odf_thresh;
-
-  std::vector<LFBGSB *> _lbfgsb;
-  itk::SimpleMutexLock mtx;
 };
 
 #endif // TRACTOGRAPHY_H_

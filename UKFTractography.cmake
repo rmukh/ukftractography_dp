@@ -6,6 +6,27 @@ if(${PRIMARY_PROJECT_NAME}_BUILD_SLICER_EXTENSION)
   include(${Slicer_USE_FILE})
 endif()
 
+# Set up OpenMP variable if case if OpenMP available
+find_package(OpenMP)
+if(OpenMP_FOUND OR OpenMP_CXX_FOUND)
+  message(STATUS "OpenMP will be linked")
+  if(NOT TARGET OpenMP::OpenMP_CXX)
+    find_package(Threads REQUIRED)
+    add_library(OpenMP::OpenMP_CXX IMPORTED INTERFACE)
+    set_property(TARGET OpenMP::OpenMP_CXX
+            PROPERTY INTERFACE_COMPILE_OPTIONS ${OpenMP_CXX_FLAGS})
+    # Only works if the same flag is passed to the linker; use CMake 3.9+ otherwise (Intel, AppleClang)
+    set_property(TARGET OpenMP::OpenMP_CXX
+            PROPERTY INTERFACE_LINK_LIBRARIES ${OpenMP_CXX_FLAGS} Threads::Threads)
+  endif()
+  set(OPENMP "OpenMP::OpenMP_CXX")
+else()
+  message(STATUS "OpenMP can't be linked. \
+  Please, install OpenMP-compatible compiler if you don't have it yet. \
+  This will give significant speed up.")
+  set(OPENMP "")
+endif()
+
 #-----------------------------------------------------------------------------
 find_package(SlicerExecutionModel REQUIRED)
 include(${SlicerExecutionModel_USE_FILE})

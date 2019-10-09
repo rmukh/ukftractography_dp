@@ -38,3 +38,6 @@ settings.json
 CMakeSettings.json
 examples/process_log_eigenvals.py
 examples/log.txt
+
+/.idea
+/b

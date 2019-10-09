@@ -85,6 +85,7 @@ set(MODULE_TARGET_LIBRARIES
     ${VTK_LIBRARIES}
     ${SlicerExecutionModel_LIBRARIES}
     ${SphericalRidgelets_LIBRARY}
+    ${OPENMP}
     )
 
 if(${PRIMARY_PROJECT_NAME}_BUILD_SLICER_EXTENSION)
