@@ -90,7 +90,7 @@ struct UKFSettings
   ukfPrecisionType sigma_mask;
   ukfPrecisionType min_radius;
   ukfPrecisionType full_brain_mean_signal_min;
-  size_t num_threads;
+  int num_threads;
 
   /*
   *  TODO refactor

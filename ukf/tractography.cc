@@ -777,15 +777,10 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   }
 
 #if defined(_OPENMP)
-    const int num_of_threads = std::min(_num_threads, static_cast<int>(starting_points.size()));
-    if (omp_get_thread_num() != num_of_threads) {
-      omp_set_dynamic(0);
-      omp_set_num_threads(num_of_threads);
-  }
+  const int num_of_threads = std::min(_num_threads, static_cast<int>(starting_points.size()));
+  omp_set_num_threads(num_of_threads);
 
-  assert(num_of_threads > 0);
-
-  std::cout << "Processing " << starting_points.size() << " starting points with " << omp_get_thread_num() << " threads" << std::endl;
+  std::cout << "Processing " << starting_points.size() << " starting points with " << num_of_threads << " threads" << std::endl;
 
 #pragma omp parallel for
 #else
