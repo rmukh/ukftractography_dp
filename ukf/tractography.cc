@@ -815,14 +815,14 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
         stdVecState tmp_info_inv_state;
         SeedPointInfo info_inv;
 
-        info.point = starting_points;
+        info.point = starting_points[i];
         info.start_dir << param[0], param[1], param[2];
         info.fa = fa;
         info.fa2 = fa2;
         info.fa3 = fa3;
         info.trace = trace;
         info.trace2 = trace2;
-        info_inv.point = starting_points;
+        info_inv.point = starting_points[i];
         info_inv.start_dir << -param[0], -param[1], -param[2];
         info_inv.fa = fa;
         info_inv.fa2 = fa2;
@@ -860,9 +860,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
             tmp_info_inv_state[1] = info_inv.start_dir[1];
             tmp_info_inv_state[2] = info_inv.start_dir[2];
         }
-
-        int signal_dim = _signal_data->GetSignalDimension();
-        ukfVectorType signal(signal_dim * 2);
 
         ukfPrecisionType Viso;
         if (_noddi)
@@ -932,7 +929,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
             ukfVectorType HighBSignalValues(signal_mask.size());
             for (int indx = 0; indx < signal_mask.size(); ++indx)
-                HighBSignalValues(indx) = signal_values(signal_mask(indx));
+                HighBSignalValues(indx) = signal_values[i](signal_mask(indx));
 
             // We can compute ridegelets coefficients
             ukfVectorType C;
@@ -1077,7 +1074,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
                 // Estimate the initial state
                 // InitLoopUKF(state, p, signal_values[i], dNormMSE);
-                NonLinearLeastSquareOptimization(thread_id, state, signal_values);
+                NonLinearLeastSquareOptimization(state, signal_values[i]);
 
                 // Output of the filter
                 tmp_info_state = ConvertVector<State, stdVecState>(state);
@@ -1089,7 +1086,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
                 ukfPrecisionType rtopSignal = 0.0;
 
                 computeRTOPfromState(state, rtopModel, rtop1, rtop2, rtop3);
-                computeRTOPfromSignal(rtopSignal, signal_values);
+                computeRTOPfromSignal(rtopSignal, signal_values[i]);
 
                 // These values are stored so that: rtop1 -> fa; rtop2 -> fa2; rtop3 -> fa3; rtop -> trace; rtopSignal -> trace2
                 info.fa = rtop1;
