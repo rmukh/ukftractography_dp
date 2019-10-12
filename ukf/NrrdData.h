@@ -54,12 +54,6 @@ public:
   */
   virtual void GetSeeds(const std::vector<int> &labels, stdVec_t &seeds) const;
 
-  /**
-   * \brief Get the seed points from the WM mask file, assuming that white matter voxels corresponds to value of 1.o
-   * \param[out] seeds   a vector containing the positions in ijk-space of the seeds
-  */
-  virtual void GetWMSeeds(stdVec_t &seeds) const;
-
   /** returns the gradients of the diffusion image */
   virtual const stdVec_t &gradients() const
   {
@@ -104,9 +98,9 @@ public:
     * Loads all the data necessary to perform tractography
   */
   virtual bool LoadData(const std::string &data_file, const std::string &seed_file, const std::string &mask_file, const std::string &csf_file,
-                        const std::string &wm_file, const bool normalizedDWIData, const bool outputNormalizedDWIData);
+                        const bool normalizedDWIData, const bool outputNormalizedDWIData);
 
-  virtual bool SetData(Nrrd *data, Nrrd *seed, Nrrd *mask, Nrrd *csf, Nrrd *wm, bool normalizedDWIData);
+  virtual bool SetData(Nrrd *data, Nrrd *seed, Nrrd *mask, Nrrd *csf, bool normalizedDWIData);
 
   /** Returns the dimensions of the signal in each directions as a vector */
   vec3_t dim() const
@@ -155,8 +149,6 @@ private:
   Nrrd *_mask_nrrd;
   /* The CSF mask data */
   Nrrd *_csf_nrrd;
-  /* The WM mask data */
-  Nrrd *_wm_nrrd;
 };
 
 #endif // NRRDDATA_H_

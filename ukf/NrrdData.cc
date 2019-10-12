@@ -11,8 +11,7 @@
 #include "itkMacro.h"
 
 NrrdData::NrrdData(ukfPrecisionType sigma_signal, ukfPrecisionType sigma_mask)
-    : ISignalData(sigma_signal, sigma_mask),
-      _data(NULL), _seed_data(NULL), _mask_data(NULL), _csf_data(NULL), _wm_data(NULL), _data_nrrd(NULL)
+    : ISignalData(sigma_signal, sigma_mask), _data(NULL), _seed_data(NULL), _mask_data(NULL), _csf_data(NULL), _wm_data(NULL), _data_nrrd(NULL)
 {
 }
 
@@ -26,8 +25,6 @@ NrrdData::~NrrdData()
     nrrdNuke(_mask_nrrd);
   if (_csf_data)
     nrrdNuke(_csf_nrrd);
-  if (_wm_data)
-    nrrdNuke(_wm_nrrd);
 }
 
 void NrrdData::Interp3Signal(const vec3_t &pos,
@@ -346,42 +343,7 @@ void NrrdData::GetSeeds(const std::vector<int> &labels,
   }
 }
 
-void NrrdData::GetWMSeeds(stdVec_t &seeds) const
-{
-  assert(seeds.size() == 0);
-
-  // Go through the volume.
-  size_t nx = _wm_nrrd->axis[2].size;
-  size_t ny = _wm_nrrd->axis[1].size;
-  size_t nz = _wm_nrrd->axis[0].size;
-
-  if (!(nx == _dim[0] && ny == _dim[1] && nz == _dim[2]))
-  {
-    std::cout << "WM Mask file dimensions DO NOT match DWI file dimensions!";
-    throw;
-  }
-
-  for (size_t i = 0; i < nx; ++i)
-  {
-    for (size_t j = 0; j < ny; ++j)
-    {
-      for (size_t k = 0; k < nz; ++k)
-      {
-        int value = 0;
-        size_t index = ny * nz * i + nz * j + k;
-
-        value = static_cast<float *>(_wm_data)[index];
-
-        if (value == 1.0)
-        {
-          seeds.push_back(vec3_t(i, j, k));
-        }
-      }
-    }
-  }
-}
-
-bool NrrdData::SetData(Nrrd *data_nrrd, Nrrd *mask_nrrd, Nrrd *csf_nrrd, Nrrd *wm_nrrd,
+bool NrrdData::SetData(Nrrd *data_nrrd, Nrrd *mask_nrrd, Nrrd *csf_nrrd,
                        Nrrd *seed_nrrd, bool normalizedDWIData)
 {
   //_data_nrrd = (Nrrd*)data;
@@ -420,9 +382,6 @@ bool NrrdData::SetData(Nrrd *data_nrrd, Nrrd *mask_nrrd, Nrrd *csf_nrrd, Nrrd *w
   this->_csf_nrrd = csf_nrrd;
   this->_csf_data = csf_nrrd->data;
 
-  this->_wm_nrrd = wm_nrrd;
-  this->_wm_data = wm_nrrd->data;
-
   return false;
 }
 
@@ -430,7 +389,6 @@ bool NrrdData::LoadData(const std::string &data_file,
                         const std::string &seed_file,
                         const std::string &mask_file,
                         const std::string &csf_file,
-                        const std::string &wm_file,
                         const bool normalizedDWIData,
                         const bool outputNormalizedDWIData)
 {
@@ -501,20 +459,7 @@ bool NrrdData::LoadData(const std::string &data_file,
     }
   }
 
-  Nrrd *wm_nrrd = nrrdNew();
-  // Load WM mask
-  if (!wm_file.empty())
-  {
-    if (nrrdLoad(wm_nrrd, wm_file.c_str(), NULL))
-    {
-      char *err = biffGetDone(NRRD);
-      std::cout << "Trouble reading " << wm_nrrd << ": " << err << std::endl;
-      free(err);
-      return true;
-    }
-  }
-
-  bool status = SetData(input_nrrd, mask_nrrd, csf_nrrd, wm_nrrd, seed_nrrd, normalizedDWIData);
+  bool status = SetData(input_nrrd, mask_nrrd, csf_nrrd, seed_nrrd, normalizedDWIData);
   return status;
 }
 

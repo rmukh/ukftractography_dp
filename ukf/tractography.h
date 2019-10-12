@@ -49,10 +49,8 @@ struct UKFSettings
   bool record_uncertainties;
   bool transform_position;
   bool store_glyphs;
-  ukfPrecisionType fa_min;
   ukfPrecisionType mean_signal_min;
   ukfPrecisionType seeding_threshold;
-  int num_tensors;
   ukfPrecisionType seeds_per_voxel;
   ukfPrecisionType rtop1_min_stop;
   bool record_rtop;
@@ -70,8 +68,6 @@ struct UKFSettings
   ukfPrecisionType Qw;
   ukfPrecisionType Qt;
   ukfPrecisionType Qwiso;
-  ukfPrecisionType Qkappa;
-  ukfPrecisionType Qvic;
   ukfPrecisionType Rs;
 
   ukfPrecisionType p0;
@@ -94,7 +90,6 @@ struct UKFSettings
   std::string seedsFile;
   std::string maskFile;
   std::string csfFile;
-  std::string wmFile;
 };
 
 /**
@@ -119,14 +114,14 @@ public:
    * Load the files that contain the DWI signal, the seeds and a mask
    * defining the volume of the brain.
   */
-  bool LoadFiles(const std::string &data_file, const std::string &seed_file, const std::string &mask_file, const std::string &csf_file,
-                 const std::string &wm_file, const bool normalized_DWI_data, const bool output_normalized_DWI_data);
+  bool LoadFiles(const std::string &data_file, const std::string &seed_file, const std::string &mask_file, const std::string &csf_file, 
+                 const bool normalized_DWI_data, const bool output_normalized_DWI_data);
 
   /**
    * Directly set the data volume pointers
   */
 
-  bool SetData(void *data, void *mask, void *csf, void *wm, void *seed, bool normalizedDWIData);
+  bool SetData(void *data, void *mask, void *csf, void *seed, bool normalizedDWIData);
 
   /**
    * Directly set the seed locations
@@ -152,7 +147,7 @@ public:
   /**
    * Follows one seed point for the 3 Tensor case
   */
-  void Follow3T(const int thread_id, const SeedPointInfo &seed, UKFFiber &fiber, unsigned char &is_discarded);
+  void Follow(const int thread_id, const SeedPointInfo &seed, UKFFiber &fiber, unsigned char &is_discarded);
 
   void Follow3T(const int thread_id, const SeedPointInfo &fiberStartSeed,
                 UKFFiber &fiber, UKFFiber &fiber1, UKFFiber &fiber2, UKFFiber &fiber3);
@@ -178,22 +173,9 @@ private:
   */
   void UnpackTensor(const ukfVectorType &b, const stdVec_t &u, stdEigVec_t &s, stdEigVec_t &ret);
 
-  /**
-  * Creates necessary variable for noddi
-  */
-  void createProtocol(const ukfVectorType &b, ukfVectorType &gradientStrength, ukfVectorType &pulseSeparation);
-
-  /** One step along the fiber for the 3-tensor case. */
-  void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3, ukfPrecisionType &fa,
-              ukfPrecisionType &fa2, ukfPrecisionType &fa3, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE,
-              ukfPrecisionType &trace, ukfPrecisionType &trace2);
-
   /** One step for ridgelets bi-exp case */
-  void Step3T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &m2, vec3_t &m3, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE,
-              ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3, ukfPrecisionType &Fm1, ukfPrecisionType &lmd1,
-              ukfPrecisionType &Fm2, ukfPrecisionType &lmd2, ukfPrecisionType &Fm3, ukfPrecisionType &lmd3, ukfPrecisionType &varW1,
-              ukfPrecisionType &varW2, ukfPrecisionType &varW3, ukfPrecisionType &varWiso, ukfPrecisionType &rtopModel,
-              ukfPrecisionType &rtopSignal);
+  void Step(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &m2, vec3_t &m3, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE,
+              ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3, ukfPrecisionType &rtopModel, ukfPrecisionType &rtopSignal);
 
   /**
    * Swaps the first tensor with the i-th tensor in state and covariance matrix.
@@ -209,14 +191,7 @@ private:
   */
 
   // BiExp version only
-  void Record(const vec3_t &x, const ukfPrecisionType fa, const ukfPrecisionType fa2, const ukfPrecisionType fa3, const ukfPrecisionType Fm1,
-              const ukfPrecisionType lmd1, const ukfPrecisionType Fm2, const ukfPrecisionType lmd2, const ukfPrecisionType Fm3,
-              const ukfPrecisionType lmd3, const ukfPrecisionType varW1, const ukfPrecisionType varW2, const ukfPrecisionType varW3,
-              const ukfPrecisionType varWiso, const State &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
-              const ukfPrecisionType trace, const ukfPrecisionType trace2);
-
-  // Other models version
-  void Record(const vec3_t &x, const ukfPrecisionType fa, const ukfPrecisionType fa2, const ukfPrecisionType fa3,
+  void Record(const vec3_t &x, const ukfPrecisionType rtop1, const ukfPrecisionType rtop2, const ukfPrecisionType rtop3, 
               const State &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
               const ukfPrecisionType trace, const ukfPrecisionType trace2);
 
@@ -227,14 +202,14 @@ private:
 
   void FiberReserveWeightTrack(UKFFiber &fiber, int fiber_size);
 
-  /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the state parameters */
-  void computeRTOPfromState(State &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3);
-
   /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the interpolated signal */
   void computeRTOPfromSignal(ukfPrecisionType &rtopSignal, const ukfVectorType &signal);
 
+  /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the state parameters */
+  void computeRTOPfromState(State &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3);
+
   /** Compute uncertanties characteristics */
-  void computeUncertaintiesCharacteristics(ukfMatrixType &cov, ukfPrecisionType &Fm1, ukfPrecisionType &lmd1, ukfPrecisionType &Fm2, ukfPrecisionType &lmd2,
+  void computeUncertaintiesCharacteristics(const ukfMatrixType &cov, ukfPrecisionType &Fm1, ukfPrecisionType &lmd1, ukfPrecisionType &Fm2, ukfPrecisionType &lmd2,
                                            ukfPrecisionType &Fm3, ukfPrecisionType &lmd3, ukfPrecisionType &varW1, ukfPrecisionType &varW2,
                                            ukfPrecisionType &varW3, ukfPrecisionType &varWiso);
 
@@ -308,7 +283,6 @@ private:
   bool _full_brain;   // is full brain?
   bool _is_seeds;     // check if seeds file provided?
   bool _csf_provided; // check if CSF file provided?
-  bool _wm_provided;  // check if WM file provided?
 
   ukfVectorType _gradientStrength, _pulseSeparation;
   /** Diffustion propagator parameters **/
@@ -318,14 +292,10 @@ private:
   const ukfPrecisionType _max_nmse;
   int _maxUKFIterations;
   ukfPrecisionType _fw_thresh;
-  /** Index of the weight in the state for the free water cases */
-  int _nPosFreeWater;
 
   // Parameters for the tractography
-  ukfPrecisionType _fa_min;
   ukfPrecisionType _mean_signal_min;
   ukfPrecisionType _seeding_threshold;
-  int _num_tensors;
   ukfPrecisionType _seeds_per_voxel;
 
   ukfPrecisionType _stepLength;
@@ -338,8 +308,6 @@ private:
   ukfPrecisionType Qw;
   ukfPrecisionType Qt;
   ukfPrecisionType Qwiso;
-  ukfPrecisionType Qkappa;
-  ukfPrecisionType Qvic;
   ukfPrecisionType Rs;
 
   bool _writeBinary;

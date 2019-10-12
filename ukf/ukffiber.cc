@@ -39,11 +39,12 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
   const bool record_varW2 = !raw_primary[0].varW2.empty();
   const bool record_varW3 = !raw_primary[0].varW3.empty();
   const bool record_varWiso = !raw_primary[0].varWiso.empty();
+  const bool record_state = !raw_primary[0].state.empty();
 
   const int num_primary_fibers = num_half_fibers / 2;
 
   std::vector<int> num_points_on_primary_fiber(num_primary_fibers); // Number of points on each full primary fiber
-  
+
   // Compute the numbers of points on full primary fibers
   for (int i = 0; i < num_primary_fibers; i++)
   {
@@ -165,7 +166,10 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
       fibers[counter].normMSE.resize(num_points_on_primary_fiber[i]);
     }
     fibers[counter].norm.resize(num_points_on_primary_fiber[i]);
-    fibers[counter].state.resize(num_points_on_primary_fiber[i]);
+    if (record_state)
+    {
+      fibers[counter].state.resize(num_points_on_primary_fiber[i]);
+    }
     if (record_cov)
     {
       fibers[counter].covariance.resize(num_points_on_primary_fiber[i]);
@@ -265,7 +269,10 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
         fibers[counter].normMSE[k] = first_half.normMSE[j];
       }
       fibers[counter].norm[k] = first_half.norm[j];
-      fibers[counter].state[k] = first_half.state[j];
+      if (record_state)
+      {
+        fibers[counter].state[k] = first_half.state[j];
+      }
       if (record_cov)
       {
         fibers[counter].covariance[k] = first_half.covariance[j];
@@ -364,7 +371,10 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
         fibers[counter].normMSE[k] = second_half.normMSE[j];
       }
       fibers[counter].norm[k] = second_half.norm[j];
-      fibers[counter].state[k] = second_half.state[j];
+      if (record_state)
+      {
+        fibers[counter].state[k] = second_half.state[j];
+      }
       if (record_cov)
       {
         fibers[counter].covariance[k] = second_half.covariance[j];

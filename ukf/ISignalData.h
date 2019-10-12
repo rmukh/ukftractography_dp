@@ -57,9 +57,6 @@ public:
   /** Get all the seed points. */
   virtual void GetSeeds(const std::vector<int> &labels, stdVec_t &seeds) const = 0;
 
-  /* Make seed points from WM mask file*/
-  virtual void GetWMSeeds(stdVec_t &seeds) const = 0;
-
   /** Returns the gradients. */
   virtual const stdVec_t &gradients() const = 0;
 
@@ -80,7 +77,7 @@ public:
     * Loads all the data necessary to perform tractography
   */
   virtual bool LoadData(const std::string &data_file, const std::string &seed_file, const std::string &mask_file, const std::string &csf_file,
-                        const std::string &wm_file, const bool normalizedDWIData, const bool outputNormalizedDWIData) = 0;
+                        const bool normalizedDWIData, const bool outputNormalizedDWIData) = 0;
 
   /** Returns the dimensions of the image */
   virtual vec3_t dim() const = 0;

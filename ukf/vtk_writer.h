@@ -136,9 +136,6 @@ protected:
   /** How many indeces in the state are used up by 1 tensor */
   int _tensor_space;
 
-  /** The number of tensors used */
-  int _num_tensors;
-
   /** Additional scaling of the eigenvalues before writing */
   const ukfPrecisionType _eigenScaleFactor;
 

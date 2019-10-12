@@ -65,7 +65,6 @@ extern "C"
                            ukf_settings.seedsFile,
                            ukf_settings.maskFile,
                            ukf_settings.csfFile,
-                           ukf_settings.wmFile,
                            normalizedDWIData, outputNormalizedDWIData) == EXIT_FAILURE)
       {
         std::cout << "LoadFiles failed with unknown error!";

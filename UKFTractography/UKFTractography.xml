@@ -58,14 +58,6 @@
       <description>CSF mask file. Tracking terminated and fiber discarded when reaching CSF voxels.</description>
     </image>
 
-    <image type="scalar" fileExtensions=".nhdr,.nrrd">
-      <name>wmFile</name>
-      <longflag alias="wmData">wmFile</longflag>
-      <label>Input WM mask file</label>
-      <channel>input</channel>
-      <description>WM mask file. Tracking terminated and fiber discarded when reaching WM voxels.</description>
-    </image>
-
     <geometry type="fiberbundle" fileExtensions=".vtp,.vtk">
       <name>tracts</name>
       <longflag>tracts</longflag>
@@ -95,22 +87,9 @@
     <double>
       <name>seedingThreshold</name>
       <longflag deprecatedalias="seedFALimit">seedingThreshold</longflag>
-      <label>Seeding: Minimum seed FA</label>
-      <description>Tractography parameter used in all models. Seed points whose fractional anisotropy (FA) or mean signal are below this value are excluded. For DP it is a Generalized FA. Default: 0.18. Range: 0-1.</description>
+      <label>Seeding: Minimum seed GFA</label>
+      <description>Seed points whose Generalized FA (GFA) or mean signal are below this value are excluded. Default: 0.18. Range: 0-1.</description>
       <default>0.18</default>
-      <constraints>
-        <minimum>0</minimum>
-        <maximum>1</maximum>
-        <step>0.01</step>
-      </constraints>
-    </double>
-
-    <double>
-      <name>stoppingFA</name>
-      <longflag deprecatedalias="minFA">stoppingFA</longflag>
-      <label>Stopping Criterion: Terminating FA</label>
-      <description>Tractography parameter used in tensor model. Tractography will stop when the fractional anisotropy (FA) of the tensor being tracked is less than this value. Note: make sure to also decrease the GA to track through lower anisotropy areas. This parameter is used only in tensor models. Default: 0.15. Range: 0-1.</description>
-      <default>0.15</default>
       <constraints>
         <minimum>0</minimum>
         <maximum>1</maximum>
@@ -162,19 +141,6 @@
         <minimum>0.0</minimum>
         <maximum>0.25</maximum>
         <step>0.00001</step>
-      </constraints>
-    </double>
-
-    <double>
-      <name>recordLength</name>
-      <longflag>recordLength</longflag>
-      <label>Output: Step length of output tractography (in mm)</label>
-      <description>Tractography parameter used in all models. Step size between points saved along fibers. Default: 0.9. Range: 0.1-4.</description>
-      <default>0.9</default>
-      <constraints>
-        <minimum>0.1</minimum>
-        <maximum>4</maximum>
-        <step>0.1</step>
       </constraints>
     </double>
 
@@ -243,16 +209,8 @@
   </parameters>
 
   <parameters>
-    <label>Tensor Model (default)</label>
+    <label>Model</label>
     <description>Tensor model parameters.</description>
-
-    <boolean>
-      <name>recordFA</name>
-      <longflag>recordFA</longflag>
-      <label>Output: Save tensor FA</label>
-      <description>Record output from tensor model: Save fractional anisotropy (FA) of the tensor(s). Attaches field 'FA' or 'FA1' and 'FA2' for 2-tensor case to fiber.</description>
-      <default>true</default>
-    </boolean>
 
     <double>
       <name>Ql</name>
@@ -358,9 +316,38 @@
       <name>recordTensors</name>
       <longflag>recordTensors</longflag>
       <label>Output: Save tensors</label>
-      <description>Record output from tensor model: Save the tensors that were computed during tractography (if using tensor model). The fields will be called 'TensorN', where N is the tensor number. Recording the tensors enables Slicer to color the fiber bundles by FA, orientation, and so on. Recording the tensors also enables quantitative analyses.</description>
-      <default>true</default>
+      <description>Record output from tensor model: Save the tensors that were computed during tractography (if using tensor model). The fields will be called 'TensorN', where N is the tensor number. Recording the tensors enables Slicer to color the fiber bundles by GFA, orientation, and so on. Recording the tensors also enables quantitative analyses.</description>
+      <default>false</default>
     </boolean>
+
+    <boolean>
+      <name>recordState</name>
+      <longflag>recordState</longflag>
+      <label>Record states</label>
+      <description>Store the states along the fiber. Will generate field 'state'. The state is the model for UKF. In the case of the two tensor model, it is a ten-parameter vector.</description>
+      <default>false</default>
+    </boolean>
+
+    <boolean>
+      <name>recordCovariance</name>
+      <longflag>recordCovariance</longflag>
+      <label>Record the covariance matrix</label>
+      <description>Store the covariance matrix along the fiber. Will generate field 'covariance' in fiber. This is the covariance from the unscented Kalman filter.</description>
+      <default>false</default>
+    </boolean>
+
+    <double>
+      <name>recordLength</name>
+      <longflag>recordLength</longflag>
+      <label>Output: Step length of output tractography (in mm)</label>
+      <description>Tractography parameter used in all models. Step size between points saved along fibers. Default: 0.9. Range: 0.1-4.</description>
+      <default>0.9</default>
+      <constraints>
+        <minimum>0.1</minimum>
+        <maximum>4</maximum>
+        <step>0.1</step>
+      </constraints>
+    </double>
   </parameters>
 
   <parameters advanced="true">
@@ -394,22 +381,6 @@
     </double>
 
     <boolean>
-      <name>recordState</name>
-      <longflag>recordState</longflag>
-      <label>Record states</label>
-      <description>Develop/Debug Only: Store the states along the fiber. Will generate field 'state'. The state is the model for UKF. In the case of the two tensor model, it is a ten-parameter vector.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
-      <name>recordCovariance</name>
-      <longflag>recordCovariance</longflag>
-      <label>Record the covariance matrix</label>
-      <description>Develop/Debug Only: Store the covariance matrix along the fiber. Will generate field 'covariance' in fiber. This is the covariance from the unscented Kalman filter.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
       <name>storeGlyphs</name>
       <longflag>storeGlyphs</longflag>
       <label>Store tensors' main directions</label>
@@ -434,24 +405,6 @@
       <description>Develop/Debug Only: Write tract file as a VTK uncompressed data file</description>
       <default>false</default>
     </boolean>
-
-    <!-- DEPRECATED-REMOVED: we will print an error and deprecation notice because this GA threshold is no
-                         longer available.
-                         for changes see: https://github.com/pnlbwh/ukftractography/pull/64  -->
-
-    <double hidden="true">
-      <longflag>minGA</longflag>
-      <label>DEPRECATED REMOVED: minGA (was Stopping Criterion: Terminating GA)</label>
-      <description>
-        <![CDATA[DEPRECATED REMOVED: this parameter is no longer valid! Please use 'stoppingThreshold' instead! GA is no longer used as a stopping threshold. Please see https://github.com/pnlbwh/ukftractography/pull/64 for more information. (Was: Tractography parameter used in all models. Tractography will stop when the generalized anisotropy (GA) is less than this value. GA is a normalized variance of the input signals (so it does not depend on any model). Note: to extend tracking through low anisotropy areas, this parameter is often more effective than the minFA. Default: 0.1. Range: 0-1.)]]>
-      </description>
-      <constraints>
-        <minimum>0</minimum>
-        <maximum>1</maximum>
-        <step>0.01</step>
-        <default>10000</default>
-      </constraints>
-    </double>
 
     <boolean hidden="true">
       <name>AllowMemoryTransfer</name>

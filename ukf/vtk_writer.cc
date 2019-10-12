@@ -30,12 +30,12 @@
 #include "git_version.h"
 
 VtkWriter::VtkWriter(const ISignalData *signal_data, bool write_tensors) : _signal_data(signal_data),
-                                                                                                                       _transform_position(true),
-                                                                                                                       _scale_glyphs(0.01),
-                                                                                                                       _write_tensors(write_tensors),
-                                                                                                                       _eigenScaleFactor(1),
-                                                                                                                       _writeBinary(true),
-                                                                                                                       _writeCompressed(true)
+                                                                           _transform_position(true),
+                                                                           _scale_glyphs(0.01),
+                                                                           _write_tensors(write_tensors),
+                                                                           _eigenScaleFactor(1),
+                                                                           _writeBinary(true),
+                                                                           _writeCompressed(true)
 {
   _p_m1 = 0;
   _p_m2 = 1;
@@ -45,7 +45,6 @@ VtkWriter::VtkWriter(const ISignalData *signal_data, bool write_tensors) : _sign
   _p_l2 = 4;
   _p_l3 = 4;
 
-  _num_tensors = 3;
   _tensor_space = 7;
 
   // this also upon initialization of writer, its the same for all
@@ -111,7 +110,7 @@ void VtkWriter::PopulateFibersAndTensors(vtkPolyData *polyData,
     vtkPointData *pointData = polyData->GetPointData();
 
     mat33_t D;
-    for (int local_tensorNumber = 1; local_tensorNumber <= _num_tensors; ++local_tensorNumber)
+    for (int local_tensorNumber = 1; local_tensorNumber <= 3; ++local_tensorNumber)
     {
       vtkSmartPointer<vtkFloatArray> curTensor = vtkSmartPointer<vtkFloatArray>::New();
       curTensor->SetNumberOfComponents(9);
@@ -315,7 +314,7 @@ int VtkWriter::Write(const std::string &file_name,
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
-  // write fa
+  // write rtop1
   if (fibers[0].fa.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> fa = vtkSmartPointer<vtkFloatArray>::New();
@@ -335,7 +334,7 @@ int VtkWriter::Write(const std::string &file_name,
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
-  // fa2
+  // rtop2
   if (fibers[0].fa2.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> fa2 = vtkSmartPointer<vtkFloatArray>::New();
@@ -354,7 +353,7 @@ int VtkWriter::Write(const std::string &file_name,
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
-  // fa3
+  // rtop3
   if (fibers[0].fa3.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> fa3 = vtkSmartPointer<vtkFloatArray>::New();
@@ -832,10 +831,6 @@ int VtkWriter::WriteGlyphs(const std::string &file_name,
     num_points += fibers[i].position.size();
   }
 
-  int num_tensors = fibers[0].state[0].size() / 5;
-  if (fibers[0].state[0].size() == 25)
-    num_tensors = 3;
-
   const ukfPrecisionType scale = ukfHalf * _scale_glyphs;
 
   for (int i = 0; i < num_fibers; ++i)
@@ -923,48 +918,26 @@ int VtkWriter::WriteGlyphs(const std::string &file_name,
 
       // Calculate the points. The glyphs are represented as two-point lines.
       vec3_t pos1, pos2;
-      if (num_tensors == 1)
-      {
-        pos1 = point - scale * m1;
-        pos2 = point + scale * m1;
-        points->InsertNextPoint(pos1[0], pos1[1], pos1[2]);
-        points->InsertNextPoint(pos2[0], pos2[1], pos2[2]);
-      }
-      else if (num_tensors == 2)
-      {
-        pos1 = point - scale * m1;
-        pos2 = point + scale * m1;
-        points->InsertNextPoint(pos1[0], pos1[1], pos1[2]);
-        points->InsertNextPoint(pos2[0], pos2[1], pos2[2]);
+      pos1 = point - scale * m1;
+      pos2 = point + scale * m1;
+      points->InsertNextPoint(pos1[0], pos1[1], pos1[2]);
+      points->InsertNextPoint(pos2[0], pos2[1], pos2[2]);
 
-        pos1 = point - scale * m2;
-        pos2 = point + scale * m2;
-        points->InsertNextPoint(pos1[0], pos1[1], pos1[2]);
-        points->InsertNextPoint(pos2[0], pos2[1], pos2[2]);
-      }
-      else if (num_tensors == 3)
-      {
-        pos1 = point - scale * m1;
-        pos2 = point + scale * m1;
-        points->InsertNextPoint(pos1[0], pos1[1], pos1[2]);
-        points->InsertNextPoint(pos2[0], pos2[1], pos2[2]);
+      pos1 = point - scale * m2;
+      pos2 = point + scale * m2;
+      points->InsertNextPoint(pos1[0], pos1[1], pos1[2]);
+      points->InsertNextPoint(pos2[0], pos2[1], pos2[2]);
 
-        pos1 = point - scale * m2;
-        pos2 = point + scale * m2;
-        points->InsertNextPoint(pos1[0], pos1[1], pos1[2]);
-        points->InsertNextPoint(pos2[0], pos2[1], pos2[2]);
-
-        pos1 = point - scale * m3;
-        pos2 = point + scale * m3;
-        points->InsertNextPoint(pos1[0], pos1[1], pos1[2]);
-        points->InsertNextPoint(pos2[0], pos2[1], pos2[2]);
-      }
+      pos1 = point - scale * m3;
+      pos2 = point + scale * m3;
+      points->InsertNextPoint(pos1[0], pos1[1], pos1[2]);
+      points->InsertNextPoint(pos2[0], pos2[1], pos2[2]);
     }
   }
   // do the lines
   vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
 
-  for (int i = 0; i < num_points * num_tensors; ++i)
+  for (int i = 0; i < num_points * 3; ++i)
   {
     vtkSmartPointer<vtkLine> line = vtkSmartPointer<vtkLine>::New();
     vtkIdType ids[2];
@@ -978,9 +951,7 @@ int VtkWriter::WriteGlyphs(const std::string &file_name,
   return EXIT_SUCCESS;
 }
 
-vec3_t
-VtkWriter::
-    PointConvert(const vec3_t &point)
+vec3_t VtkWriter::PointConvert(const vec3_t &point)
 {
   vec3_t rval;
   ukfVectorType p(4);

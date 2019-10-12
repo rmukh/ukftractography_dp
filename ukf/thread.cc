@@ -93,7 +93,7 @@ ITK_THREAD_RETURN_TYPE ThreadCallback(void *arg)
       // With debugging direction files
       // str->tractography_->Follow3T(id_, seed_infos_[*it], output_fiber_group_[*it], output_fiber_group_1_[*it], output_fiber_group_2_[*it], output_fiber_group_3_[*it]);
       // Standart output
-      str->tractography_->Follow3T(id_, seed_infos_[*it], output_fiber_group_[*it], discarded_fibers_[*it]);
+      str->tractography_->Follow(id_, seed_infos_[*it], output_fiber_group_[*it], discarded_fibers_[*it]);
   }
 #if ITK_VERSION_MAJOR >= 5
   return itk::ITK_THREAD_RETURN_DEFAULT_VALUE;

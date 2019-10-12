@@ -194,7 +194,6 @@ class InteractiveUKFWidget(ScriptedLoadableModuleWidget):
 
     # Move tensor options frame to interactor
     with It(slicer.util.findChildren(cliw, text="Tensor Model (default)")[0]) as w:
-      findChild(w, "recordFA").setChecked(False)
       findChild(w, "recordTrace").setChecked(False)
       findChild(w, "recordFreeWater").setChecked(False)
       findChild(w, "recordTensors").setChecked(False)

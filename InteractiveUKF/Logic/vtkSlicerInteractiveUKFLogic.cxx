@@ -302,12 +302,6 @@ void vtkSlicerInteractiveUKFLogic::set_seedsPerVoxel(double val)
   g_tracto->_seeds_per_voxel = val;
 }
 
-void vtkSlicerInteractiveUKFLogic::set_stoppingFA(double val)
-{
-  if (!g_tracto)
-    return;
-  g_tracto->_fa_min = val;
-}
 void vtkSlicerInteractiveUKFLogic::set_seedingThreshold(double val)
 {
   if (!g_tracto)
@@ -363,20 +357,6 @@ void vtkSlicerInteractiveUKFLogic::set_recordLength(double val)
 }
 
 // these calls invalidate the model and must call UpdateFilterModelType()
-void vtkSlicerInteractiveUKFLogic::set_numTensor(size_t val)
-{
-  if (!g_tracto)
-    return;
-  g_tracto->_num_tensors = val;
-  g_tracto->UpdateFilterModelType();
-}
-void vtkSlicerInteractiveUKFLogic::set_noddi(bool val)
-{
-  if (!g_tracto)
-    return;
-  g_tracto->_noddi = val;
-  g_tracto->UpdateFilterModelType();
-}
 
 void vtkSlicerInteractiveUKFLogic::set_freeWater(bool val)
 {

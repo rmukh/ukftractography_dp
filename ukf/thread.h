@@ -39,7 +39,6 @@ struct thread_struct
   Tractography *tractography_;
   WorkDistribution *work_distribution;
   std::vector<SeedPointInfo> *seed_infos_;
-  int num_tensors_;
   std::vector<UKFFiber> *output_fiber_group_;
   std::vector<unsigned char> *discarded_fibers_;
 

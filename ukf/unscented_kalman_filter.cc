@@ -169,7 +169,6 @@ void UnscentedKalmanFilter::Filter(const State &x,
   {
     z_Eigen[i] = z[i];
   }
-  // std::cout<<"recorded signal: "<<z_Eigen<<std::endl;
 
   {
     if (localConstFilterModel->isRidgelets())
@@ -177,6 +176,8 @@ void UnscentedKalmanFilter::Filter(const State &x,
     else
       localConstFilterModel->F(X); // slightly negative fw is fixed here
   }
+
+  // std::cout<<"recorded signal: "<<z_Eigen<<std::endl;
 
   /** Used for the estimation of the new state */
   ukfMatrixType dim_dimext(dim, 2 * dim + 1);

@@ -37,31 +37,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
 {
   PARSE_ARGS;
 
-  /* Begin deprecation section */
-  {
-    /*
-  *  Check for and print warning about invalid parameter `minGA`
-  *
-  *  GA is no longer used as a tracking threshold.
-  *
-  *  Please see the following for more information:
-  *   https://github.com/pnlbwh/ukftractography/pull/64
-  *   https://github.com/pnlbwh/ukftractography/pull/75
-  *
-  */
-
-    // check infeasible default value as work-around because
-    // Slicer CLI generates command line arguments for all
-    // parameters, and the CLP doesn't indicate no-arg
-
-    if (minGAArg.isSet() && minGA != 10000)
-    {
-      std::cerr << "Error: the `minGA` parameter is no longer valid because GA is not used! Please use 'stoppingThreshold' instead! Please see `--help` for more information." << std::endl;
-      return EXIT_FAILURE;
-    }
-  }
-  /* End deprecation section */
-
   if (argc < 3)
   {
     std::cout << "Usage: " << argv[0] << " --dwiFile dMRI file --maskFile mask file --tracts output fiber tracts file name" << std::endl;
@@ -69,7 +44,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     return 1;
   }
 
-  ukfPrecisionType l_stoppingFA = stoppingFA;
   ukfPrecisionType l_stoppingThreshold = stoppingThreshold;
   ukfPrecisionType l_stepLength = stepLength;
   ukfPrecisionType l_recordLength = recordLength;
@@ -127,18 +101,9 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     labels.push_back(1); //Default to use label 1
   }
 
-  if (l_stoppingFA == 0.15)
-  {
-    ukf_setAndTell(l_stoppingFA, l_stoppingFA, "stoppingFA");
-  }
-  else
-  {
-    ukf_tell(l_stoppingFA, "stoppingFA");
-  }
-
   if (l_seedingThreshold == 0.18)
   {
-    ukf_setAndTell(l_seedingThreshold, FULL_BRAIN_MEAN_SIGNAL_MIN, "seedingThreshold"); // Used to default to 2 times the FA threshold.
+    ukf_setAndTell(l_seedingThreshold, FULL_BRAIN_MEAN_SIGNAL_MIN, "seedingThreshold"); 
   }
   else
   {
@@ -299,7 +264,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.record_rtop = recordRTOP;
     s.transform_position = true; // TODO hard-coded :/
     s.store_glyphs = storeGlyphs;
-    s.fa_min = l_stoppingFA;
     s.mean_signal_min = l_stoppingThreshold;
     s.seeding_threshold = l_seedingThreshold;
     s.seeds_per_voxel = seedsPerVoxel;
@@ -333,7 +297,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.seedsFile = seedsFile;
     s.maskFile = maskFile;
     s.csfFile = csfFile;
-    s.wmFile = wmFile;
     s.writeAsciiTracts = writeAsciiTracts;
     s.writeUncompressedTracts = writeUncompressedTracts;
   }
