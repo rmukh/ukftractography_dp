@@ -31,7 +31,7 @@ public:
   /**
    * \brief Constructor
   */
-  VtkWriter(const ISignalData *signal_data, Tractography::model_type filter_model_type, bool write_tensors);
+  VtkWriter(const ISignalData *signal_data, bool write_tensors);
 
   /** Destructor */
   virtual ~VtkWriter()
@@ -47,9 +47,8 @@ public:
    * \return EXIT_FAILURE or EXIT_SUCCESS
   */
   int Write(const std::string &file_name,
-            const std::string &tractsWithSecondTensor,
             const std::vector<UKFFiber> &fibers,
-            bool write_state, bool store_glyphs, bool if_noddi, bool diffusionPropagator);
+            bool write_state, bool store_glyphs);
 
   int WriteWeight(const std::string &file_name, const std::vector<UKFFiber> &fibers);
 
@@ -124,9 +123,6 @@ protected:
   /** If set to true, WritePoint will convert the points from ijk to RAS space before writing */
   bool _transform_position;
 
-  /** What model was the tractography performed with */
-  const Tractography::model_type _filter_model_type;
-
   /** Scaling of the glyphs */
   const ukfPrecisionType _scale_glyphs;
 
@@ -142,9 +138,6 @@ protected:
 
   /** The number of tensors used */
   int _num_tensors;
-
-  /** Was the full or simplified tensor model used? */
-  bool _full;
 
   /** Additional scaling of the eigenvalues before writing */
   const ukfPrecisionType _eigenScaleFactor;

@@ -27,10 +27,9 @@ public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   /** Constructor */
-  SignalModel(const int local_state_dim, const ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained)
+  SignalModel(const int local_state_dim, const ukfPrecisionType rs, bool constrained)
       : _state_dim(local_state_dim),
-        _rs(rs), _signal_dim(0), _signal_data(NULL), weights_on_tensors_(weights_on_tensors),
-        _constrained(constrained), _ridgelets_used(false)
+        _rs(rs), _signal_dim(0), _signal_data(NULL), _constrained(constrained), _ridgelets_used(false)
   {
     _Q.resize(_state_dim, _state_dim);
     _Q.setConstant(ukfZero); // necessary because otherwise there is memory left overs in the matrix
@@ -45,10 +44,9 @@ public:
     }
   }
 
-  SignalModel(const int local_state_dim, const ukfPrecisionType rs, const ukfVectorType &weights_on_tensors, bool constrained, bool ridgelets_used)
+  SignalModel(const int local_state_dim, const ukfPrecisionType rs, bool constrained, bool ridgelets_used)
       : _state_dim(local_state_dim),
-        _rs(rs), _signal_dim(0), _signal_data(NULL), weights_on_tensors_(weights_on_tensors),
-        _constrained(constrained), _ridgelets_used(ridgelets_used)
+        _rs(rs), _signal_dim(0), _signal_data(NULL), _constrained(constrained), _ridgelets_used(ridgelets_used)
   {
     _Q.resize(_state_dim, _state_dim);
     _Q.setConstant(ukfZero); // necessary because otherwise there is memory left overs in the matrix
@@ -225,9 +223,6 @@ protected:
   /** Equality right hand side, only used for constrained UKF */
   ukfVectorType _e;
 
-  /** The weights of each tensor */
-  const ukfVectorType weights_on_tensors_;
-
   /** Are we using the constrained filter */
   bool _constrained;
 
@@ -277,9 +272,5 @@ inline ukfPrecisionType AngularSimilarity(vec3_t &x_sr, vec3_t &x_pred)
 
   return 1.0 - (std::acos(std::min(std::max(dot / (den_a * den_b), -1.0), 1.0)) / Pi);
 }
-
-/* Common Function used for NODDI */
-extern void createProtocol(const ukfVectorType &_b_values,
-                           ukfVectorType &_gradientStrength, ukfVectorType &_pulseSeparation);
 
 #endif // FILTER_MODEL_H_

@@ -139,17 +139,6 @@
       <default>-1</default>
     </integer>
 
-    <integer-enumeration>
-      <name>numTensor</name>
-      <longflag>numTensor</longflag>
-      <label>Tracking: Number of tensors/orientations in model</label>
-      <description>Number of tensors (tensor model) or orientations (NODDI model) used.</description>
-      <default>2</default>
-      <element>1</element>
-      <element>2</element>
-      <element>3</element>
-    </integer-enumeration>
-
     <double>
       <name>stepLength</name>
       <longflag>stepLength</longflag>
@@ -167,7 +156,7 @@
       <name>Qm</name>
       <longflag>Qm</longflag>
       <label>Tracking: Rate of change of tensor direction/orientation</label>
-      <description>UKF data fitting parameter for tensor or NODDI model: Process noise for angles/direction. Defaults: Noddi-0.001; Single tensor-0.005; other-0.001. Suggested Range: 0.00001 - 0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
+      <description>UKF data fitting parameter for tensor: Process noise for angles/direction. Default: 0.001. Suggested Range: 0.00001 - 0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
       <default>0.0</default>
       <constraints>
         <minimum>0.0</minimum>
@@ -201,214 +190,6 @@
         <step>1</step>
       </constraints>
     </double>
-
-    <boolean>
-      <name>recordNMSE</name>
-      <longflag>recordNMSE</longflag>
-      <label>Output: Save Normalized Mean Square Error </label>
-      <description>Record output from data fitting: Store normalized mean square error (NMSE) along fibers.</description>
-      <default>false</default>
-    </boolean>
-  </parameters>
-
-  <parameters>
-    <label>Tensor Model (default)</label>
-    <description>Tensor model parameters.</description>
-
-    <boolean>
-      <name>freeWater</name>
-      <longflag>freeWater</longflag>
-      <label>Tensor Model: Estimate term for free water</label>
-      <description>Adds a term for free water diffusion to the model. The free water model is a tensor with all 3 eigenvalues equal to the diffusivity of free water (0.003). To output the free water fraction, make sure to use the "save free water" parameter.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
-      <name>recordFA</name>
-      <longflag>recordFA</longflag>
-      <label>Output: Save tensor FA</label>
-      <description>Record output from tensor model: Save fractional anisotropy (FA) of the tensor(s). Attaches field 'FA' or 'FA1' and 'FA2' for 2-tensor case to fiber.</description>
-      <default>true</default>
-    </boolean>
-
-    <boolean>
-      <name>recordTrace</name>
-      <longflag>recordTrace</longflag>
-      <label>Output: Save tensor trace</label>
-      <description>Record output from tensor model: Save the trace of the tensor(s). Attaches field 'Trace' or 'Trace1' and 'Trace2' for 2-tensor case to fiber.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
-      <name>recordFreeWater</name>
-      <longflag>recordFreeWater</longflag>
-      <label>Output: Save free water fraction</label>
-      <description>Record output from tensor plus free water model: Save the fraction of free water. Attaches field 'FreeWater' to fiber.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
-      <name>recordTensors</name>
-      <longflag>recordTensors</longflag>
-      <label>Output: Save tensors</label>
-      <description>Record output from tensor model: Save the tensors that were computed during tractography (if using tensor model). The fields will be called 'TensorN', where N is the tensor number. Recording the tensors enables Slicer to color the fiber bundles by FA, orientation, and so on. Recording the tensors also enables quantitative analyses.</description>
-      <default>true</default>
-    </boolean>
-
-    <double>
-      <name>Ql</name>
-      <longflag>Ql</longflag>
-      <label>UKF Parameter (Advanced): Rate of change of eigenvalues</label>
-      <description>UKF data fitting parameter for tensor model: Process noise for eigenvalues. Defaults: 1 tensor-300 ; 2 tensor-50 ; 3 tensor-100. Suggested Range: 1-1000. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
-      <default>0.0</default>
-      <constraints>
-        <minimum>0</minimum>
-        <maximum>1000</maximum>
-        <step>1</step>
-      </constraints>
-    </double>
-
-    <double>
-      <name>Qw</name>
-      <longflag>Qw</longflag>
-      <label>UKF Parameter (Advanced): Rate of change of volume fraction (?)</label>
-      <description>UKF data fitting parameter for tensor plus free water model: Process noise for volume fraction weights. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
-      <default>0.0</default>
-      <constraints>
-        <minimum>0.0</minimum>
-        <maximum>0.25</maximum>
-        <step>0.00001</step>
-      </constraints>
-    </double>
-
-    <double>
-      <name>Qt</name>
-      <longflag>Qt</longflag>
-      <label>UKF Parameter (Advanced): Rate of change of eigenvalues for the slow diffusion (diffusion propagator model)</label>
-      <description>UKF data fitting parameter for tensor model: Process noise for slow diffusion eigenvalues.</description>
-      <default>0.0</default>
-    </double>
-
-    <double>
-      <name>Qwiso</name>
-      <longflag>Qwiso</longflag>
-      <label>UKF Parameter (Advanced): Rate of change of freewater weight</label>
-      <description>UKF data fitting parameter for tensor plus free water model: Process noise for free water weights, ignored if no free water estimation. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
-      <default>0.0</default>
-      <constraints>
-        <minimum>0.0</minimum>
-        <maximum>0.25</maximum>
-        <step>0.00001</step>
-      </constraints>
-    </double>
-  </parameters>
-
-  <parameters advanced="true">
-    <label>NODDI Model</label>
-    <description>Use NODDI model</description>
-
-    <boolean>
-      <name>noddi</name>
-      <longflag>noddi</longflag>
-      <label>NODDI Model: Use NODDI Model </label>
-      <description>Use neurite orientation dispersion and density imaging (NODDI) model instead of tensor model.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
-      <name>recordVic</name>
-      <longflag>recordVic</longflag>
-      <label>Output: Save NODDI intra-cellular volume fraction. </label>
-      <description>Record output from NODDI model: Store volume fraction of intra-cellular compartment along fibers.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
-      <name>recordKappa</name>
-      <longflag>recordKappa</longflag>
-      <label>Output: Save NODDI dispersion parameter (kappa)</label>
-      <description>Record output from NODDI model: concentration parameter that measures the extent of orientation dispersion.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
-      <name>recordViso</name>
-      <longflag>recordViso</longflag>
-      <label>Output: Save NODDI CSF volume fraction. </label>
-      <description>Record output from NODDI model: Store volume fraction of CSF compartment along fibers.</description>
-      <default>false</default>
-    </boolean>
-
-    <double>
-      <name>Qkappa</name>
-      <longflag>Qkappa</longflag>
-      <label>UKF Parameter (Advanced): Rate of change of kappa value</label>
-      <description>UKF data fitting parameter for NODDI model: Rate of change of kappa (orientation dispersion) value. Higher kappa values indicate more fiber dispersion. Default: 0.01.</description>
-      <default>0.01</default>
-    </double>
-
-    <double>
-      <name>Qvic</name>
-      <longflag>Qvic</longflag>
-      <label>UKF Parameter (Advanced): Rate of change of intracellular volume fraction</label>
-      <description>UKF data fitting parameter for NODDI model: Rate of change of volume fraction of intracellular component. Default: 0.004.</description>
-      <default>0.004</default>
-    </double>
-  </parameters>
-
-  <parameters advanced="true">
-    <label>Signal Parameters (Expert Only)</label>
-    <description></description>
-
-    <double>
-      <name>Rs</name>
-      <longflag>Rs</longflag>
-      <label>Signal Parameter (Advanced): Expected noise in signal</label>
-      <description>UKF Data Term: Measures expected noise in signal. This is used by the UKF method to decide how much to trust the data. This should be increased for very noisy data or reduced for high quality data. Defaults: single tensor/orientation-0.01; other-0.02. Suggested Range: 0.001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
-      <default> 0.0 </default>
-      <constraints>
-        <minimum>0.0</minimum>
-        <maximum>0.25</maximum>
-        <step>0.001</step>
-      </constraints>
-    </double>
-  </parameters>
-
-  <parameters advanced="true">
-    <label>Diffusion Propagator model </label>
-    <description>Use the Bi-exponential diffusion propagator model, with 3 tensors and free water.</description>
-
-    <boolean>
-      <name>diffusionPropagator</name>
-      <longflag>diffusionPropagator</longflag>
-      <label>Diffusion Propagator model </label>
-      <description>Use the Bi-exponential diffusion propagator model, with 3 tensors and free water.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
-      <name>recordRTOP</name>
-      <longflag>recordRTOP</longflag>
-      <label>Record the return to origin probability</label>
-      <description>Record the return to origin probability when using the diffusion propagator model.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
-      <name>recordWeights</name>
-      <longflag>recordWeights</longflag>
-      <label>Record w1, w2, w3, wiso</label>
-      <description>Record each tensor weight and free water weight.</description>
-      <default>false</default>
-    </boolean>
-
-    <boolean>
-      <name>recordUncertainties</name>
-      <longflag>recordUncertainties</longflag>
-      <label>Record Fm1, lambdas1, Fm2, lambdas2, Fm3, lambdas3, var w1, var w2, var w3, var iso</label>
-      <description>Record Frobenius norms of covariance matrix for all directions, their lambdas and variance for all weights.</description>
-      <default>false</default>
-    </boolean>
 
     <double>
       <name>minRTOP1stop</name>
@@ -459,7 +240,145 @@
         <step>0.05</step>
       </constraints>
     </double>
+  </parameters>
 
+  <parameters>
+    <label>Tensor Model (default)</label>
+    <description>Tensor model parameters.</description>
+
+    <boolean>
+      <name>recordFA</name>
+      <longflag>recordFA</longflag>
+      <label>Output: Save tensor FA</label>
+      <description>Record output from tensor model: Save fractional anisotropy (FA) of the tensor(s). Attaches field 'FA' or 'FA1' and 'FA2' for 2-tensor case to fiber.</description>
+      <default>true</default>
+    </boolean>
+
+    <double>
+      <name>Ql</name>
+      <longflag>Ql</longflag>
+      <label>UKF Parameter (Advanced): Rate of change of eigenvalues</label>
+      <description>UKF data fitting parameter for tensor model: Process noise for eigenvalues. Defaults: 1 tensor-300 ; 2 tensor-50 ; 3 tensor-100. Suggested Range: 1-1000. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
+      <default>0.0</default>
+      <constraints>
+        <minimum>0</minimum>
+        <maximum>1000</maximum>
+        <step>1</step>
+      </constraints>
+    </double>
+
+    <double>
+      <name>Qw</name>
+      <longflag>Qw</longflag>
+      <label>UKF Parameter (Advanced): Rate of change of volume fraction (?)</label>
+      <description>UKF data fitting parameter for tensor plus free water model: Process noise for volume fraction weights. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
+      <default>0.0</default>
+      <constraints>
+        <minimum>0.0</minimum>
+        <maximum>0.25</maximum>
+        <step>0.00001</step>
+      </constraints>
+    </double>
+
+    <double>
+      <name>Qt</name>
+      <longflag>Qt</longflag>
+      <label>UKF Parameter (Advanced): Rate of change of eigenvalues for the slow diffusion</label>
+      <description>UKF data fitting parameter for tensor model: Process noise for slow diffusion eigenvalues.</description>
+      <default>0.0</default>
+    </double>
+
+    <double>
+      <name>Qwiso</name>
+      <longflag>Qwiso</longflag>
+      <label>UKF Parameter (Advanced): Rate of change of freewater weight</label>
+      <description>UKF data fitting parameter for tensor plus free water model: Process noise for free water weights, ignored if no free water estimation. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
+      <default>0.0</default>
+      <constraints>
+        <minimum>0.0</minimum>
+        <maximum>0.25</maximum>
+        <step>0.00001</step>
+      </constraints>
+    </double>
+  </parameters>
+
+  <parameters>
+    <label>Additional outputs</label>
+    <description>In addition to the tracts itself, you can choose to write to the output different model, signal and etc. parameters</description>
+
+    <boolean>
+      <name>recordNMSE</name>
+      <longflag>recordNMSE</longflag>
+      <label>Output: Save Normalized Mean Square Error </label>
+      <description>Record output from data fitting: Store normalized mean square error (NMSE) along fibers.</description>
+      <default>false</default>
+    </boolean>
+
+    <boolean>
+      <name>recordRTOP</name>
+      <longflag>recordRTOP</longflag>
+      <label>Record the return to origin probability</label>
+      <description>Record the return to origin probability when using the diffusion propagator model.</description>
+      <default>false</default>
+    </boolean>
+
+    <boolean>
+      <name>recordWeights</name>
+      <longflag>recordWeights</longflag>
+      <label>Record w1, w2, w3, wiso</label>
+      <description>Record each tensor weight and free water weight.</description>
+      <default>false</default>
+    </boolean>
+
+    <boolean>
+      <name>recordUncertainties</name>
+      <longflag>recordUncertainties</longflag>
+      <label>Record Fm1, lambdas1, Fm2, lambdas2, Fm3, lambdas3, var w1, var w2, var w3, var iso</label>
+      <description>Record Frobenius norms of covariance matrix for all directions, their lambdas and variance for all weights.</description>
+      <default>false</default>
+    </boolean>
+
+    <boolean>
+      <name>recordTrace</name>
+      <longflag>recordTrace</longflag>
+      <label>Output: Save tensor trace</label>
+      <description>Record output from tensor model: Save the trace of the tensor(s). Attaches field 'Trace' or 'Trace1' and 'Trace2' for 2-tensor case to fiber.</description>
+      <default>false</default>
+    </boolean>
+
+    <boolean>
+      <name>recordFreeWater</name>
+      <longflag>recordFreeWater</longflag>
+      <label>Output: Save free water fraction</label>
+      <description>Record output from tensor plus free water model: Save the fraction of free water. Attaches field 'FreeWater' to fiber.</description>
+      <default>false</default>
+    </boolean>
+
+    <boolean>
+      <name>recordTensors</name>
+      <longflag>recordTensors</longflag>
+      <label>Output: Save tensors</label>
+      <description>Record output from tensor model: Save the tensors that were computed during tractography (if using tensor model). The fields will be called 'TensorN', where N is the tensor number. Recording the tensors enables Slicer to color the fiber bundles by FA, orientation, and so on. Recording the tensors also enables quantitative analyses.</description>
+      <default>true</default>
+    </boolean>
+  </parameters>
+
+  <parameters advanced="true">
+    <label>Signal Parameters (Expert Only)</label>
+    <description></description>
+
+    <double>
+      <name>Rs</name>
+      <longflag>Rs</longflag>
+      <label>Signal Parameter (Advanced): Expected noise in signal</label>
+      <description>UKF Data Term: Measures expected noise in signal. This is used by the UKF method to decide how much to trust the data. This should be increased for very noisy data or reduced for high quality data. Defaults: single tensor/orientation-0.01; other-0.02. Suggested Range: 0.001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
+      <default> 0.0 </default>
+      <constraints>
+        <minimum>0.0</minimum>
+        <maximum>0.25</maximum>
+        <step>0.001</step>
+      </constraints>
+    </double>
   </parameters>
 
   <parameters advanced="true">
@@ -489,48 +408,6 @@
       <description>Develop/Debug Only: Store the covariance matrix along the fiber. Will generate field 'covariance' in fiber. This is the covariance from the unscented Kalman filter.</description>
       <default>false</default>
     </boolean>
-
-    <boolean>
-      <name>fullTensorModel</name>
-      <longflag>fullTensorModel</longflag>
-      <label>Use full tensor model</label>
-      <description>Develop/Debug Only: Use the full tensor model instead of the default model. The default model has both smaller eigenvalues equal, whereas the full model allows 3 different eigenvalues.</description>
-      <default>false</default>
-    </boolean>
-
-    <double>
-      <name>maxBranchingAngle</name>
-      <longflag>maxBranchingAngle</longflag>
-      <label>Maximum branching angle</label>
-      <description>Develop/Debug Only: Maximum branching angle, in degrees. When using multiple tensors, a new branch will be created when the tensors' major directions form an angle between (minBranchingAngle, maxBranchingAngle). Branching is supressed when this maxBranchingAngle is set to 0.0. Default: 0.0. Range: 0-90.</description>
-      <default>0.0</default>
-      <constraints>
-        <minimum>0</minimum>
-        <maximum>90</maximum>
-        <step>1</step>
-      </constraints>
-    </double>
-
-    <double>
-      <name>minBranchingAngle</name>
-      <longflag>minBranchingAngle</longflag>
-      <label>Minimum branching angle</label>
-      <description>Develop/Debug Only: Minimum branching angle, in degrees. When using multiple tensors, a new branch will be created when the tensors' major directions form an angle between (minBranchingAngle, maxBranchingAngle). Default: 0. Range: 0-90.</description>
-      <default>0.0</default>
-      <constraints>
-        <minimum>0</minimum>
-        <maximum>90</maximum>
-        <step>1</step>
-      </constraints>
-    </double>
-
-    <geometry type="fiberbundle" fileExtensions=".vtp,.vtk">
-      <name>tractsWithSecondTensor</name>
-      <longflag>tractsWithSecondTensor</longflag>
-      <label>Branched Fibers (second tensor, optional)</label>
-      <channel>output</channel>
-      <description>Develop/Debug Only: Tracts generated, with second tensor output (if there is one).</description>
-    </geometry>
 
     <boolean>
       <name>storeGlyphs</name>
@@ -566,7 +443,7 @@
       <longflag>minGA</longflag>
       <label>DEPRECATED REMOVED: minGA (was Stopping Criterion: Terminating GA)</label>
       <description>
-        <![CDATA[DEPRECATED REMOVED: this parameter is no longer valid! Please use 'stoppingThreshold' instead! GA is no longer used as a stopping threshold. Please see https://github.com/pnlbwh/ukftractography/pull/64 for more information. (Was: Tractography parameter used in all models. Tractography will stop when the generalized anisotropy (GA) is less than this value. GA is a normalized variance of the input signals (so it does not depend on any model). Note: to extend tracking through low anisotropy areas, this parameter is often more effective than the minFA. This parameter is used by both tensor and NODDI models. Default: 0.1. Range: 0-1.)]]>
+        <![CDATA[DEPRECATED REMOVED: this parameter is no longer valid! Please use 'stoppingThreshold' instead! GA is no longer used as a stopping threshold. Please see https://github.com/pnlbwh/ukftractography/pull/64 for more information. (Was: Tractography parameter used in all models. Tractography will stop when the generalized anisotropy (GA) is less than this value. GA is a normalized variance of the input signals (so it does not depend on any model). Note: to extend tracking through low anisotropy areas, this parameter is often more effective than the minFA. Default: 0.1. Range: 0-1.)]]>
       </description>
       <constraints>
         <minimum>0</minimum>

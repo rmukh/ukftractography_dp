@@ -29,93 +29,24 @@
 
 #include "git_version.h"
 
-VtkWriter::VtkWriter(const ISignalData *signal_data, Tractography::model_type filter_model_type, bool write_tensors) : _signal_data(signal_data),
+VtkWriter::VtkWriter(const ISignalData *signal_data, bool write_tensors) : _signal_data(signal_data),
                                                                                                                        _transform_position(true),
-                                                                                                                       _filter_model_type(filter_model_type),
                                                                                                                        _scale_glyphs(0.01),
                                                                                                                        _write_tensors(write_tensors),
                                                                                                                        _eigenScaleFactor(1),
                                                                                                                        _writeBinary(true),
                                                                                                                        _writeCompressed(true)
 {
+  _p_m1 = 0;
+  _p_m2 = 1;
+  _p_m3 = 2;
 
-  if (filter_model_type == Tractography::_1T || filter_model_type == Tractography::_1T_FW)
-  {
-    _full = false;
-    _p_m1 = 0;
-    _p_m2 = 1;
-    _p_m3 = 2;
-    _p_l1 = 3;
-    _p_l2 = 4;
-    _p_l3 = 4;
-    _num_tensors = 1;
-    _tensor_space = 5;
-  }
-  else if (filter_model_type == Tractography::_1T_FULL || filter_model_type == Tractography::_1T_FW_FULL)
-  {
-    _full = true;
-    _p_l1 = 3,
-    _p_l2 = 4;
-    _p_l3 = 5;
-    _num_tensors = 1;
-    _tensor_space = 6;
-  }
-  else if (filter_model_type == Tractography::_2T || filter_model_type == Tractography::_2T_FW)
-  {
-    _full = false;
-    _p_m1 = 0;
-    _p_m2 = 1;
-    _p_m3 = 2;
-    _p_l1 = 3;
-    _p_l2 = 4;
-    _p_l3 = 4;
-    _num_tensors = 2;
-    _tensor_space = 5;
-  }
-  else if (filter_model_type == Tractography::_2T_FULL || filter_model_type == Tractography::_2T_FW_FULL)
-  {
-    _full = true;
-    _p_l1 = 3,
-    _p_l2 = 4;
-    _p_l3 = 5;
-    _num_tensors = 2;
-    _tensor_space = 6;
-  }
-  else if (filter_model_type == Tractography::_3T)
-  {
-    _full = false;
-    _p_m1 = 0;
-    _p_m2 = 1;
-    _p_m3 = 2;
-    _p_l1 = 3;
-    _p_l2 = 4;
-    _p_l3 = 4;
-    _num_tensors = 3;
-    _tensor_space = 5;
-  }
-  else if (filter_model_type == Tractography::_3T_FULL)
-  {
-    _full = true;
-    _p_l1 = 3, _p_l2 = 4;
-    _p_l3 = 5;
-    _num_tensors = 3;
-    _tensor_space = 6;
-  }
-  else if (filter_model_type == Tractography::_3T_BIEXP_RIDG)
-  {
-    _full = false;
+  _p_l1 = 3;
+  _p_l2 = 4;
+  _p_l3 = 4;
 
-    _p_m1 = 0;
-    _p_m2 = 1;
-    _p_m3 = 2;
-
-    _p_l1 = 3;
-    _p_l2 = 4;
-    _p_l3 = 4;
-
-    _num_tensors = 3;
-    _tensor_space = 7;
-  }
+  _num_tensors = 3;
+  _tensor_space = 7;
 
   // this also upon initialization of writer, its the same for all
   ukfMatrixType i2r = _signal_data->i2r();
@@ -127,7 +58,7 @@ VtkWriter::VtkWriter(const ISignalData *signal_data, Tractography::model_type fi
 }
 
 void VtkWriter::PopulateFibersAndTensors(vtkPolyData *polyData,
-                                          const std::vector<UKFFiber> &fibers)
+                                         const std::vector<UKFFiber> &fibers)
 {
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 
@@ -215,7 +146,7 @@ void VtkWriter::PopulateFibersAndTensors(vtkPolyData *polyData,
 }
 
 void VtkWriter::PopulateFibersDirs(vtkPolyData *polyData,
-                                    const std::vector<UKFFiber> &fibers)
+                                   const std::vector<UKFFiber> &fibers)
 {
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 
@@ -328,12 +259,9 @@ void VtkWriter::WritePolyData(vtkSmartPointer<vtkPolyData> pd, const char *filen
 }
 
 int VtkWriter::Write(const std::string &file_name,
-                      const std::string &tractsWithSecondTensor,
-                      const std::vector<UKFFiber> &fibers,
-                      bool write_state,
-                      bool store_glyphs,
-                      bool if_noddi,
-                      bool diffusionPropagator)
+                     const std::vector<UKFFiber> &fibers,
+                     bool write_state,
+                     bool store_glyphs)
 {
   if (fibers.size() == 0)
   {
@@ -357,14 +285,6 @@ int VtkWriter::Write(const std::string &file_name,
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
   // handle fibers and tensors
   this->PopulateFibersAndTensors(polyData, fibers);
-
-  // no idea if this below is ever called.
-  if (!tractsWithSecondTensor.empty())
-  {
-    vtkSmartPointer<vtkPolyData> polyData2 = vtkSmartPointer<vtkPolyData>::New();
-    this->PopulateFibersAndTensors(polyData2, fibers);
-    WritePolyData(polyData2, tractsWithSecondTensor.c_str());
-  }
 
   // norm, fa etc hung as arrays on the point data for the polyData
   // object.
@@ -401,12 +321,8 @@ int VtkWriter::Write(const std::string &file_name,
     vtkSmartPointer<vtkFloatArray> fa = vtkSmartPointer<vtkFloatArray>::New();
     fa->SetNumberOfComponents(1);
     fa->Allocate(num_points);
-    if (if_noddi)
-      fa->SetName("Vic1");
-    else if (diffusionPropagator)
-      fa->SetName("RTOP1");
-    else
-      fa->SetName("FA1");
+    fa->SetName("RTOP1");
+
     for (int i = 0; i < num_fibers; ++i)
     {
       int fiber_size = fibers[i].position.size();
@@ -423,12 +339,7 @@ int VtkWriter::Write(const std::string &file_name,
   if (fibers[0].fa2.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> fa2 = vtkSmartPointer<vtkFloatArray>::New();
-    if (if_noddi)
-      fa2->SetName("Vic2");
-    else if (diffusionPropagator)
-      fa2->SetName("RTOP2");
-    else
-      fa2->SetName("FA2");
+    fa2->SetName("RTOP2");
     fa2->SetNumberOfComponents(1);
     fa2->Allocate(num_points);
     for (int i = 0; i < num_fibers; ++i)
@@ -447,12 +358,7 @@ int VtkWriter::Write(const std::string &file_name,
   if (fibers[0].fa3.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> fa3 = vtkSmartPointer<vtkFloatArray>::New();
-    if (if_noddi)
-      fa3->SetName("Vic3");
-    else if (diffusionPropagator)
-      fa3->SetName("RTOP3");
-    else
-      fa3->SetName("FA3");
+    fa3->SetName("RTOP3");
     fa3->SetNumberOfComponents(1);
     fa3->Allocate(num_points);
     for (int i = 0; i < num_fibers; ++i)
@@ -473,12 +379,7 @@ int VtkWriter::Write(const std::string &file_name,
     vtkSmartPointer<vtkFloatArray> trace = vtkSmartPointer<vtkFloatArray>::New();
     trace->SetNumberOfComponents(1);
     trace->Allocate(num_points);
-    if (if_noddi)
-      trace->SetName("OrientationDispersionIndex1");
-    else if (diffusionPropagator)
-      trace->SetName("RTOP_model");
-    else
-      trace->SetName("trace1");
+    trace->SetName("RTOP_model");
     for (int i = 0; i < num_fibers; ++i)
     {
       int fiber_size = fibers[i].position.size();
@@ -497,12 +398,8 @@ int VtkWriter::Write(const std::string &file_name,
     vtkSmartPointer<vtkFloatArray> trace2 = vtkSmartPointer<vtkFloatArray>::New();
     trace2->SetNumberOfComponents(1);
     trace2->Allocate(num_points);
-    if (if_noddi)
-      trace2->SetName("OrientationDispersionIndex2");
-    else if (diffusionPropagator)
-      trace2->SetName("RTOP_signal");
-    else
-      trace2->SetName("trace2");
+    trace2->SetName("RTOP_signal");
+
     for (int i = 0; i < num_fibers; ++i)
     {
       int fiber_size = fibers[i].position.size();
@@ -520,10 +417,7 @@ int VtkWriter::Write(const std::string &file_name,
     vtkSmartPointer<vtkFloatArray> free_water = vtkSmartPointer<vtkFloatArray>::New();
     free_water->SetNumberOfComponents(1);
     free_water->Allocate(num_points);
-    if (if_noddi)
-      free_water->SetName("Viso");
-    else
-      free_water->SetName("FreeWater");
+    free_water->SetName("FreeWater");
     for (int i = 0; i < num_fibers; ++i)
     {
       int fiber_size = fibers[i].position.size();
@@ -1118,39 +1012,15 @@ void VtkWriter::State2Tensor(const State &state, mat33_t &D, const int tensorNum
   const int tensorIndex = (tensorNumber - 1);
   const size_t after_tensor_offset_index = _tensor_space * (tensorIndex);
 
-  if (_full)
-  {
-    static const size_t local_phi_index = 0;
-    static const size_t local_theta_index = 1;
-    static const size_t local_psi_index = 2;
+  eigenVec1 << state[after_tensor_offset_index + _p_m1],
+      state[after_tensor_offset_index + _p_m2],
+      state[after_tensor_offset_index + _p_m3];
 
-    const mat33_t &R =
-        rotation(
-            state[after_tensor_offset_index + local_phi_index],
-            state[after_tensor_offset_index + local_theta_index],
-            state[after_tensor_offset_index + local_psi_index]);
+  // Perform ijk->RAS transform on eigen vectors
+  eigenVec1 = _sizeFreeI2R * eigenVec1;
 
-    // Extract eigenvectors
-    eigenVec1 << R(0, 0), R(1, 0), R(2, 0);
-    /* HACK THIS SEEMS WRONG!  Why have eigenVec2 or eigenVec3?
-    vec3_t eigenVec2;
-    vec3_t eigenVec3;
-    eigenVec2 << R(0,1), R(1,1), R(2,1);
-    eigenVec3 << R(0,2), R(1,2), R(2,2);
-*/
-  }
-  else
-  {
-    eigenVec1 << state[after_tensor_offset_index + _p_m1],
-        state[after_tensor_offset_index + _p_m2],
-        state[after_tensor_offset_index + _p_m3];
-
-    // Perform ijk->RAS transform on eigen vectors
-    eigenVec1 = _sizeFreeI2R * eigenVec1;
-
-    // Renormalize eigenvectors
-    eigenVec1.normalize();
-  }
+  // Renormalize eigenvectors
+  eigenVec1.normalize();
 
   // Compute the diffusion matrix in RAS coordinate system
   // The transformed matrix is still positive-definite

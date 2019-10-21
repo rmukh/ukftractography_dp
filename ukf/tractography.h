@@ -39,32 +39,21 @@ const ukfPrecisionType D_ISO = 0.003; // Diffusion coefficient of free water
 
 struct UKFSettings
 {
-  bool record_fa;
   bool record_nmse;
   bool record_trace;
   bool record_state;
   bool record_cov;
   bool record_free_water;
   bool record_tensors;
-  bool record_Vic;
-  bool record_kappa;
-  bool record_Viso;
   bool record_weights;
   bool record_uncertainties;
   bool transform_position;
   bool store_glyphs;
-  bool branches_only;
   ukfPrecisionType fa_min;
   ukfPrecisionType mean_signal_min;
   ukfPrecisionType seeding_threshold;
   int num_tensors;
   ukfPrecisionType seeds_per_voxel;
-  ukfPrecisionType min_branching_angle;
-  ukfPrecisionType max_branching_angle;
-  bool is_full_model;
-  bool free_water;
-  bool noddi;
-  bool diffusion_propagator;
   ukfPrecisionType rtop1_min_stop;
   bool record_rtop;
   ukfPrecisionType max_nmse;
@@ -120,22 +109,6 @@ class UKFBASELIB_EXPORTS Tractography
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  /** Defines a type to specify the model */
-  enum model_type
-  {
-    _1T,
-    _1T_FW,
-    _1T_FULL,
-    _1T_FW_FULL,
-    _2T,
-    _2T_FW,
-    _2T_FULL,
-    _2T_FW_FULL,
-    _3T,
-    _3T_FULL,
-    _3T_BIEXP_RIDG
-  };
-
   /** Constructor, is called from main.cc where all parameters are defined. */
   Tractography(UKFSettings settings);
 
@@ -184,22 +157,6 @@ public:
   void Follow3T(const int thread_id, const SeedPointInfo &fiberStartSeed,
                 UKFFiber &fiber, UKFFiber &fiber1, UKFFiber &fiber2, UKFFiber &fiber3);
 
-  void Follow3T(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber,
-                bool is_branching, std::vector<SeedPointInfo> &branching_seeds,
-                std::vector<BranchingSeedAffiliation> &branching_seed_affiliation);
-
-  /**
-   * Follows one seed point for the 2 Tensor case
-  */
-  void Follow2T(const int thread_id, const size_t seed_index, const SeedPointInfo &seed, UKFFiber &fiber,
-                bool is_branching, std::vector<SeedPointInfo> &branching_seeds,
-                std::vector<BranchingSeedAffiliation> &branching_seed_affiliation);
-
-  /**
-   * Follows one seed point for the 1 Tensor case
-  */
-  void Follow1T(const int thread_id, const SeedPointInfo &seed, UKFFiber &fiber);
-
   /*
   * Update filter model type
   */
@@ -238,29 +195,13 @@ private:
               ukfPrecisionType &varW2, ukfPrecisionType &varW3, ukfPrecisionType &varWiso, ukfPrecisionType &rtopModel,
               ukfPrecisionType &rtopSignal);
 
-  /** One step along the fiber for the 2-tensor case. */
-  void Step2T(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, ukfPrecisionType &fa, ukfPrecisionType &fa2,
-              State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE, ukfPrecisionType &trace, ukfPrecisionType &trace2);
-
-  /** One step along the fiber for the 1-tensor case. */
-  void Step1T(const int thread_id, vec3_t &x, ukfPrecisionType &fa, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE,
-              ukfPrecisionType &trace);
-
   /**
-   * Swaps the first tensor with the i-th tensor in state and covariance matrix for the 3 Tensor case.
+   * Swaps the first tensor with the i-th tensor in state and covariance matrix.
    * This is used when the main direction of the tractography 'switches' tensor.
   */
-  void SwapState3T(State &state, ukfMatrixType &covariance, int i);
-  void SwapState3T(stdVecState &state, ukfMatrixType &covariance, int i);
 
-  void SwapState3T_BiExp(State &state, ukfMatrixType &covariance, int i);
-  void SwapState3T_BiExp(stdVecState &state, ukfMatrixType &covariance, int i);
-
-  /**
-   * Swap the tensors in the state and covariance matrix for the 2-tensor case. This is used when the
-   * principal direction of the minor tensor has more weight than the one of the current tensor.
-  */
-  void SwapState2T(State &state, ukfMatrixType &covariance);
+  void SwapState(State &state, ukfMatrixType &covariance, int i);
+  void SwapState(stdVecState &state, ukfMatrixType &covariance, int i);
 
   /**
    * Saves one point along the fiber so that everything can be written to a
@@ -327,8 +268,6 @@ private:
   /** Pointer to generic diffusion data */
   NrrdData *_signal_data;
 
-  /** Switch for attaching the FA value to the fiber at each point of the tractography */
-  const bool _record_fa;
   /**
    * Switch for attaching the normalized mean squared error of the reconstructed signal to the real signal
    * to the fiber at each point of the tractography
@@ -342,13 +281,7 @@ private:
   const bool _record_cov;
   /** Switch for attaching the free water percentage to the fiber at each point of the tractography */
   const bool _record_free_water;
-  // Noddi Model parameters
-  /** Switch for attaching the Vic to the fiber at each point of the tractography */
-  const bool _record_Vic;
-  /** Switch for attaching the kappa to the fiber at each point of the tractography */
-  const bool _record_kappa;
-  /** Switch for attaching the Viso to the fiber at each point of the tractography */
-  const bool _record_Viso;
+
   /**
    * Switch for attaching the diffusion tensors to the fiber at each point of the tractography.
    * This is important for visualizing the fiber properties in Slicer.
@@ -362,18 +295,13 @@ private:
   const bool _transform_position;
   /** Attach the glyphs to the VTK file */
   const bool _store_glyphs;
-  /** To output branches only */
-  bool _branches_only;
 
   // Internal parameters
-  bool _is_branching;
   const ukfPrecisionType _p0;
   const ukfPrecisionType _sigma_signal;
   const ukfPrecisionType _sigma_mask;
 
   const ukfPrecisionType _min_radius;
-
-  ukfVectorType weights_on_tensors;
 
   /** Maximal number of points in the tract */
   const int _max_length;
@@ -381,10 +309,10 @@ private:
   bool _is_seeds;     // check if seeds file provided?
   bool _csf_provided; // check if CSF file provided?
   bool _wm_provided;  // check if WM file provided?
-  bool _noddi;
+
   ukfVectorType _gradientStrength, _pulseSeparation;
   /** Diffustion propagator parameters **/
-  bool _diffusion_propagator;
+
   ukfPrecisionType _rtop1_min_stop;
   bool _record_rtop;
   const ukfPrecisionType _max_nmse;
@@ -399,10 +327,7 @@ private:
   ukfPrecisionType _seeding_threshold;
   int _num_tensors;
   ukfPrecisionType _seeds_per_voxel;
-  ukfPrecisionType _cos_theta_min;
-  ukfPrecisionType _cos_theta_max;
-  bool _is_full_model;
-  bool _free_water;
+
   ukfPrecisionType _stepLength;
   int _steps_per_record;
   std::vector<int> _labels;
@@ -425,7 +350,6 @@ private:
   vtkPolyData *_outputPolyData;
 
   // TODO smartpointer
-  model_type _filter_model_type;
   SignalModel *_model;
   signalMaskType signal_mask;
 

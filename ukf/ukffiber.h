@@ -65,26 +65,12 @@ struct UKFFiber
 };
 
 /**
- * \struct BranchingSeedAffiliation
- * \brief Which fibers belong together
- *
- * The structure to document on which primary fiber and at which position is the seed of the branch
-*/
-struct BranchingSeedAffiliation
-{
-  size_t fiber_index_;
-  int position_on_fiber_;
-};
-
-/**
  * \brief Joins two fibers originating from the same seed point
  *
  * A pair of two primary fibers are started from each seed point in two opposite directions. This functions joins them up pairly to
  * form complete primary fibers, and eliminates fibers that are too short. Besides, each branch is back traced to form a whole fiber
 */
-void PostProcessFibers(const std::vector<UKFFiber> &raw_primary, const std::vector<UKFFiber> &raw_branch,
-                       const std::vector<BranchingSeedAffiliation> &branching_seed_affiliation,
-                       const std::vector<unsigned char> &discarded_fibers, const bool branches_only, std::vector<UKFFiber> &fibers);
+void PostProcessFibers(const std::vector<UKFFiber> &raw_primary, const std::vector<unsigned char> &discarded_fibers, std::vector<UKFFiber> &fibers);
 
 /** The minimum number of points on a fiber. UKFFiber with fewer points are rejected */
 const int MINIMUM_NUM_POINTS_ON_FIBER = 10;

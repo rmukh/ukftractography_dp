@@ -80,11 +80,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   ukfPrecisionType l_Qw = Qw;
   ukfPrecisionType l_Qt = Qt;
   ukfPrecisionType l_Qwiso = Qwiso;
-  ukfPrecisionType l_Qkappa = Qkappa;
-  ukfPrecisionType l_Qvic = Qvic;
   ukfPrecisionType l_Rs = Rs;
-  ukfPrecisionType l_maxBranchingAngle = maxBranchingAngle;
-  ukfPrecisionType l_minBranchingAngle = minBranchingAngle;
 
   ukfPrecisionType l_minRTOP1stop = minRTOP1stop;
   ukfPrecisionType l_maxNMSE = maxNMSE;
@@ -103,11 +99,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     return 1; //This is to indicate that the module returns with error
   }
 
-  if (numTensor == 1)
-  {
-    tractsWithSecondTensor.clear(); //Reassure the string is empty
-  }
-
   if (l_maxHalfFiberLength <= 0)
   {
     std::cout << "Invalid maximum half fiber length!" << std::endl;
@@ -120,45 +111,16 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     return 1;
   }
 
-  if (!freeWater && recordFreeWater)
-  {
-    std::cout << "In Order to use the \"--recordFreeWater\" flag, also the \"--freeWater\" flag must be used!" << std::endl;
-    return 1;
-  }
-
-  if (freeWater && numTensor == 3)
-  {
-    std::cout << "In Order to use the free water estimation the number of Tensors (\"--numTensor\") must be set to 1 or 2.";
-    std::cout << "(3-Tensor case not implemented yet.)" << std::endl;
-    return 1;
-  }
-
   if (l_recordLength < l_stepLength)
   {
     std::cout << "recordLength should be greater than stepLength" << std::endl;
     return 1;
   }
 
-  if (!freeWater && diffusionPropagator)
-  {
-    std::cout << "Since the Biexponential model is used, the free water parameter will be estimated" << std::endl;
-    freeWater = true;
-  }
-
   // SETTING THE DEFAULT PARAMETERS
-  std::string strModel = fullTensorModel ? "full model" : "simple";
-  std::string strFreeWater = freeWater ? " with free water estimation" : "";
-  if (diffusionPropagator)
-    strModel = "Biexponential Spherical Ridgelets model";
-
-  std::cout << "Using the " << numTensor << "T " << strModel << strFreeWater << ". Setting the default parameters accordingly:\n";
+  std::cout << "Using the Diffustion Propagator Bi-exponential Spherical Ridgelets model. Setting the default parameters accordingly:\n";
   std::cout << "\"*\": set by user\n";
   std::cout << "\"-\": default setting\n";
-
-  if (seedsFile.empty())
-  {
-    l_maxBranchingAngle = 0.0;
-  }
 
   if (labels.size() == 0)
   {
@@ -183,94 +145,20 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     ukf_tell(l_seedingThreshold, "seedingThreshold");
   }
 
-  if (!noddi)
-  {
-    if (recordVic || recordKappa || recordViso)
-    {
-      std::cout << "Can use recordVic or recordKappa or recordViso parameters only with noddi model";
-      return EXIT_FAILURE;
-    }
-  }
-
-  if (!diffusionPropagator)
-  {
-    if (recordWeights)
-    {
-      std::cout << "Can use recordWeights only with diffusion propagator biexponential model";
-      return EXIT_FAILURE;
-    }
-  }
-
   if (l_Qm == 0.0)
   {
-    if (noddi)
-    {
-      if (numTensor == 1)
-        ukf_setAndTell(l_Qm, 0.0025, "Qm");
-      else
-        ukf_setAndTell(l_Qm, 0.001, "Qm");
-    }
-    else if (numTensor == 1)
-    {
-      ukf_setAndTell(l_Qm, 0.005, "Qm"); //l_Qm = 0.0015;
-    }
-    else if (diffusionPropagator)
-    {
-      ukf_setAndTell(l_Qm, 0.001, "Qm");
-    }
-    else
-    {
-      if (fullTensorModel)
-      {
-        ukf_setAndTell(l_Qm, 0.002, "Qm"); //l_Qm = 0.002;
-      }
-      else
-      {
-        ukf_setAndTell(l_Qm, 0.001, "Qm"); //l_Qm = 0.001; was 0.003, changed to 0.001 for new Interp3Signal
-      }
-    }
+    ukf_setAndTell(l_Qm, 0.001, "Qm");
   }
   else
   {
     ukf_tell(l_Qm, "Qm");
   }
 
-  if (noddi)
+  if (l_Ql == 0.0)
   {
-    if (l_Qkappa == 0.0)
-      ukf_setAndTell(l_Qkappa, 0.01, "Qkappa");
-    else
-      ukf_tell(l_Qkappa, "Qkappa");
-  }
-  else
-  {
-    if (l_Ql == 0.0)
-    {
-      if (diffusionPropagator)
-      {
-        ukf_setAndTell(l_Ql, 150.0, "Ql");
-      }
-      else if (numTensor == 1)
-      {
-        ukf_setAndTell(l_Ql, 300.0, "Ql"); //l_Ql = 25.0;
-      }
-      else if (numTensor == 2)
-      {
-        ukf_setAndTell(l_Ql, 50.0, "Ql"); //was l_Ql = 100.0; for old Interp3Signal
-      }
-      else if (numTensor == 3)
-      {
-        ukf_setAndTell(l_Ql, 100.0, "Ql"); //l_Ql = 150.0;
-      }
-    }
-    else
-    {
-      ukf_tell(l_Ql, "Ql");
-    }
+    ukf_setAndTell(l_Ql, 150.0, "Ql");
   }
 
-  if (diffusionPropagator)
-  {
     if (l_Qt == 0.0)
     {
       ukf_setAndTell(l_Qt, 50.0, "Qt");
@@ -329,29 +217,11 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     {
       ukf_tell(l_FWthresh, "FWthresh");
     }
-  }
+  
 
   if (l_Rs == 0.0)
   {
-    if (diffusionPropagator)
-    {
       ukf_setAndTell(l_Rs, 0.015, "Rs");
-    }
-    else if (numTensor == 1)
-    {
-      ukf_setAndTell(l_Rs, 0.01, "Rs"); //l_Rs = 0.02;
-    }
-    else
-    {
-      if (fullTensorModel)
-      {
-        ukf_setAndTell(l_Rs, 0.01, "Rs"); // = 0.01;
-      }
-      else
-      {
-        ukf_setAndTell(l_Rs, 0.02, "Rs"); //was l_Rs = 0.015;for old Interp3Signal
-      }
-    }
   }
   else
   {
@@ -376,43 +246,17 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     ukf_tell(l_recordLength, "recordLength");
   }
 
-  if (noddi)
-  {
-    if (l_Qvic == 0.0)
-      if (numTensor == 1)
-        ukf_setAndTell(l_Qvic, 0.0005, "Qvic = Qviso");
-      else
-        ukf_setAndTell(l_Qvic, 0.004, "Qvic = Qviso");
-    else
-      ukf_tell(l_Qvic, "Qvic = Qviso");
-  }
-  else if (freeWater)
-  {
     if (l_Qw == 0.0)
     {
-      if (diffusionPropagator)
-      {
         ukf_setAndTell(l_Qw, 0.002, "Qw");
-      }
-      else if (numTensor == 1)
-      {
-        ukf_setAndTell(l_Qw, 0.0025, "Qw"); // estimated in a paramsearch // 0.0025
-      }
-      else if (numTensor == 2)
-      {
-        ukf_setAndTell(l_Qw, 0.0015, "Qw"); // 0.0015
-      }
     }
     else
     {
       ukf_tell(l_Qw, "Qw");
     }
-  }
-
-  if (diffusionPropagator)
-  {
+  
     ukf_setAndTell(l_Qwiso, 0.002, "Qwiso");
-  }
+  
 
   if (l_stoppingThreshold == 0.1)
   {
@@ -444,33 +288,21 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   // initializing settings
   //UKFSettings& s -- from function argument
   {
-    s.record_fa = recordFA;
     s.record_nmse = recordNMSE;
     s.record_trace = recordTrace;
     s.record_state = recordState;
     s.record_cov = recordCovariance;
     s.record_free_water = recordFreeWater;
     s.record_tensors = recordTensors;
-    s.record_Vic = recordVic;
     s.record_weights = recordWeights;
     s.record_uncertainties = recordUncertainties;
-    s.record_kappa = recordKappa;
-    s.record_Viso = recordViso;
     s.record_rtop = recordRTOP;
     s.transform_position = true; // TODO hard-coded :/
     s.store_glyphs = storeGlyphs;
-    s.branches_only = false; // TODO hard-coded :/
     s.fa_min = l_stoppingFA;
     s.mean_signal_min = l_stoppingThreshold;
     s.seeding_threshold = l_seedingThreshold;
-    s.num_tensors = numTensor;
     s.seeds_per_voxel = seedsPerVoxel;
-    s.min_branching_angle = l_minBranchingAngle;
-    s.max_branching_angle = l_maxBranchingAngle;
-    s.is_full_model = fullTensorModel;
-    s.free_water = freeWater;
-    s.noddi = noddi;
-    s.diffusion_propagator = diffusionPropagator;
     s.stepLength = l_stepLength;
     s.recordLength = l_recordLength;
     s.maxHalfFiberLength = maxHalfFiberLength;
@@ -482,8 +314,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.Qw = l_Qw;
     s.Qt = l_Qt;
     s.Qwiso = l_Qwiso;
-    s.Qkappa = l_Qkappa;
-    s.Qvic = l_Qvic;
     s.Rs = l_Rs;
 
     s.rtop1_min_stop = l_minRTOP1stop;
@@ -499,7 +329,6 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     s.min_radius = MIN_RADIUS;
 
     s.output_file = tracts;
-    s.output_file_with_second_tensor = tractsWithSecondTensor;
     s.dwiFile = dwiFile;
     s.seedsFile = seedsFile;
     s.maskFile = maskFile;
