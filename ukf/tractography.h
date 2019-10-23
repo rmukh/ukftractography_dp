@@ -174,7 +174,7 @@ private:
   void UnpackTensor(const ukfVectorType &b, const stdVec_t &u, stdEigVec_t &s, stdEigVec_t &ret);
 
   /** One step for ridgelets bi-exp case */
-  void Step(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &m2, vec3_t &m3, State &state, ukfMatrixType &covariance, ukfPrecisionType &dNormMSE,
+  void Step(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &m2, vec3_t &m3, ukfStateVector &state, ukfStateSquareMatrix &covariance, ukfPrecisionType &dNormMSE,
               ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3, ukfPrecisionType &rtopModel, ukfPrecisionType &rtopSignal);
 
   /**
@@ -182,7 +182,7 @@ private:
    * This is used when the main direction of the tractography 'switches' tensor.
   */
 
-  void SwapState(State &state, ukfMatrixType &covariance, int i);
+  void SwapState(ukfStateVector &state, ukfMatrixType &covariance, int i);
   void SwapState(stdVecState &state, ukfMatrixType &covariance, int i);
 
   /**
@@ -192,7 +192,7 @@ private:
 
   // BiExp version only
   void Record(const vec3_t &x, const ukfPrecisionType rtop1, const ukfPrecisionType rtop2, const ukfPrecisionType rtop3, 
-              const State &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
+              const ukfStateVector &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
               const ukfPrecisionType trace, const ukfPrecisionType trace2);
 
   void RecordWeightTrack(const vec3_t &x, UKFFiber &fiber, ukfPrecisionType d1, ukfPrecisionType d2, ukfPrecisionType d3);
@@ -206,30 +206,30 @@ private:
   void computeRTOPfromSignal(ukfPrecisionType &rtopSignal, const ukfVectorType &signal);
 
   /** Compute the Return to Origin probability in the case of the diffusionPropagator model, using the state parameters */
-  void computeRTOPfromState(State &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3);
+  void computeRTOPfromState(ukfStateVector &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3);
 
   /** Compute uncertanties characteristics */
   void computeUncertaintiesCharacteristics(const ukfMatrixType &cov, ukfPrecisionType &Fm1, ukfPrecisionType &lmd1, ukfPrecisionType &Fm2, ukfPrecisionType &lmd2,
                                            ukfPrecisionType &Fm3, ukfPrecisionType &lmd3, ukfPrecisionType &varW1, ukfPrecisionType &varW2,
                                            ukfPrecisionType &varW3, ukfPrecisionType &varWiso);
 
-  /** Print the State on the standard output in the case of the diffusion propagator model */
-  void PrintState(State &state);
+  /** Print the ukfStateVector on the standard output in the case of the diffusion propagator model */
+  void PrintState(ukfStateVector &state);
 
   /** Non Linear Least Square Optimization of input parameters */
-  void NonLinearLeastSquareOptimization(State &state, const ukfVectorType &signal);
+  void NonLinearLeastSquareOptimization(ukfStateVector &state, const ukfVectorType &signal);
 
   /** Make the seed point in the other direction */
   void InverseStateDiffusionPropagator(stdVecState &reference, stdVecState &inverted);
 
   /** Loop the UKF with 5 iterations, used by step 2T */
-  void LoopUKF(const int thread_id, State &state, ukfMatrixType &covariance, ukfVectorType &signal, State &state_new, ukfMatrixType &covariance_new, ukfPrecisionType &dNormMSE);
+  void LoopUKF(const int thread_id, ukfStateVector &state, ukfStateSquareMatrix &covariance, ukfVectorType &signal, ukfStateVector &state_new, ukfStateSquareMatrix &covariance_new, ukfPrecisionType &dNormMSE);
 
-  /** Convert State to Matrix */
-  void StateToMatrix(State &state, ukfMatrixType &matrix);
+  /** Convert ukfStateVector to Matrix */
+  void StateToMatrix(ukfStateVector &state, ukfMatrixType &matrix);
 
-  /** Convert Matrix to State */
-  void MatrixToState(ukfMatrixType &matrix, State &state);
+  /** Convert Matrix to ukfStateVector */
+  void MatrixToState(ukfMatrixType &matrix, ukfStateVector &state);
 
   /** Vector of Pointers to Unscented Kalaman Filters. One for each thread. */
   std::vector<UnscentedKalmanFilter *> _ukf;

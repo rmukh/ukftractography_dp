@@ -602,7 +602,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       }
 
       // Input of the filter
-      State state = ConvertVector<stdVecState, State>(tmp_info_state);
+      ukfStateVector state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_state);
       ukfMatrixType p(info.covariance);
 
       // Estimate the initial state
@@ -610,7 +610,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       NonLinearLeastSquareOptimization(state, signal_values[i]);
 
       // Output of the filter
-      tmp_info_state = ConvertVector<State, stdVecState>(state);
+      tmp_info_state = ConvertVector<ukfStateVector, stdVecState>(state);
 
       ukfPrecisionType rtopModel = 0.0;
       ukfPrecisionType rtop1 = 0.0;
@@ -642,8 +642,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       info_inv.start_dir << -tmp_info_state[0], -tmp_info_state[1], -tmp_info_state[2];
 
       // Add the primary seeds to the vector
-      info.state = ConvertVector<stdVecState, State>(tmp_info_state);
-      info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
+      info.state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_state);
+      info_inv.state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_inv_state);
 
       seed_infos.push_back(info);
       seed_infos.push_back(info_inv);
@@ -652,12 +652,12 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       {
         SwapState(tmp_info_state, p, 2);
         info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
-        info.state = ConvertVector<stdVecState, State>(tmp_info_state);
+        info.state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_state);
 
         // Create the seed for the opposite direction, keep the other parameters as set for the first direction
         InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
 
-        info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
+        info_inv.state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_inv_state);
         info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
 
         seed_infos.push_back(info);
@@ -667,12 +667,12 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
         {
           SwapState(tmp_info_state, p, 3);
           info.start_dir << tmp_info_state[0], tmp_info_state[1], tmp_info_state[2];
-          info.state = ConvertVector<stdVecState, State>(tmp_info_state);
+          info.state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_state);
 
           // Create the seed for the opposite direction, keep the other parameters as set for the first direction
           InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
 
-          info_inv.state = ConvertVector<stdVecState, State>(tmp_info_inv_state);
+          info_inv.state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_inv_state);
           info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
 
           seed_infos.push_back(info);
@@ -855,7 +855,7 @@ void Tractography::computeRTOPfromSignal(ukfPrecisionType &rtopSignal, const ukf
   }
 }
 
-void Tractography::computeRTOPfromState(State &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3)
+void Tractography::computeRTOPfromState(ukfStateVector &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3)
 {
   state[3] = std::max(state[3], 1.0);
   state[4] = std::max(state[4], 1.0);
@@ -962,9 +962,9 @@ void Tractography::computeUncertaintiesCharacteristics(const ukfMatrixType &cov,
   varWiso = cov(24, 24);
 }
 
-void Tractography::PrintState(State &state)
+void Tractography::PrintState(ukfStateVector &state)
 {
-  std::cout << "State \n";
+  std::cout << "ukfStateVector \n";
   std::cout << "\t m1: " << state[0] << " " << state[1] << " " << state[2] << std::endl;
   std::cout << "\t l11 .. l14: " << state[3] << " " << state[4] << " " << state[5] << " " << state[6] << std::endl;
   std::cout << "\t m2: " << state[7] << " " << state[8] << " " << state[9] << std::endl;
@@ -976,7 +976,7 @@ void Tractography::PrintState(State &state)
   std::cout << " --- " << std::endl;
 }
 
-void Tractography::NonLinearLeastSquareOptimization(State &state, const ukfVectorType &signal)
+void Tractography::NonLinearLeastSquareOptimization(ukfStateVector &state, const ukfVectorType &signal)
 {
   // Fill in array of parameters we are not intented to optimized
   // We still need to pass this parameters to optimizer because we need to compute
@@ -1195,7 +1195,7 @@ void Tractography::InverseStateDiffusionPropagator(stdVecState &reference, stdVe
   }
 }
 
-void Tractography::StateToMatrix(State &state, ukfMatrixType &matrix)
+void Tractography::StateToMatrix(ukfStateVector &state, ukfMatrixType &matrix)
 {
   //assert(state.size() > 0);
 
@@ -1205,7 +1205,7 @@ void Tractography::StateToMatrix(State &state, ukfMatrixType &matrix)
     matrix(it, 0) = state[it];
 }
 
-void Tractography::MatrixToState(ukfMatrixType &matrix, State &state)
+void Tractography::MatrixToState(ukfMatrixType &matrix, ukfStateVector &state)
 {
   //assert(matrix.cols() == 1);
   //assert(matrix.rows() > 0);
@@ -1342,8 +1342,8 @@ void Tractography::Follow(const int thread_id,
 
   // Unpack the fiberStartSeed information.
   vec3_t x = fiberStartSeed.point;
-  State state = fiberStartSeed.state;
-  ukfMatrixType p(fiberStartSeed.covariance);
+  ukfStateVector state = fiberStartSeed.state;
+  ukfStateSquareMatrix p(fiberStartSeed.covariance);
   /* 
   I don't create new variables in a SeedPointInfo for rtop values and keep
   everything in fa variables just to keep consistency with other models 
@@ -1376,7 +1376,7 @@ void Tractography::Follow(const int thread_id,
 
   // Tract the fiber.
   ukfMatrixType signal_tmp(_model->signal_dim(), 1);
-  ukfMatrixType state_tmp(_model->state_dim(), 1);
+  ukfStateVector state_tmp;
 
   int stepnr = 0;
   while (true)
@@ -1468,8 +1468,8 @@ void Tractography::Follow3T(const int thread_id,
 
   // Unpack the fiberStartSeed information.
   vec3_t x = fiberStartSeed.point;
-  State state = fiberStartSeed.state;
-  ukfMatrixType p(fiberStartSeed.covariance);
+  ukfStateVector state = fiberStartSeed.state;
+  ukfStateSquareMatrix p(fiberStartSeed.covariance);
   /* 
   I don't create new variables in a SeedPointInfo for rtop values and keep
   everything in fa variables just to keep consistency with other models 
@@ -1578,8 +1578,8 @@ void Tractography::Step(const int thread_id,
                           vec3_t &m1,
                           vec3_t &m2,
                           vec3_t &m3,
-                          State &state,
-                          ukfMatrixType &covariance,
+                          ukfStateVector &state,
+                          ukfStateSquareMatrix &covariance,
                           ukfPrecisionType &dNormMSE,
                           ukfPrecisionType &rtop1,
                           ukfPrecisionType &rtop2,
@@ -1593,11 +1593,11 @@ void Tractography::Step(const int thread_id,
          static_cast<int>(covariance.rows()) == _model->state_dim());
   assert(static_cast<int>(state.size()) == _model->state_dim());
   */
-  State state_new(_model->state_dim());
-  State state_prev(_model->state_dim());
+  ukfStateVector state_new(_model->state_dim());
+  ukfStateVector state_prev(_model->state_dim());
   state_prev = state;
 
-  ukfMatrixType covariance_new(_model->state_dim(), _model->state_dim());
+  ukfStateSquareMatrix covariance_new;
   covariance_new.setConstant(ukfZero);
 
   // Use the Unscented Kalman Filter to get the next estimate.
@@ -1638,11 +1638,11 @@ void Tractography::Step(const int thread_id,
 }
 
 void Tractography::LoopUKF(const int thread_id,
-                           State &state,
-                           ukfMatrixType &covariance,
+                           ukfStateVector &state,
+                           ukfStateSquareMatrix &covariance,
                            ukfVectorType &signal,
-                           State &state_new,
-                           ukfMatrixType &covariance_new,
+                           ukfStateVector &state_new,
+                           ukfStateSquareMatrix &covariance_new,
                            ukfPrecisionType &dNormMSE)
 {
   _ukf[thread_id]->Filter(state, covariance, signal, state_new, covariance_new, dNormMSE);
@@ -1653,7 +1653,7 @@ void Tractography::LoopUKF(const int thread_id,
   ukfPrecisionType er_org = dNormMSE;
   ukfPrecisionType er = er_org;
 
-  State state_prev = state;
+  ukfStateVector state_prev = state;
 
   for (int jj = 0; jj < _maxUKFIterations; ++jj)
   {
@@ -1676,12 +1676,12 @@ void Tractography::SwapState(stdVecState &state,
                              ukfMatrixType &covariance,
                              int i)
 {
-  State tmp_state = ConvertVector<stdVecState, State>(state);
+  ukfStateVector tmp_state = ConvertVector<stdVecState, ukfStateVector>(state);
   SwapState(tmp_state, covariance, i);
-  state = ConvertVector<State, stdVecState>(tmp_state);
+  state = ConvertVector<ukfStateVector, stdVecState>(tmp_state);
 }
 
-void Tractography::SwapState(State &state,
+void Tractography::SwapState(ukfStateVector &state,
                              ukfMatrixType &covariance,
                              int i)
 {
@@ -1779,7 +1779,7 @@ void Tractography::SwapState(State &state,
 }
 
 void Tractography::Record(const vec3_t &x, const ukfPrecisionType rtop1, const ukfPrecisionType rtop2, const ukfPrecisionType rtop3, 
-                          const State &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
+                          const ukfStateVector &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
                           const ukfPrecisionType trace, const ukfPrecisionType trace2)
 {
   /*
@@ -1823,7 +1823,7 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType rtop1, const u
     fiber.free_water.push_back(wiso);
 
     /* Angles */
-    State store_state(state);
+    ukfStateVector store_state(state);
     vec3_t dir1;
     initNormalized(dir1, store_state[0], store_state[1], store_state[2]);
     vec3_t dir2;
@@ -1862,7 +1862,7 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType rtop1, const u
   // Record the state
   if (_record_state)
   {
-    State store_state(state);
+    ukfStateVector store_state(state);
     vec3_t dir;
 
     // normalize m1

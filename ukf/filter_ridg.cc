@@ -1,8 +1,8 @@
 #include "filter_ridg.h"
 
-// 2T Bi-Exponential model with spherical ridgelets //
+// 3T Bi-Exponential model with spherical ridgelets //
 // Functions for 3-tensor bi-exponential simple model.
-void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &covMatrix) const
+void Ridg_BiExp_FW::F(ukfStateCovMatrix &X, ukfVectorType s, const ukfMatrixType &covMatrix) const
 {
 	/*
 	assert(_signal_dim > 0);
@@ -315,7 +315,7 @@ ukfPrecisionType Ridg_BiExp_FW::cosine_similarity(vec3_t &First, vec3_t &Second)
 	return dot / (den_a * den_b);
 }
 
-void Ridg_BiExp_FW::F(ukfMatrixType &X) const
+void Ridg_BiExp_FW::F(ukfStateCovMatrix &X) const
 {
 	// Identity version of state-transition function
 	
@@ -383,7 +383,7 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X) const
 		// Free water
 		X(24, i) = CheckZero(X(24, i), "F");
 	}
-};
+}
 
 void Ridg_BiExp_FW::H(const ukfMatrixType &X, ukfMatrixType &Y) const
 {
@@ -500,7 +500,7 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X, ukfMatrixType &Y) const
 	}
 }
 
-void Ridg_BiExp_FW::State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3)
+void Ridg_BiExp_FW::State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3)
 {
 	// Orientations;
 	initNormalized(m1, x[0], x[1], x[2]);
@@ -534,7 +534,7 @@ void Ridg_BiExp_FW::State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &
 		m3 = -m3;
 }
 
-void Ridg_BiExp_FW::State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &m2, vec3_t &m3)
+void Ridg_BiExp_FW::State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1, vec3_t &m2, vec3_t &m3)
 {
 	// Orientations;
 	initNormalized(m1, x[0], x[1], x[2]);

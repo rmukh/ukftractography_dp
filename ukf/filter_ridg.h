@@ -147,13 +147,13 @@ public:
     {
     }
 
-    virtual void F(ukfMatrixType & /* X */, ukfVectorType /* s */, const ukfMatrixType & /* &covMatrix */) const;
-    virtual void F(ukfMatrixType & /* X */) const;
+    virtual void F(ukfStateCovMatrix & /* X */, ukfVectorType /* s */, const ukfMatrixType & /* &covMatrix */) const;
+    virtual void F(ukfStateCovMatrix & /* X */) const;
     virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const;
     ukfPrecisionType cosine_similarity(vec3_t &First, vec3_t &Second) const;
 
-    virtual void State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3);
-    virtual void State2Tensor3T(const State &x, const vec3_t &old_m, vec3_t &m1, vec3_t &m2, vec3_t &m3);
+    virtual void State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3);
+    virtual void State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1, vec3_t &m2, vec3_t &m3);
 
     /** The minimum/maximum value of the eigenvalues. Clamped in each step */
     const ukfPrecisionType _lambda_min_fast_diffusion;

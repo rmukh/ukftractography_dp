@@ -71,8 +71,8 @@ public:
   }
 
   /** state transition function */
-  virtual void F(ukfMatrixType & /* X */) const = 0;
-  virtual void F(ukfMatrixType & /* X */, ukfVectorType /* s */, const ukfMatrixType & /* covMatrix */) const = 0;
+  virtual void F(ukfStateCovMatrix & /* X */) const = 0;
+  virtual void F(ukfStateCovMatrix & /* X */, ukfVectorType /* s */, const ukfMatrixType & /* covMatrix */) const = 0;
 
   /** observation, i.e. signal reconstruction */
   virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const = 0;
@@ -82,27 +82,27 @@ public:
   // lambdas).
 
   /** Extracts principal diffusion direction and eigen values from the state for the 1T cases */
-  virtual void State2Tensor1T(const State &, vec3_t &, vec3_t &)
+  virtual void State2Tensor1T(const ukfStateVector &, vec3_t &, vec3_t &)
   {
     assert(!"Not implemented");
   }
 
   /** Extracts principal diffusion direction and eigen values from the state for the 2T cases */
-  virtual void State2Tensor2T(const State &, const vec3_t &, vec3_t &,
+  virtual void State2Tensor2T(const ukfStateVector &, const vec3_t &, vec3_t &,
                               vec3_t &, vec3_t &, vec3_t &)
   {
     assert(!"Not implemented");
   }
 
   /** Extracts principal diffusion direction and eigen values from the state for the 3T cases */
-  virtual void State2Tensor3T(const State &, const vec3_t &, vec3_t &,
+  virtual void State2Tensor3T(const ukfStateVector &, const vec3_t &, vec3_t &,
                               vec3_t &, vec3_t &, vec3_t &, vec3_t &,
                               vec3_t &)
   {
     assert(!"Not implemented");
   }
 
-  virtual void State2Tensor3T(const State &, const vec3_t &, vec3_t &, vec3_t &, vec3_t &)
+  virtual void State2Tensor3T(const ukfStateVector &, const vec3_t &, vec3_t &, vec3_t &, vec3_t &)
   {
     assert(!"Not implemented");
   }

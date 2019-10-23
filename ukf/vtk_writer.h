@@ -115,7 +115,7 @@ protected:
    * \param[out] D The calculated diffusion tensor
    * \todo I think there is something wrong with choosing a orthonormal basis for the tensor
   */
-  void State2Tensor(const State &state, mat33_t &D, const int tensorNumber) const;
+  void State2Tensor(const ukfStateVector &state, mat33_t &D, const int tensorNumber) const;
 
   /** The diffusion weighted signal data */
   const ISignalData *_signal_data;

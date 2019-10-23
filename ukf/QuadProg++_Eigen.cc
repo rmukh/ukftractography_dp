@@ -262,7 +262,7 @@ void delete_constraint(ukfMatrixType &R, ukfMatrixType &J, Eigen::VectorXi &A, u
   }
 }
 
-void cholesky_decomposition(ukfMatrixType &A)
+void cholesky_decomposition(ukfStateSquareMatrix &A)
 {
   const int n = A.rows();
 
@@ -299,7 +299,7 @@ void cholesky_decomposition(ukfMatrixType &A)
   }
 }
 
-inline void forward_elimination(const ukfMatrixType &L, ukfVectorType &y, const ukfVectorType &b)
+inline void forward_elimination(const ukfStateSquareMatrix &L, ukfVectorType &y, const ukfVectorType &b)
 {
   const int n = L.rows();
 
@@ -315,7 +315,7 @@ inline void forward_elimination(const ukfMatrixType &L, ukfVectorType &y, const 
   }
 }
 
-inline void backward_elimination(const ukfMatrixType &U, ukfVectorType &x, const ukfVectorType &y)
+inline void backward_elimination(const ukfStateSquareMatrix &U, ukfStateVector &x, const ukfVectorType &y)
 {
   const int n = U.rows();
 
@@ -331,7 +331,7 @@ inline void backward_elimination(const ukfMatrixType &U, ukfVectorType &x, const
   }
 }
 
-void cholesky_solve(const ukfMatrixType &L, ukfVectorType &x, const ukfVectorType &b)
+void cholesky_solve(const ukfStateSquareMatrix &L, ukfStateVector &x, const ukfStateVector &b)
 {
   const int n = L.rows();
 
@@ -412,10 +412,10 @@ void print_vector(const char *name, const typename Eigen::Matrix<T, Eigen::Dynam
 
 // The Solving function, implementing the Goldfarb-Idnani method
 
-ukfPrecisionType solve_quadprog(ukfMatrixType &G, ukfVectorType &g0,
+ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
                                 const ukfMatrixType &CE, const ukfVectorType &ce0,
                                 const ukfMatrixType &CI, const ukfVectorType &ci0,
-                                ukfVectorType &x)
+                                ukfStateVector &x)
 {
   std::ostringstream msg;
 

@@ -125,7 +125,7 @@ void VtkWriter::PopulateFibersAndTensors(vtkPolyData *polyData,
         const size_t fiber_size = fibers[i].position.size();
         for (size_t j = 0; j < fiber_size; ++j)
         {
-          const State &state = fibers[i].state[j];
+          const ukfStateVector &state = fibers[i].state[j];
           State2Tensor(state, D, local_tensorNumber);
           ukfPrecisionType tmp[9];
           for (unsigned ii = 0, v = 0; ii < 3; ++ii)
@@ -741,7 +741,7 @@ int VtkWriter::Write(const std::string &file_name,
       const int fiber_size = static_cast<int>(fibers[i].position.size());
       for (int j = 0; j < fiber_size; ++j)
       {
-        const State &state = fibers[i].state[j];
+        const ukfStateVector &state = fibers[i].state[j];
         for (int k = 0; k < state_dim; ++k)
         {
           tmpArray[k] = state[k];
@@ -839,7 +839,7 @@ int VtkWriter::WriteGlyphs(const std::string &file_name,
     for (int j = 0; j < fiber_size; ++j)
     {
       vec3_t point = fibers[i].position[j];
-      const State &state = fibers[i].state[j];
+      const ukfStateVector &state = fibers[i].state[j];
 
       // Get the directions.
       vec3_t m1 = vec3_t::Zero();
@@ -977,7 +977,7 @@ vec3_t VtkWriter::PointConvert(const vec3_t &point)
   return rval;
 }
 
-void VtkWriter::State2Tensor(const State &state, mat33_t &D, const int tensorNumber) const
+void VtkWriter::State2Tensor(const ukfStateVector &state, mat33_t &D, const int tensorNumber) const
 {
   vec3_t eigenVec1;
   const int tensorIndex = (tensorNumber - 1);

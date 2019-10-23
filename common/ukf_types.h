@@ -28,10 +28,16 @@ typedef Eigen::DiagonalMatrix<ukfPrecisionType, 3> diagmat3_t;
 
 typedef Eigen::VectorXd signalMaskType;
 
+// UKF filter predefined types for DP model speedup
+typedef Eigen::Matrix<ukfPrecisionType, 25, 51> ukfStateCovMatrix;
+typedef Eigen::Matrix<ukfPrecisionType, 25, 25> ukfStateSquareMatrix;
+typedef Eigen::Matrix<ukfPrecisionType, 51, 51> ukfWeightsRepeatedMatrix;
+typedef Eigen::Matrix<ukfPrecisionType, 51, 1> ukfWeightsRepeatedVector;
+typedef Eigen::Matrix<ukfPrecisionType, 25, 1> ukfStateVector;
+
 /** Short hand for the state vector */
 #include <vector>
 typedef std::vector<ukfPrecisionType> stdVecState;
-typedef ukfVectorType State;
 
 /**
  * \struct vec3_t

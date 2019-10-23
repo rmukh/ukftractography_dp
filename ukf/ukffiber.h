@@ -32,8 +32,8 @@ struct UKFFiber
   std::vector<ukfPrecisionType> fa3;
   /** Array 2 norm of the covariance matrix */
   std::vector<ukfPrecisionType> norm;
-  /** State of the current model at the current position*/
-  std::vector<State> state;
+  /** ukfStateVector of the current model at the current position*/
+  std::vector<ukfStateVector> state;
   /** dim(state) x dim(state) matrix */
   std::vector<ukfMatrixType> covariance;
   /** Percentage of free water i.e. 1-w */

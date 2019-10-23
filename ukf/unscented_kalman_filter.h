@@ -38,12 +38,12 @@ public:
    * \param[out] p_new Updated covariance
    * \param[out] The normalized mean squared reconstruction error
   */
-  void Filter(const State& x, const ukfMatrixType& p, const ukfVectorType& z, // This is the signal
-              State& x_new, ukfMatrixType& p_new, ukfPrecisionType& dNormMSE);
+  void Filter(const ukfStateVector& x, const ukfStateSquareMatrix& p, const ukfVectorType& z, // This is the signal
+              ukfStateVector& x_new, ukfStateSquareMatrix& p_new, ukfPrecisionType& dNormMSE);
 
 private:
   /** Spreads the points around the current state using the covariance. */
-  void SigmaPoints(const State& x, const ukfMatrixType& p, ukfMatrixType& x_spread);
+  void SigmaPoints(const ukfStateVector& x, const ukfStateSquareMatrix& p, ukfStateCovMatrix& x_spread);
 
   /**
    * \brief Contrains the state matrix
@@ -51,17 +51,17 @@ private:
    *          Will be constrained in this function.
    * \param W The covariance necesseray for contraining. See the malcolm MICCAI paper.
   */
-  void Constrain(ukfMatrixType& X, const ukfMatrixType& W);
+  void Constrain(ukfStateCovMatrix& X, const ukfStateSquareMatrix& W);
 
   /**
    * \brief Contrains the state vector
    * \param X The state vector which will be constrained.
    * \param W The covariance necesseray for contraining. See the malcolm MICCAI paper.
   */
-  void Constrain(ukfVectorType& x, const ukfMatrixType& W);
+  void Constrain(ukfStateVector& x, const ukfMatrixType& W);
 
   /** A helper function to check if the constrain operation is necessary */
-  bool violatesContraints(ukfVectorType& x);
+  bool violatesContraints(ukfStateVector& x);
 
   /** Pointer to the filter model */
   const SignalModel * const m_FilterModel;
@@ -73,10 +73,10 @@ private:
   ukfPrecisionType m_Scale;
 
   /** The weights for spreading the sigma points */
-  ukfVectorType m_Weights;
+  ukfWeightsRepeatedVector m_Weights;
 
   /** Matrix of weights for spreading of sigma points consisting of the repeted entries of m_Weights */
-  ukfMatrixType m_WeightsRepeated;
+  ukfWeightsRepeatedMatrix m_WeightsRepeated;
 
   /** A fixed parameters used for spreading of the sigma points */
   ukfPrecisionType m_SigmaPointSpread;

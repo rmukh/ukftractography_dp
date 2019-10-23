@@ -22,9 +22,9 @@ class SeedPointInfo
 public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   /** The state of the state-space represenation of the model. */
-  State state;
+  ukfStateVector state;
   /** The covariance matrix of the state */
-  ukfMatrixType covariance;
+  ukfStateSquareMatrix covariance;
   /** The location of the seed */
   vec3_t point;
   /** The starting direction for the simple model */
