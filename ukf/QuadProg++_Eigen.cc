@@ -74,8 +74,8 @@ inline void update_r(const ukfMatrixType &R, ukfVectorType &r, const ukfVectorTy
 
 inline ukfPrecisionType distance(ukfPrecisionType a, ukfPrecisionType b)
 {
-  const ukfPrecisionType a1 = fabs(a);
-  const ukfPrecisionType b1 = fabs(b);
+  const ukfPrecisionType a1 = std::fabs(a);
+  const ukfPrecisionType b1 = std::fabs(b);
   if (a1 > b1)
   {
     ukfPrecisionType t = (b1 / a1);
@@ -113,7 +113,7 @@ bool add_constraint(ukfMatrixType &R, ukfMatrixType &J, ukfVectorType &d, int &i
     ukfPrecisionType cc = d[j - 1];
     ukfPrecisionType ss = d[j];
     ukfPrecisionType h = distance(cc, ss);
-    if (fabs(h) < std::numeric_limits<ukfPrecisionType>::epsilon()) // h == 0
+    if (std::fabs(h) < std::numeric_limits<ukfPrecisionType>::epsilon()) // h == 0
     {
       continue;
     }
@@ -155,12 +155,12 @@ bool add_constraint(ukfMatrixType &R, ukfMatrixType &J, ukfVectorType &d, int &i
   print_vector("d", d, iq);
 #endif
 
-  if (fabs(d[iq - 1]) <= std::numeric_limits<ukfPrecisionType>::epsilon() * R_norm)
+  if (std::fabs(d[iq - 1]) <= std::numeric_limits<ukfPrecisionType>::epsilon() * R_norm)
   {
     // problem degenerate
     return false;
   }
-  R_norm = std::max<ukfPrecisionType>(R_norm, fabs(d[iq - 1]));
+  R_norm = std::max<ukfPrecisionType>(R_norm, std::fabs(d[iq - 1]));
   return true;
 }
 
@@ -222,7 +222,7 @@ void delete_constraint(ukfMatrixType &R, ukfMatrixType &J, Eigen::VectorXi &A, u
     ukfPrecisionType cc = R(j, j);
     ukfPrecisionType ss = R(j + 1, j);
     ukfPrecisionType h = distance(cc, ss);
-    if (fabs(h) < std::numeric_limits<ukfPrecisionType>::epsilon()) // h == 0
+    if (std::fabs(h) < std::numeric_limits<ukfPrecisionType>::epsilon()) // h == 0
     {
       continue;
     }
@@ -581,7 +581,7 @@ ukfPrecisionType solve_quadprog(ukfMatrixType &G, ukfVectorType &g0,
     /* compute full step length t2: i.e., the minimum step in primal space s.t. the contraint
      *      becomes feasible */
     ukfPrecisionType t2 = ukfZero;
-    if (fabs(dot_product(z, z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
+    if (std::fabs(dot_product(z, z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
     {
       t2 = (-dot_product(np, x) - ce0[i]) / dot_product(z, np);
     }
@@ -725,7 +725,7 @@ l2a: /* Step 2a: determine step direction */
   }
   ukfPrecisionType t2 = -1;
   /* Compute t2: full step length (minimum step in primal space such that the constraint ip becomes feasible */
-  if (fabs(dot_product(z, z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
+  if (std::fabs(dot_product(z, z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
   {
     t2 = -s[ip] / dot_product(z, np);
     if (t2 < 0) // patch suggested by Takano Akio for handling numerical inconsistencies
@@ -794,7 +794,7 @@ l2a: /* Step 2a: determine step direction */
   print_vector("A", A, iq + 1);
 #endif
 
-  if (fabs(t - t2) < std::numeric_limits<ukfPrecisionType>::epsilon())
+  if (std::fabs(t - t2) < std::numeric_limits<ukfPrecisionType>::epsilon())
   {
 #ifdef TRACE_SOLVER
     std::cout << "Full step has taken " << t << std::endl;

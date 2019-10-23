@@ -12,9 +12,9 @@
 
 ukfPrecisionType l2fa(ukfPrecisionType l1, ukfPrecisionType l2, ukfPrecisionType l3)
 {
-  if (l2 == l3)
+  if (std::fabs(l2 - l3) < std::numeric_limits<double>::epsilon())
   {
-    return fabs(l1 - l2) / sqrt(l1 * l1 + 2.0 * l2 * l2);
+    return std::fabs(l1 - l2) / sqrt(l1 * l1 + 2.0 * l2 * l2);
   }
   else
   {

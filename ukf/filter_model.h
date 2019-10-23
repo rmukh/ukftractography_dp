@@ -191,7 +191,7 @@ public:
 protected:
   /** Checks if d is smaller than a small negative threshold. If yes an error is returned. Otherwise d is rounded to ukfZero
     */
-  ukfPrecisionType CheckZero(const ukfPrecisionType &d) const;
+  ukfPrecisionType CheckZero(const ukfPrecisionType &d, const std::string &func_name) const;
 
   /** The dimension of the state */
   const int _state_dim;

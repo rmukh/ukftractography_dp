@@ -140,7 +140,7 @@ public:
         _e.resize(1);
 
         _E(21, 0) = _E(22, 0) = _E(23, 0) = -1.0;
-        _e(0) = 1;
+        _e(0) = 1.0;
     }
 
     virtual ~Ridg_BiExp_FW()

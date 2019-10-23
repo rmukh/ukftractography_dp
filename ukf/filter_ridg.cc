@@ -107,12 +107,12 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
 		X(20, i) = std::min(X(20, i), _lambda_max_diffusion);
 
 		// Weights
-		X(21, i) = CheckZero(X(21, i));
-		X(22, i) = CheckZero(X(22, i));
-		X(23, i) = CheckZero(X(23, i));
+		X(21, i) = CheckZero(X(21, i), "F");
+		X(22, i) = CheckZero(X(22, i), "F");
+		X(23, i) = CheckZero(X(23, i), "F");
 
 		// Free water
-		X(24, i) = CheckZero(X(24, i));
+		X(24, i) = CheckZero(X(24, i), "F");
 
 		for (unsigned int v = 0; v < exe_vol.rows() / 2; v += 2)
 		{
@@ -264,9 +264,9 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X, ukfVectorType s, const ukfMatrixType &co
 		X(22, i) = X(22, i) / denom;
 		X(23, i) = X(23, i) / denom;
 
-		X(21, i) = CheckZero(X(21, i));
-		X(22, i) = CheckZero(X(22, i));
-		X(23, i) = CheckZero(X(23, i));
+		X(21, i) = CheckZero(X(21, i), "F");
+		X(22, i) = CheckZero(X(22, i), "F");
+		X(23, i) = CheckZero(X(23, i), "F");
 
 		// ukfPrecisionType degre = std::acos(std::min(std::max(m1.dot(m_temp) / (m1.norm() * m_temp.norm()), -1.0), 1.0)) * 180 / Pi;
 
@@ -318,12 +318,12 @@ ukfPrecisionType Ridg_BiExp_FW::cosine_similarity(vec3_t &First, vec3_t &Second)
 void Ridg_BiExp_FW::F(ukfMatrixType &X) const
 {
 	// Identity version of state-transition function
-	/*
+	
 	assert(_signal_dim > 0);
 	assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
 		   (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
 			X.cols() == 1));
-			*/
+	
 	for (unsigned int i = 0; i < X.cols(); ++i)
 	{
 		// Directions
@@ -376,18 +376,17 @@ void Ridg_BiExp_FW::F(ukfMatrixType &X) const
 		X(20, i) = std::min(std::max(X(20, i), _lambda_min_slow_diffusion), _lambda_max_diffusion);
 
 		// Weights
-		X(21, i) = CheckZero(X(21, i));
-		X(22, i) = CheckZero(X(22, i));
-		X(23, i) = CheckZero(X(23, i));
+		X(21, i) = CheckZero(X(21, i), "F");
+		X(22, i) = CheckZero(X(22, i), "F");
+		X(23, i) = CheckZero(X(23, i), "F");
 
 		// Free water
-		X(24, i) = CheckZero(X(24, i));
+		X(24, i) = CheckZero(X(24, i), "F");
 	}
 };
 
 void Ridg_BiExp_FW::H(const ukfMatrixType &X, ukfMatrixType &Y) const
 {
-	/*
 	assert(_signal_dim > 0);
 	assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
 		   (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
@@ -396,7 +395,7 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X, ukfMatrixType &Y) const
 		   (Y.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
 			Y.cols() == 1));
 	assert(_signal_data);
-*/
+
 	const stdVec_t &gradients = _signal_data->gradients();
 	const ukfVectorType &b = _signal_data->GetBValues();
 
@@ -443,12 +442,12 @@ void Ridg_BiExp_FW::H(const ukfMatrixType &X, ukfMatrixType &Y) const
 		// }
 
 		// Get compartments weights
-		const ukfPrecisionType w1 = CheckZero(X(21, i));
-		const ukfPrecisionType w2 = CheckZero(X(22, i));
-		const ukfPrecisionType w3 = CheckZero(X(23, i));
+		const ukfPrecisionType w1 = CheckZero(X(21, i), "H");
+		const ukfPrecisionType w2 = CheckZero(X(22, i), "H");
+		const ukfPrecisionType w3 = CheckZero(X(23, i), "H");
 
 		// Get free water weight from state
-		const ukfPrecisionType wiso = CheckZero(X(24, i));
+		const ukfPrecisionType wiso = CheckZero(X(24, i), "H");
 
 		// Fill in lambdas matricies
 		diagmat3_t lambdas11, lambdas12, lambdas21, lambdas22, lambdas31, lambdas32;

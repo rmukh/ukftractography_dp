@@ -9,11 +9,11 @@
 #include <iostream>
 #include "utilities.h"
 
-ukfPrecisionType SignalModel::CheckZero(const ukfPrecisionType &local_d) const
+ukfPrecisionType SignalModel::CheckZero(const ukfPrecisionType &local_d, const std::string &func_name) const
 {
   if (local_d < 0)
   {
-    std::cout << "A value turns zero" << std::endl;
+    std::cout << "A value turns zero in " << func_name << std::endl;
     return ukfZero;
   }
   return local_d;

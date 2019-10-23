@@ -535,7 +535,7 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
   for (unsigned int i = 0; i < gradientCount; ++i)
   {
     const ukfPrecisionType gradientNorm = _gradients[i].norm();
-    const ukfPrecisionType effectiveBvalue = (fabs(gradientNorm - ukfOne) > 1e-4) ? gradientNorm * gradientNorm * bValue : bValue;
+    const ukfPrecisionType effectiveBvalue = (std::fabs(gradientNorm - ukfOne) > 1e-4) ? gradientNorm * gradientNorm * bValue : bValue;
     //http://www.na-mic.org/Wiki/index.php/NAMIC_Wiki:DTI:Nrrd_format
     //It is after this magnitude rescaling that the nominal bValue (given via "DWMRI_b-value:=bValue") applies.
 

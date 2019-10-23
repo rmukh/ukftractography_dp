@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
       {
       const float f1 = farray1->GetValue(j);
       const float f2 = farray2->GetValue(j);
-      if(fabs(f1 - f2) > 1.0e-3)
+      if(std::fabs(f1 - f2) > 1.0e-3)
         {
         std::cerr << "Difference is aove tolerance "
                   << f1 << " " << f2 << std::endl;

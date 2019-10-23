@@ -1305,7 +1305,7 @@ void Tractography::UnpackTensor(const ukfVectorType &b, // b - bValues
     ukfPrecisionType phi, psi;
     const ukfPrecisionType theta = std::acos(Q(2, 2));
     ukfPrecisionType epsilon = 1.0e-10;
-    if (fabs(theta) > epsilon)
+    if (std::fabs(theta) > epsilon)
     {
       phi = atan2(Q(1, 2), Q(0, 2));
       psi = atan2(Q(2, 1), -Q(2, 0));

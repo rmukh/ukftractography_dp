@@ -357,7 +357,7 @@ public:
             q = (gamma + (d_best - d_step)) + gamma;
             r = p / q;
 
-            if (r < 0.0 && gamma != 0.0)
+            if (r < 0.0 && !(std::fabs(gamma) < std::numeric_limits<double>::epsilon()))
             {
                 step_c = step + r * (st_best - step);
             }

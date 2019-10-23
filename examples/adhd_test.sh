@@ -25,13 +25,12 @@ eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --tracts $output_path \
- --diffusionPropagator \
  --stepLength 0.5 \
+ --numThreads 1 \
  --recordNMSE \
  --recordWeights \
  --recordRTOP \
- --seedsFile $seeds_path \
- --numTensor 3 | tee $logFile
+ --seedsFile $seeds_path | tee $logFile
  end=`date +%s`
 
 runtime=$((end - start))

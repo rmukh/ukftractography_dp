@@ -114,14 +114,14 @@ bool UnscentedKalmanFilter::violatesContraints(ukfVectorType &x)
     }
   }
 
-  const ukfVectorType e_test = (-ukfOne) * (m_FilterModel->E().transpose()) * x; // -E'*x
-  for (unsigned int i = 0; i < e_test.size(); ++i)                               // if any(-E'*x != e) constraint is
-                                                                                 // broken
+  // Optimized for this UKF tractography only. Not a general implementation
+  const ukfPrecisionType e_test = ((-ukfOne) * (m_FilterModel->E().transpose()) * x)[0]; // -E'*x
+                                                                                         // if any(-E'*x != e) constraint is
+                                                                                         // broken
+
+  if (!(std::fabs(e_test - (m_FilterModel->e())[0]) < std::numeric_limits<double>::epsilon()))
   {
-    if (e_test[i] != (m_FilterModel->e())[i])
-    {
-      return true;
-    }
+    return true;
   }
   return false;
 }
