@@ -324,8 +324,19 @@ void NrrdData::GetSeeds(const std::vector<int> &labels,
               value = static_cast<int *>(_seed_data)[index];
             }
             break;
+            case 9:
+            {
+              value = ceil(static_cast<float *>(_seed_data)[index]); // Any value > 0 round to 1
+            }
+            break;
+            case 10:
+            {
+              value = ceil(static_cast<double *>(_seed_data)[index]); // Any value > 0 round to 1
+            }
+            break;
             default:
               std::cout << "Unsupported data type for seed file!" << std::endl;
+              throw;
               assert(false);
             }
             if (*cit == value)
