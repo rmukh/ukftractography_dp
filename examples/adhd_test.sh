@@ -18,7 +18,7 @@ mask_path="/home/rinat/Desktop/ukftests/epi_corrected_tensormask.nrrd"
 seeds_path="/home/rinat/Desktop/ukftests/Segmentation-label_363x.nrrd"
 
 # OUTPUT FIBER
-output_path='/home/rinat/Desktop/ukftests/adhd363/seeds_tc_363x_NO_init_multi_3.vtk'
+output_path='/home/rinat/Desktop/ukftests/adhd363/seeds_tc_363x_NO_init_multi_4.vtk'
 
 # --seedsFile $seeds_path \
 eval $BINARY \
@@ -26,6 +26,7 @@ eval $BINARY \
  --maskFile $mask_path \
  --tracts $output_path \
  --stepLength 0.5 \
+ --numThreads 1 \
  --seedsFile $seeds_path | tee $logFile
  end=`date +%s`
 

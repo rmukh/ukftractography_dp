@@ -1376,7 +1376,6 @@ void Tractography::Follow(const int thread_id,
 
   // Tract the fiber.
   ukfMatrixType signal_tmp(_model->signal_dim(), 1);
-  ukfStateVector state_tmp;
 
   int stepnr = 0;
   while (true)
@@ -1391,9 +1390,7 @@ void Tractography::Follow(const int thread_id,
     // the fiber gets too long.
     const bool is_brain = _signal_data->ScalarMaskValue(x) > 0; //_signal_data->Interp3ScalarMask(x) > 0.1;
 
-    state_tmp.col(0) = state;
-
-    _model->H(state_tmp, signal_tmp);
+    _model->H(state, signal_tmp);
 
     //const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = false;
@@ -1506,7 +1503,6 @@ void Tractography::Follow3T(const int thread_id,
 
   // Tract the fiber.
   ukfMatrixType signal_tmp(_model->signal_dim(), 1);
-  ukfMatrixType state_tmp(_model->state_dim(), 1);
 
   int stepnr = 0;
   while (true)
@@ -1522,9 +1518,7 @@ void Tractography::Follow3T(const int thread_id,
     // the fiber gets too long.
     const bool is_brain = _signal_data->ScalarMaskValue(x) > 0; //_signal_data->Interp3ScalarMask(x) > 0.1;
 
-    state_tmp.col(0) = state;
-
-    _model->H(state_tmp, signal_tmp);
+    _model->H(state, signal_tmp);
 
     const ukfPrecisionType mean_signal = s2adc(signal_tmp);
     bool in_csf = (mean_signal < _mean_signal_min);

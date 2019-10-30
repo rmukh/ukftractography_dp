@@ -120,7 +120,7 @@ public:
         ukfPrecisionType residual = 0.0;
 
         // Convert the parameter to the ukfMtarixType
-        ukfVectorType localState(x.size() + _fixed_params.size());
+        ukfStateVector localState;
         if (phase == 1)
         {
             localState(0) = _fixed_params(0);

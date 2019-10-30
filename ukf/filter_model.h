@@ -75,7 +75,8 @@ public:
   virtual void F(ukfStateCovMatrix & /* X */, ukfVectorType /* s */, const ukfMatrixType & /* covMatrix */) const = 0;
 
   /** observation, i.e. signal reconstruction */
-  virtual void H(const ukfMatrixType &X, ukfMatrixType &Y) const = 0;
+  virtual void H(const ukfStateCovMatrix & /* X */, ukfMatrixType & /* Y */) const = 0;
+  virtual void H(const ukfStateVector &, ukfMatrixType &) const = 0;
 
   // Functions that convert the state into a tensor representation that can be
   // used for tractography (meaning the main direction and all the eigenvalues/
@@ -255,7 +256,7 @@ inline ukfPrecisionType BhattacharyyaCoeff(vec3_t &x_sr, vec3_t &x_pred, const u
 {
   vec3_t diff = x_sr - x_pred;
   ukfMatrixType cov_total = (cov + cov2) / 2.0;
-  return std::exp(-( (0.125 * diff.transpose() * cov_total.inverse() * diff) + 0.5 * std::log(cov_total.determinant() / std::sqrt(cov.determinant() * cov2.determinant()))));
+  return std::exp(-((0.125 * diff.transpose() * cov_total.inverse() * diff) + 0.5 * std::log(cov_total.determinant() / std::sqrt(cov.determinant() * cov2.determinant()))));
 }
 
 inline ukfPrecisionType AngularSimilarity(vec3_t &x_sr, vec3_t &x_pred)
