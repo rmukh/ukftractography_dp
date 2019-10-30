@@ -22,7 +22,7 @@ public:
                   vector<vector<unsigned>> &connridg, signalMaskType &sm, ukfPrecisionType fl, ukfPrecisionType mot)
         : SignalModel(25, rs, constrained, false),
           _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000.0),
-          _w_fast_diffusion(0.7), m_D_iso(SetIdentityScaled(diff_fw)), A(Aridg), Q(Qridg), fcs(fcsridg), nu(nuridg), conn(connridg),
+          _w_fast_diffusion(0.7), m_D_iso(SetIdentityScaled(diff_fw)), A(Aridg), QRidg(Qridg), fcs(fcsridg), nu(nuridg), conn(connridg),
           signal_mask(sm), fista_lambda(fl), max_odf_thresh(mot)
     {
         // size(X, 'column') == 25
@@ -170,7 +170,7 @@ public:
 
     /** Ridgelets matricies/vectors **/
     ukfMatrixType &A;
-    ukfMatrixType &Q;
+    ukfMatrixType &QRidg;
     ukfMatrixType &fcs;
     ukfMatrixType &nu;
     vector<vector<unsigned>> &conn;

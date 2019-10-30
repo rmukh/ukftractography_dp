@@ -31,7 +31,6 @@ public:
       : _state_dim(local_state_dim),
         _rs(rs), _signal_dim(0), _signal_data(NULL), _constrained(constrained), _ridgelets_used(false)
   {
-    _Q.resize(_state_dim, _state_dim);
     _Q.setConstant(ukfZero); // necessary because otherwise there is memory left overs in the matrix
 
     if (constrained)
@@ -48,7 +47,6 @@ public:
       : _state_dim(local_state_dim),
         _rs(rs), _signal_dim(0), _signal_data(NULL), _constrained(constrained), _ridgelets_used(ridgelets_used)
   {
-    _Q.resize(_state_dim, _state_dim);
     _Q.setConstant(ukfZero); // necessary because otherwise there is memory left overs in the matrix
 
     if (constrained)
@@ -134,7 +132,7 @@ public:
   }
 
   /** The noise in the state transfer function used by the UKF. */
-  const ukfMatrixType &Q() const
+  const ukfStateSquareMatrix &Q() const
   {
     return _Q;
   }
@@ -207,7 +205,7 @@ protected:
   ISignalData *_signal_data;
 
   /** Process noise */
-  ukfMatrixType _Q;
+  ukfStateSquareMatrix _Q;
 
   /** Signal reconstruction noise */
   ukfMatrixType _R;

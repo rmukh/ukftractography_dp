@@ -182,8 +182,8 @@ private:
    * This is used when the main direction of the tractography 'switches' tensor.
   */
 
-  void SwapState(ukfStateVector &state, ukfMatrixType &covariance, int i);
-  void SwapState(stdVecState &state, ukfMatrixType &covariance, int i);
+  void SwapState(ukfStateVector &state, ukfStateSquareMatrix &covariance, int i);
+  void SwapState(stdVecState &state, ukfStateSquareMatrix &covariance, int i);
 
   /**
    * Saves one point along the fiber so that everything can be written to a

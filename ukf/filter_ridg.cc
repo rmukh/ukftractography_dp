@@ -23,7 +23,7 @@ void Ridg_BiExp_FW::F(ukfStateCovMatrix &X, ukfVectorType s, const ukfMatrixType
 		slv.FISTA(C);
 	}
 
-	ukfVectorType ODF = Q * C;
+	ukfVectorType ODF = QRidg * C;
 
 	ukfMatrixType exe_vol;
 	ukfMatrixType dir_vol;

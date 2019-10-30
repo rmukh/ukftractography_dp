@@ -585,17 +585,12 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // STEP 2.1: Use L-BFGS-B from ITK library at the same point in space.
       // The UKF is an estimator, and we want to find the estimate with the smallest error through the iterations
 
-      // Set the covariance value
-      const int state_dim = tmp_info_state.size();
-      info.covariance.resize(state_dim, state_dim);
-      info_inv.covariance.resize(state_dim, state_dim);
-
       // make sure covariances are really empty
       info.covariance.setConstant(ukfZero);
       info_inv.covariance.setConstant(ukfZero);
 
       // fill the diagonal of the covariance matrix with _p0 (zeros elsewhere)
-      for (int local_i = 0; local_i < state_dim; ++local_i)
+      for (int local_i = 0; local_i < 25; ++local_i)
       {
         info.covariance(local_i, local_i) = _p0;
         info_inv.covariance(local_i, local_i) = _p0;
@@ -603,7 +598,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
       // Input of the filter
       ukfStateVector state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_state);
-      ukfMatrixType p(info.covariance);
+      ukfStateSquareMatrix p(info.covariance);
 
       // Estimate the initial state
       // InitLoopUKF(state, p, signal_values[i], dNormMSE);
@@ -1667,7 +1662,7 @@ void Tractography::LoopUKF(const int thread_id,
 }
 
 void Tractography::SwapState(stdVecState &state,
-                             ukfMatrixType &covariance,
+                             ukfStateSquareMatrix &covariance,
                              int i)
 {
   ukfStateVector tmp_state = ConvertVector<stdVecState, ukfStateVector>(state);
@@ -1676,7 +1671,7 @@ void Tractography::SwapState(stdVecState &state,
 }
 
 void Tractography::SwapState(ukfStateVector &state,
-                             ukfMatrixType &covariance,
+                             ukfStateSquareMatrix &covariance,
                              int i)
 {
   // This function is only for Bi-exp model
@@ -1686,7 +1681,7 @@ void Tractography::SwapState(ukfStateVector &state,
   int state_dim = _model->state_dim();
   assert(state_dim == 25);
 
-  ukfMatrixType tmp(state_dim, state_dim);
+  ukfStateSquareMatrix tmp(state_dim, state_dim);
   state_dim = 7;
   --i;
   int j = i == 1 ? 2 : 1;

@@ -27,7 +27,7 @@
 namespace QuadProgPP
 {
 // Utility functions for updating some data needed by the solution method
-inline void compute_d(ukfVectorType &d, const ukfMatrixType &J, const ukfVectorType &np)
+inline void compute_d(ukfStateVector &d, const ukfMatrixType &J, const ukfVectorType &np)
 {
   const int n = d.size();
 
@@ -43,7 +43,7 @@ inline void compute_d(ukfVectorType &d, const ukfMatrixType &J, const ukfVectorT
   }
 }
 
-inline void update_z(ukfVectorType &z, const ukfMatrixType &J, const ukfVectorType &d, int iq)
+inline void update_z(ukfStateVector &z, const ukfMatrixType &J, const ukfVectorType &d, int iq)
 {
   const int n = z.size();
 
@@ -89,7 +89,7 @@ inline ukfPrecisionType distance(ukfPrecisionType a, ukfPrecisionType b)
   return a1 * ::std::sqrt(2.0);
 }
 
-bool add_constraint(ukfMatrixType &R, ukfMatrixType &J, ukfVectorType &d, int &iq, ukfPrecisionType &R_norm)
+bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukfStateVector &d, int &iq, ukfPrecisionType &R_norm)
 {
   const int n = d.size();
 
@@ -164,7 +164,7 @@ bool add_constraint(ukfMatrixType &R, ukfMatrixType &J, ukfVectorType &d, int &i
   return true;
 }
 
-void delete_constraint(ukfMatrixType &R, ukfMatrixType &J, Eigen::VectorXi &A, ukfVectorType &u, int n,
+void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, Eigen::VectorXi &A, ukfVectorType &u, int n,
                        int p, int &iq, int l)
 {
 #ifdef TRACE_SOLVER
@@ -299,7 +299,7 @@ void cholesky_decomposition(ukfStateSquareMatrix &A)
   }
 }
 
-inline void forward_elimination(const ukfStateSquareMatrix &L, ukfVectorType &y, const ukfVectorType &b)
+inline void forward_elimination(const ukfStateSquareMatrix &L, ukfStateVector &y, const ukfVectorType &b)
 {
   const int n = L.rows();
 
@@ -335,7 +335,7 @@ void cholesky_solve(const ukfStateSquareMatrix &L, ukfStateVector &x, const ukfS
 {
   const int n = L.rows();
 
-  ukfVectorType y(n);
+  ukfStateVector y(n);
 
   /* Solve L * y = b */
   forward_elimination(L, y, b);
@@ -469,8 +469,14 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
     throw std::logic_error(msg.str());
   }
   x.resize(n);
-  ukfMatrixType R(n, n), J(n, n);
-  ukfVectorType s(m + p), z(n), r(m + p), d(n), np(n), u(m + p), x_old(n), u_old(m + p);
+  ukfStateSquareMatrix R, J;
+  ukfStateVector z, d, np, x_old;
+  ukfVectorType s(m + p), r(m + p), u(m + p), u_old(m + p);
+
+  std::cout << "s " << s.rows() << " " << s.cols() << std::endl;
+  std::cout << "r " << r.rows() << " " << r.cols() << std::endl;
+  std::cout << "u " << u.rows() << " " << u.cols() << std::endl;
+  std::cout << "u_old " << u_old.rows() << " " << u_old.cols() << std::endl;
 
   ukfPrecisionType inf;
   if (std::numeric_limits<ukfPrecisionType>::has_infinity)
