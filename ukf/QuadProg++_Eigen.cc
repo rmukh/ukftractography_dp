@@ -341,73 +341,6 @@ void cholesky_solve(const ukfStateSquareMatrix &L, ukfStateVector &x, const ukfS
   backward_elimination(L, x, y);
 }
 
-inline ukfPrecisionType dot_product(const ukfVectorType &x, const ukfVectorType &y)
-{
-  int n = x.size();
-  ukfPrecisionType sum;
-
-  sum = ukfZero;
-  for (int i = 0; i < n; ++i)
-  {
-    sum += x[i] * y[i];
-  }
-  return sum;
-}
-
-// Utility functions for printing vectors and matrices
-void print_matrix(const char *name, const ukfMatrixType &A, int n, int m)
-{
-  std::ostringstream s;
-  std::string t;
-
-  if (n == -1)
-  {
-    n = A.rows();
-  }
-  if (m == -1)
-  {
-    m = A.cols();
-  }
-
-  s << name << ": " << std::endl;
-  for (int i = 0; i < n; ++i)
-  {
-    s << " ";
-    for (int j = 0; j < m; ++j)
-    {
-      s << A(i, j) << ", ";
-    }
-    s << std::endl;
-  }
-  t = s.str();
-  t = t.substr(0, t.size() - 3); // To remove the trailing space, comma and newline
-
-  std::cout << t << std::endl;
-}
-
-template <typename T>
-void print_vector(const char *name, const typename Eigen::Matrix<T, Eigen::Dynamic, 1> &v, int n)
-{
-  std::ostringstream s;
-  std::string t;
-
-  if (n == -1)
-  {
-    n = v.size();
-  }
-
-  s << name << ": " << std::endl
-    << " ";
-  for (int i = 0; i < n; ++i)
-  {
-    s << v[i] << ", ";
-  }
-  t = s.str();
-  t = t.substr(0, t.size() - 2); // To remove the trailing space and comma
-
-  std::cout << t << std::endl;
-}
-
 // The Solving function, implementing the Goldfarb-Idnani method
 
 ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
@@ -433,8 +366,8 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
   }
 
   const int n = 25;
-  const int p = CE.cols();
-  const int m = CI.cols();
+  const int p = 1;
+  const int m = 32;
 
   ukfStateSquareMatrix R, J;
   ukfStateVector z, d, np, x_old;
@@ -471,25 +404,17 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
    */
 
   /* compute the trace of the original matrix G */
-  ukfPrecisionType c1 = ukfZero;
-  for (int i = 0; i < n; ++i)
-  {
-    c1 += G(i, i);
-  }
+  ukfPrecisionType c1 = G.trace();
+
   /* decompose the matrix G in the form L^T L */
   cholesky_decomposition(G);
 #ifdef TRACE_SOLVER
   print_matrix("G", G);
 #endif
   /* initialize the matrix R */
-  for (int i = 0; i < n; ++i)
-  {
-    d[i] = ukfZero;
-    for (int j = 0; j < n; ++j)
-    {
-      R(i, j) = ukfZero;
-    }
-  }
+  d.setZero();
+  R.setZero();
+
   ukfPrecisionType R_norm = ukfOne; /* this variable will hold the norm of the matrix R */
 
   /* compute the inverse of the factorized matrix G^-1, this is the initial value for H */
@@ -500,7 +425,7 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
     forward_elimination(G, z, d);
     for (int j = 0; j < n; ++j)
     {
-      J(i, j) = z[j];
+      J(i, j) = z[j]; // change
     }
     c2 += z[i];
     d[i] = ukfZero;
@@ -517,12 +442,10 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
    * x = G^-1 * g0
    */
   cholesky_solve(G, x, g0);
-  for (int i = 0; i < n; ++i)
-  {
-    x[i] = -x[i];
-  }
+  x = -x;
+
   /* and compute the current solution value */
-  ukfPrecisionType f_value = ukfHalf * dot_product(g0, x);
+  ukfPrecisionType f_value = ukfHalf * g0.dot(x);
 #ifdef TRACE_SOLVER
   std::cout << "Unconstrained solution: " << f_value << std::endl;
   print_vector("x", x);
@@ -532,10 +455,8 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
   iq = 0;
   for (int i = 0; i < p; ++i)
   {
-    for (int j = 0; j < n; ++j)
-    {
-      np[j] = CE(j, i);
-    }
+    np = CE.col(i);
+
     compute_d(d, J, np);
     update_z(z, J, d, iq);
     update_r(R, r, d, iq);
@@ -549,15 +470,12 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
     /* compute full step length t2: i.e., the minimum step in primal space s.t. the contraint
      *      becomes feasible */
     ukfPrecisionType t2 = ukfZero;
-    if (std::fabs(dot_product(z, z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
+    if (std::fabs(z.dot(z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
     {
-      t2 = (-dot_product(np, x) - ce0) / dot_product(z, np);
+      t2 = (-np.dot(x)- ce0) / z.dot(np);
     }
     /* set x = x + t2 * z */
-    for (int k = 0; k < n; ++k)
-    {
-      x[k] += t2 * z[k];
-    }
+    x = t2 * z;
 
     /* set u = u+ */
     u[iq] = t2;
@@ -567,7 +485,7 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
     }
 
     /* compute the new solution value */
-    f_value += ukfHalf * (t2 * t2) * dot_product(z, np);
+    f_value += ukfHalf * (t2 * t2) * z.dot(np);
     A[i] = -i - 1;
 
     // NOTE: Removed by CB, its okay not to add an equality constraint!
@@ -584,7 +502,8 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
     iai[i] = i;
   }
 
-l1: iter++;
+l1:
+  iter++;
 #ifdef TRACE_SOLVER
   print_vector("x", x);
 #endif
@@ -605,7 +524,7 @@ l1: iter++;
     ukfPrecisionType sum = ukfZero;
     for (int j = 0; j < n; ++j)
     {
-      sum += CI(j, i) * x[j];
+      sum += CI(j, i) * x[j]; // change
     }
     sum += ci0[i];
     s[i] = sum;
@@ -623,14 +542,11 @@ l1: iter++;
   /* save old values for u and A */
   for (int i = 0; i < iq; ++i)
   {
-    u_old[i] = u[i];
-    A_old[i] = A[i];
+    u_old[i] = u[i]; //change
+    A_old[i] = A[i]; //change
   }
   /* and for x */
-  for (int i = 0; i < n; ++i)
-  {
-    x_old[i] = x[i];
-  }
+  x_old = x;
 
 l2: /* Step 2: check for feasibility and determine a new S-pair */
   for (int i = 0; i < m; ++i)
@@ -648,7 +564,7 @@ l2: /* Step 2: check for feasibility and determine a new S-pair */
   /* set np = n[ip] */
   for (int i = 0; i < n; ++i)
   {
-    np[i] = CI(i, ip);
+    np[i] = CI(i, ip); //change
   }
   /* set u = [u 0]^T */
   u[iq] = ukfZero;
@@ -693,9 +609,9 @@ l2a: /* Step 2a: determine step direction */
   }
   ukfPrecisionType t2 = -1;
   /* Compute t2: full step length (minimum step in primal space such that the constraint ip becomes feasible */
-  if (std::fabs(dot_product(z, z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
+  if (std::fabs(z.dot(z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
   {
-    t2 = -s[ip] / dot_product(z, np);
+    t2 = -s[ip] / z.dot(np);
     if (t2 < 0) // patch suggested by Takano Akio for handling numerical inconsistencies
       t2 = inf;
   }
@@ -741,12 +657,9 @@ l2a: /* Step 2a: determine step direction */
   }
   /* case (iii): step in primal and dual space */
   /* set x = x + t * z */
-  for (int k = 0; k < n; k++)
-  {
-    x[k] += t * z[k];
-  }
+  x = t*z;
   /* update the solution value */
-  f_value += t * dot_product(z, np) * (ukfHalf * t + u[iq]);
+  f_value += t * z.dot(np) * (ukfHalf * t + u[iq]);
   /* u = u + t * [-r 1] */
   for (int k = 0; k < iq; k++)
   {
@@ -789,10 +702,7 @@ l2a: /* Step 2a: determine step direction */
         u[i] = u_old[i];
         iai[A[i]] = -1;
       }
-      for (int i = 0; i < n; ++i)
-      {
-        x[i] = x_old[i];
-      }
+      x = x_old;
       goto l2; /* go to step 2 */
     }
     else
@@ -824,7 +734,7 @@ l2a: /* Step 2a: determine step direction */
   ukfPrecisionType sum = ukfZero;
   for (int k = 0; k < n; k++)
   {
-    sum += CI(k, ip) * x[k];
+    sum += CI(k, ip) * x[k]; //change
   }
   s[ip] = sum + ci0[ip];
 
