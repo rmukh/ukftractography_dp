@@ -47,10 +47,10 @@ namespace QuadProgPP
 */
 ukfPrecisionType solve_quadprog(ukfStateSquareMatrix& G,         // nxn Matrix - Will be changed in the function!
                       ukfStateVector& g0,        // n
-                      const ukfMatrixType& CE,  // nxp - Equality constraints, just a dummy
-                      const ukfVectorType& ce0, // p   - Equality constraints, just a dummy
-                      const ukfMatrixType& CI,  // nxm - Inequality constraints
-                      const ukfVectorType& ci0, // m
+                      const ukfStateVector& CE,  // nxp - Equality constraints, just a dummy
+                      const ukfPrecisionType& ce0, // p   - Equality constraints, just a dummy
+                      const QPInequalityConst& CI,  // nxm - Inequality constraints
+                      const QPInequalityConstVec& ci0, // m
                       ukfStateVector& x);        // n   - Solution of the QP problem
 
 }

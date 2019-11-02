@@ -43,12 +43,8 @@ public:
         // d is the contraint value
         // D'*x >= -d
 
-        const unsigned int N_constr = 32;
-
         // N_constr constraints for the 25 dimensions of the state
-        _D.resize(25, N_constr);
         _D.setConstant(ukfZero);
-        _d.resize(N_constr);
 
         /* Setting the constraints according to D'*x >= -d */
 
@@ -135,12 +131,10 @@ public:
         _d(31) = 1; // wiso <= 1
 
         // Equality constraints (w1 + w2 + w3 = 1)
-        _E.resize(25, 1);
         _E.setConstant(ukfZero);
-        _e.resize(1);
 
         _E(21, 0) = _E(22, 0) = _E(23, 0) = -1.0;
-        _e(0) = 1.0;
+        _e = 1.0;
     }
 
     virtual ~Ridg_BiExp_FW()

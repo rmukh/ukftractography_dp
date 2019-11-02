@@ -60,11 +60,11 @@ void UnscentedKalmanFilter::Constrain(ukfStateVector &x, const ukfMatrixType &W)
     const ukfStateSquareMatrix WTranspose = W.transpose();
     ukfStateSquareMatrix W_tmp = (W + WTranspose) * ukfHalf;
     ukfStateVector g0 = -ukfOne * (W_tmp.transpose()) * x;
-    const ukfVectorType d = m_FilterModel->d(); // the inequality constraints
-    const ukfMatrixType D = m_FilterModel->D(); // -- " --
+    const QPInequalityConstVec d = m_FilterModel->d(); // the inequality constraints
+    const QPInequalityConst D = m_FilterModel->D(); // -- " --
 
-    const ukfVectorType e = m_FilterModel->e(); // the equality constraints
-    const ukfMatrixType E = m_FilterModel->E(); // -- " --
+    const ukfPrecisionType e = m_FilterModel->e(); // the equality constraints
+    const ukfStateVector E = m_FilterModel->E(); // -- " --
 
     const ukfPrecisionType error = solve_quadprog(W_tmp, g0, E, e, D, d, x);
     //std::cout << "after " << x(21) << " " << x(22) << " " << x(23) << " sum " << x(21) + x(22) + x(23) << std::endl;
@@ -103,7 +103,7 @@ bool UnscentedKalmanFilter::violatesContraints(ukfStateVector &x)
                                                                                          // if any(-E'*x != e) constraint is
                                                                                          // broken
 
-  if (!(std::fabs(e_test - (m_FilterModel->e())[0]) < std::numeric_limits<double>::epsilon()))
+  if (!(std::fabs(e_test - (m_FilterModel->e())) < std::numeric_limits<double>::epsilon()))
   {
     return true;
   }

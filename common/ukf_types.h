@@ -35,6 +35,12 @@ typedef Eigen::Matrix<ukfPrecisionType, 51, 51> ukfWeightsRepeatedMatrix;
 typedef Eigen::Matrix<ukfPrecisionType, 51, 1> ukfWeightsRepeatedVector;
 typedef Eigen::Matrix<ukfPrecisionType, 25, 1> ukfStateVector;
 
+// QP related types
+typedef Eigen::Matrix<ukfPrecisionType, 33, 1> QPConstrainedVec;
+typedef Eigen::Matrix<int, 33, 1> QPConstrainedVecInt;
+typedef Eigen::Matrix<unsigned int, 33, 1> QPConstrainedVecUnInt;
+typedef Eigen::Matrix<ukfPrecisionType, 25, 32> QPInequalityConst;
+typedef Eigen::Matrix<ukfPrecisionType, 32, 1> QPInequalityConstVec;
 /** Short hand for the state vector */
 #include <vector>
 typedef std::vector<ukfPrecisionType> stdVecState;

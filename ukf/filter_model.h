@@ -146,25 +146,25 @@ public:
   // The next two functions are only used for the constrained case
 
   /** The inequality constraint matrix for the constrained UKF */
-  const ukfMatrixType &D() const
+  const QPInequalityConst &D() const
   {
     return _D;
   }
 
   /** The inequality constraint right hand side for the constrained UKF */
-  const ukfVectorType &d() const
+  const QPInequalityConstVec &d() const
   {
     return _d;
   }
 
   /** The equality constraint matrix for the constrained UKF */
-  const ukfMatrixType &E() const
+  const ukfStateVector &E() const
   {
     return _E;
   }
 
   /** The equality constraint right hand side for the constrained UKF */
-  const ukfVectorType &e() const
+  const ukfPrecisionType &e() const
   {
     return _e;
   }
@@ -211,16 +211,16 @@ protected:
   ukfMatrixType _R;
 
   /** Inequality constraint matrix, only used for constrained UKF */
-  ukfMatrixType _D;
+  QPInequalityConst _D;
 
   /** Inequality right hand side, only used for constrained UKF */
-  ukfVectorType _d;
+  QPInequalityConstVec _d;
 
   /** Equality constraint matrix, only used for constrained UKF */
-  ukfMatrixType _E;
+  ukfStateVector _E;
 
   /** Equality right hand side, only used for constrained UKF */
-  ukfVectorType _e;
+  ukfPrecisionType _e;
 
   /** Are we using the constrained filter */
   bool _constrained;
