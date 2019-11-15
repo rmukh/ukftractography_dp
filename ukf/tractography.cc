@@ -304,14 +304,13 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   // Create random offsets from the seed voxel.
   stdVec_t rand_dirs;
 
-  if ((seeds.size() == 1 && _seeds_per_voxel <= 1.0) || _seeds_per_voxel <= 1.0) // if there is only one seed don't use offset so fibers can be
-                                                                                 // compared
+  if (seeds.size() == 1 && static_cast<unsigned>(_seeds_per_voxel) == 1) // if there is only one seed don't use offset so fibers can be compared
   {
     rand_dirs.push_back(vec3_t(0, 0, 0) /* make_vec(0, 0, 0) */); // in the test cases.
   }
   else
   {
-    for (int i = 0; i < _seeds_per_voxel; ++i)
+    for (unsigned i = 0; i < static_cast<unsigned>(std::ceil(_seeds_per_voxel)); ++i)
     {
       vec3_t dir(static_cast<ukfPrecisionType>((rand() % 10001) - 5000),
                  static_cast<ukfPrecisionType>((rand() % 10001) - 5000),
@@ -334,15 +333,15 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   stdEigVec_t signal_values;
   ukfVectorType signal(signal_dim * 2);
 
-  int num_less_than_zero = 0;
-  int num_invalid = 0;
+  unsigned num_less_than_zero = 0;
+  unsigned num_invalid = 0;
 
-  int tmp_counter = 1;
+  unsigned tmp_counter = 1;
   unsigned every_n = 1;
 
   if (_seeds_per_voxel < 1.0)
   {
-    every_n = static_cast<unsigned>(1.0 / _seeds_per_voxel); // will be rounded to the nearest int
+    every_n = static_cast<unsigned>(std::round(1.0 / _seeds_per_voxel)); // will be rounded to the nearest int
     std::cout << "Seed every " << every_n << " point" << std::endl;
   }
 
@@ -1326,9 +1325,9 @@ void Tractography::UnpackTensor(const ukfVectorType &b, // b - bValues
 }
 
 void Tractography::Follow(const int thread_id,
-                            const SeedPointInfo &fiberStartSeed,
-                            UKFFiber &fiber,
-                            unsigned char &is_discarded)
+                          const SeedPointInfo &fiberStartSeed,
+                          UKFFiber &fiber,
+                          unsigned char &is_discarded)
 {
   // For ridgelets bi-exp model only!
   int fiber_size = 100;
@@ -1563,18 +1562,18 @@ void Tractography::Follow3T(const int thread_id,
 }
 
 void Tractography::Step(const int thread_id,
-                          vec3_t &x,
-                          vec3_t &m1,
-                          vec3_t &m2,
-                          vec3_t &m3,
-                          ukfStateVector &state,
-                          ukfStateSquareMatrix &covariance,
-                          ukfPrecisionType &dNormMSE,
-                          ukfPrecisionType &rtop1,
-                          ukfPrecisionType &rtop2,
-                          ukfPrecisionType &rtop3,
-                          ukfPrecisionType &rtopModel,
-                          ukfPrecisionType &rtopSignal)
+                        vec3_t &x,
+                        vec3_t &m1,
+                        vec3_t &m2,
+                        vec3_t &m3,
+                        ukfStateVector &state,
+                        ukfStateSquareMatrix &covariance,
+                        ukfPrecisionType &dNormMSE,
+                        ukfPrecisionType &rtop1,
+                        ukfPrecisionType &rtop2,
+                        ukfPrecisionType &rtop3,
+                        ukfPrecisionType &rtopModel,
+                        ukfPrecisionType &rtopSignal)
 {
   // For ridgelets bi-exp model
   /*
@@ -1767,7 +1766,7 @@ void Tractography::SwapState(ukfStateVector &state,
   state(iw) = tmp_weight;
 }
 
-void Tractography::Record(const vec3_t &x, const ukfPrecisionType rtop1, const ukfPrecisionType rtop2, const ukfPrecisionType rtop3, 
+void Tractography::Record(const vec3_t &x, const ukfPrecisionType rtop1, const ukfPrecisionType rtop2, const ukfPrecisionType rtop3,
                           const ukfStateVector &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
                           const ukfPrecisionType trace, const ukfPrecisionType trace2)
 {
