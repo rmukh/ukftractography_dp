@@ -845,76 +845,14 @@ int VtkWriter::WriteGlyphs(const std::string &file_name,
       vec3_t m1 = vec3_t::Zero();
       vec3_t m2 = vec3_t::Zero();
       vec3_t m3 = vec3_t::Zero();
-      if (state.size() == 5)
-      {
-        m1 << state[2], state[1], state[0];
-        m1 = state[3] / 100.0 * m1;
-      }
-      else if (state.size() == 6)
-      {
-        m1 = rotation_main_dir(state[0], state[1], state[2]);
-        const ukfPrecisionType tmp = m1[0];
-        m1[0] = m1[2];
-        m1[2] = tmp;
-        m1 = state[3] / 100.0 * m1;
-      }
-      else if (state.size() == 10)
-      {
-        m1 << state[2], state[1], state[0];
-        m2 << state[7], state[6], state[5];
-        m1 = state[3] / 100.0 * m1;
-        m2 = state[8] / 100.0 * m2;
-      }
-      else if (state.size() == 12)
-      {
-        m1 = rotation_main_dir(state[0], state[1], state[2]);
-        m2 = rotation_main_dir(state[6], state[7], state[8]);
-        ukfPrecisionType tmp = m1[0];
-        m1[0] = m1[2];
-        m1[2] = tmp;
-        tmp = m2[0];
-        m2[0] = m2[2];
-        m2[2] = tmp;
-        m1 = state[3] / 100.0 * m1;
-        m2 = state[9] / 100.0 * m2;
-      }
-      else if (state.size() == 15)
-      {
-        m1 << state[2], state[1], state[0];
-        m2 << state[7], state[6], state[5];
-        m3 << state[12], state[11], state[10];
-        m1 = state[3] / 100.0 * m1;
-        m2 = state[8] / 100.0 * m2;
-        m3 = state[13] / 100.0 * m3;
-      }
-      else if (state.size() == 18)
-      {
-        m1 = rotation_main_dir(state[0], state[1], state[2]);
-        m2 = rotation_main_dir(state[6], state[7], state[8]);
-        m3 = rotation_main_dir(state[12], state[13], state[14]);
-        ukfPrecisionType tmp = m1[0];
-        m1[0] = m1[2];
-        m1[2] = tmp;
-        tmp = m2[0];
-        m2[0] = m2[2];
-        m2[2] = tmp;
-        tmp = m3[0];
-        m3[0] = m3[2];
-        m3[2] = tmp;
-        m1 = state[3] / 100.0 * m1;
-        m2 = state[9] / 100.0 * m2;
-        m3 = state[15] / 100.0 * m3;
-      }
-      else if (state.size() == 25)
-      {
-        // For BiExp diffusion propagator (check if is correct)
-        m1 << state[2], state[1], state[0];
-        m2 << state[9], state[8], state[7];
-        m3 << state[16], state[15], state[14];
-        m1 = state[3] / 100.0 * m1;
-        m2 = state[10] / 100.0 * m2;
-        m3 = state[17] / 100.0 * m3;
-      }
+
+      // For BiExp diffusion propagator (check if is correct)
+      m1 << state[2], state[1], state[0];
+      m2 << state[9], state[8], state[7];
+      m3 << state[16], state[15], state[14];
+      m1 = state[3] / 100.0 * m1;
+      m2 = state[10] / 100.0 * m2;
+      m3 = state[17] / 100.0 * m3;
 
       // Calculate the points. The glyphs are represented as two-point lines.
       vec3_t pos1, pos2;
@@ -934,6 +872,7 @@ int VtkWriter::WriteGlyphs(const std::string &file_name,
       points->InsertNextPoint(pos2[0], pos2[1], pos2[2]);
     }
   }
+  
   // do the lines
   vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
 
