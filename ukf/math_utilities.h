@@ -25,11 +25,11 @@
 
 #define DEG_TO_RAD (UKF_PI/180.0)
 #define RAD_TO_DEG (180.0/UKF_PI)
-inline double DegToRad(const double deg) {
+inline ukfPrecisionType DegToRad(const ukfPrecisionType deg) {
    return deg * DEG_TO_RAD;
 }
 
-inline double RadToDeg(const double rad) {
+inline ukfPrecisionType RadToDeg(const ukfPrecisionType rad) {
    return rad * RAD_TO_DEG;
 }
 

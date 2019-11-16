@@ -70,6 +70,7 @@ void UnscentedKalmanFilter::Constrain(ukfStateVector &x, const ukfMatrixType &W)
     //std::cout << "after " << x(21) << " " << x(22) << " " << x(23) << " sum " << x(21) + x(22) + x(23) << std::endl;
     if (error > 0.01) // error usually much smaller than that, if solve_quadprog fails it returns inf
     {
+      std::cout << "Error = " << error << std::endl;
       throw std::logic_error("solve_quadprog error exceeds threshold 0.01!");
     }
   }
@@ -103,7 +104,7 @@ bool UnscentedKalmanFilter::violatesContraints(ukfStateVector &x)
                                                                                          // if any(-E'*x != e) constraint is
                                                                                          // broken
 
-  if (!(std::fabs(e_test - (m_FilterModel->e())) < std::numeric_limits<double>::epsilon()))
+  if (!(std::fabs(e_test - (m_FilterModel->e())) < std::numeric_limits<ukfPrecisionType>::epsilon()))
   {
     return true;
   }

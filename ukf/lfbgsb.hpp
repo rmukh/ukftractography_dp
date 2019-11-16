@@ -357,7 +357,7 @@ public:
             q = (gamma + (d_best - d_step)) + gamma;
             r = p / q;
 
-            if (r < 0.0 && !(std::fabs(gamma) < std::numeric_limits<double>::epsilon()))
+            if (r < 0.0 && !(std::fabs(gamma) < std::numeric_limits<ukfPrecisionType>::epsilon()))
             {
                 step_c = step + r * (st_best - step);
             }
@@ -575,13 +575,13 @@ public:
 
             if (stage_1 && f_step <= f_best && f_step > armijo_check_val)
             {
-                double f_mod = f_step - step * dgrad_test;
-                double f_best_mod = f_best - st_best * dgrad_test;
-                double f_other_mod = f_other - st_other * dgrad_test;
+                ukfPrecisionType f_mod = f_step - step * dgrad_test;
+                ukfPrecisionType f_best_mod = f_best - st_best * dgrad_test;
+                ukfPrecisionType f_other_mod = f_other - st_other * dgrad_test;
 
-                double dgrad_mod = dgrad - dgrad_test;
-                double dgrad_best_mod = dgrad_best - dgrad_test;
-                double dgrad_other_mod = dgrad_other - dgrad_test;
+                ukfPrecisionType dgrad_mod = dgrad - dgrad_test;
+                ukfPrecisionType dgrad_best_mod = dgrad_best - dgrad_test;
+                ukfPrecisionType dgrad_other_mod = dgrad_other - dgrad_test;
 
                 infoc = interv_uncert(st_best, f_best_mod, dgrad_best_mod, st_other, f_other_mod, dgrad_other_mod, step, f_mod, dgrad_mod, bracket, st_min, st_max);
 
@@ -698,7 +698,7 @@ public:
         ukfVectorType g;
         objFunc(x, g);
 
-        double err = g.norm();
+        ukfPrecisionType err = g.norm();
         if (err <= tol)
         {
             XOpt = x0;

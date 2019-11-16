@@ -15,21 +15,15 @@ dwi_path="/home/rinat/Desktop/ukftests/dwi-Aligned-Ed-Bet-Merged-unring-Epi.nhdr
 mask_path="/home/rinat/Desktop/ukftests/epi_corrected_tensormask.nrrd"
 
 # OUTPUT FIBER
-output_path='/home/rinat/Desktop/ukftests/seeds_tc_full.vtk'
+output_path='/home/rinat/Desktop/ukftests/seeds_tc_fraction.vtk'
 
 # --seedsFile $seeds_path \
 eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --tracts $output_path \
- --seedsPerVoxel 1 \
- --diffusionPropagator \
- --minRTOP 20 \
- --recordNMSE \
- --recordWeights \
- --recordRTOP \
- --seedingThreshold 0.3 \
- --numTensor 3 | tee $logFile
+ --seedsPerVoxel 0.04 \
+ --seedingThreshold 0.18 | tee $logFile
  end=`date +%s`
 
 runtime=$((end - start))

@@ -36,9 +36,8 @@ inline void compute_d(ukfStateVector &d, const ukfMatrixType &J, const ukfVector
   {
     ukfPrecisionType sum = ukfZero;
     for (int r = 0; r < n; ++r)
-    {
       sum += J(r, c) * np[r];
-    }
+
     d[c] = sum;
   }
 }
@@ -52,9 +51,7 @@ inline void update_z(ukfStateVector &z, const ukfMatrixType &J, const ukfVectorT
   {
     z[i] = ukfZero;
     for (int j = iq; j < n; ++j)
-    {
       z[i] += J(i, j) * d[j];
-    }
   }
 }
 
@@ -64,34 +61,33 @@ inline void update_r(const ukfMatrixType &R, QPConstrainedVec &r, const ukfVecto
   for (int i = iq - 1; i >= 0; i--)
   {
     ukfPrecisionType sum = ukfZero;
-    for (int j = i + 1; j < iq; ++j)
-    {
+    for (int j = i + 1; j < iq; j++)
       sum += R(i, j) * r[j];
-    }
+
     r[i] = (d[i] - sum) / R(i, i);
   }
 }
 
 inline ukfPrecisionType distance(ukfPrecisionType a, ukfPrecisionType b)
 {
-  const ukfPrecisionType a1 = std::fabs(a);
-  const ukfPrecisionType b1 = std::fabs(b);
+  const ukfPrecisionType a1 = ::std::fabs(a);
+  const ukfPrecisionType b1 = ::std::fabs(b);
   if (a1 > b1)
   {
     ukfPrecisionType t = (b1 / a1);
-    return a1 * std::sqrt(ukfOne + t * t);
+    return a1 * ::std::sqrt(ukfOne + t * t);
   }
   else if (b1 > a1)
   {
     ukfPrecisionType t = (a1 / b1);
-    return b1 * std::sqrt(ukfOne + t * t);
+    return b1 * ::std::sqrt(ukfOne + t * t);
   }
-  return a1 * std::sqrt(2.0);
+  return a1 * ::std::sqrt(2.0);
 }
 
 bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukfStateVector &d, int &iq, ukfPrecisionType &R_norm)
 {
-  const int n = d.size();
+  const int n = static_cast<int>(d.size());
 
 #ifdef TRACE_SOLVER
   std::cout << "Add constraint " << iq << '/';
@@ -114,9 +110,8 @@ bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukfStateVe
     ukfPrecisionType ss = d[j];
     ukfPrecisionType h = distance(cc, ss);
     if (std::fabs(h) < std::numeric_limits<ukfPrecisionType>::epsilon()) // h == 0
-    {
       continue;
-    }
+
     d[j] = ukfZero;
     ss = ss / h;
     cc = cc / h;
@@ -145,9 +140,8 @@ bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukfStateVe
    *    into column iq - 1 of R
    */
   for (int i = 0; i < iq; ++i)
-  {
     R(i, iq - 1) = d[i];
-  }
+
 #ifdef TRACE_SOLVER
   std::cout << iq << std::endl;
   print_matrix("R", R, iq, iq);
@@ -173,7 +167,7 @@ void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, QPConst
   int qq = 0; // just to prevent warnings from smart compilers
   bool found = false;
   /* Find the index qq for active constraint l to be removed */
-  for (int i = p; i < iq; ++i)
+  for (int i = p; i < iq; i++)
   {
     if (A[i] == l)
     {
@@ -194,9 +188,7 @@ void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, QPConst
     A[i] = A[i + 1];
     u[i] = u[i + 1];
     for (int j = 0; j < n; ++j)
-    {
       R(j, i) = R(j, i + 1);
-    }
   }
 
   A[iq - 1] = A[iq];
@@ -204,9 +196,8 @@ void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, QPConst
   A[iq] = 0;
   u[iq] = ukfZero;
   for (int j = 0; j < iq; ++j)
-  {
     R(j, iq - 1) = ukfZero;
-  }
+
   /* constraint has been fully removed */
   iq--;
 #ifdef TRACE_SOLVER
@@ -214,18 +205,17 @@ void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, QPConst
 #endif
 
   if (iq == 0)
-  {
     return;
-  }
+
   for (int j = qq; j < iq; j++)
   {
     ukfPrecisionType cc = R(j, j);
     ukfPrecisionType ss = R(j + 1, j);
     ukfPrecisionType h = distance(cc, ss);
+
     if (std::fabs(h) < std::numeric_limits<ukfPrecisionType>::epsilon()) // h == 0
-    {
       continue;
-    }
+
     cc = cc / h;
     ss = ss / h;
     R(j + 1, j) = ukfZero;
@@ -285,7 +275,7 @@ void cholesky_decomposition(ukfStateSquareMatrix &A)
           os << "Error in cholesky decomposition, sum: " << sum;
           throw std::logic_error(os.str());
         }
-        A(i, i) = ::std::sqrt(sum);
+        A(i, i) = std::sqrt(sum);
       }
       else
       {
@@ -293,9 +283,7 @@ void cholesky_decomposition(ukfStateSquareMatrix &A)
       }
     }
     for (int k = i + 1; k < n; k++)
-    {
       A(i, k) = A(k, i);
-    }
   }
 }
 
@@ -375,13 +363,10 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
 
   ukfPrecisionType inf;
   if (std::numeric_limits<ukfPrecisionType>::has_infinity)
-  {
     inf = std::numeric_limits<ukfPrecisionType>::infinity();
-  }
   else
-  {
     inf = 1.0E300;
-  }
+
   QPConstrainedVecInt A, A_old, iai;
   int iq, iter = 0;
   QPConstrainedVecUnInt iaexcl;
@@ -419,14 +404,14 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
 
   /* compute the inverse of the factorized matrix G^-1, this is the initial value for H */
   ukfPrecisionType c2 = ukfZero;
-  for (int i = 0; i < n; ++i)
+  for (int i = 0; i < n; i++)
   {
     d[i] = ukfOne;
     forward_elimination(G, z, d);
-    for (int j = 0; j < n; ++j)
-    {
+
+    for (int j = 0; j < n; j++)
       J(i, j) = z[j]; // change
-    }
+
     c2 += z[i];
     d[i] = ukfZero;
   }
@@ -471,18 +456,15 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
      *      becomes feasible */
     ukfPrecisionType t2 = ukfZero;
     if (std::fabs(z.dot(z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
-    {
-      t2 = (-np.dot(x)- ce0) / z.dot(np);
-    }
+      t2 = (-np.dot(x) - ce0) / z.dot(np);
+
     /* set x = x + t2 * z */
-    x = t2 * z;
+    x = x + t2 * z;
 
     /* set u = u+ */
     u[iq] = t2;
     for (int k = 0; k < iq; ++k)
-    {
       u[k] -= t2 * r[k];
-    }
 
     /* compute the new solution value */
     f_value += ukfHalf * (t2 * t2) * z.dot(np);
@@ -498,9 +480,7 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
   }
   /* set iai = K \ A */
   for (int i = 0; i < m; ++i)
-  {
     iai[i] = i;
-  }
 
 l1:
   iter++;
@@ -523,9 +503,8 @@ l1:
     iaexcl[i] = true;
     ukfPrecisionType sum = ukfZero;
     for (int j = 0; j < n; ++j)
-    {
       sum += CI(j, i) * x[j]; // change
-    }
+
     sum += ci0[i];
     s[i] = sum;
     psi += std::min(ukfZero, sum);
@@ -535,15 +514,13 @@ l1:
 #endif
 
   if (fabs(psi) <= m * std::numeric_limits<ukfPrecisionType>::epsilon() * c1 * c2 * 100.0)
-  {
-    /* numerically there are not infeasibilities anymore */
-    return f_value;
-  }
+    return f_value; /* numerically there are not infeasibilities anymore */
+
   /* save old values for u and A */
   for (int i = 0; i < iq; ++i)
   {
-    u_old[i] = u[i]; //change
-    A_old[i] = A[i]; //change
+    u_old[i] = u[i];
+    A_old[i] = A[i];
   }
   /* and for x */
   x_old = x;
@@ -557,15 +534,12 @@ l2: /* Step 2: check for feasibility and determine a new S-pair */
       ip = i;
     }
   }
+
   if (ss >= ukfZero)
-  {
     return f_value;
-  }
+
   /* set np = n[ip] */
-  for (int i = 0; i < n; ++i)
-  {
-    np[i] = CI(i, ip); //change
-  }
+  np = CI.col(ip);
   /* set u = [u 0]^T */
   u[iq] = ukfZero;
   /* add ip to the active set A */
@@ -640,9 +614,8 @@ l2a: /* Step 2a: determine step direction */
   {
     /* set u = u +  t * [-r 1] and drop constraint l from the active set A */
     for (int k = 0; k < iq; k++)
-    {
       u[k] -= t * r[k];
-    }
+
     u[iq] += t;
     iai[l] = l;
     delete_constraint(R, J, A, u, n, p, iq, l);
@@ -657,14 +630,13 @@ l2a: /* Step 2a: determine step direction */
   }
   /* case (iii): step in primal and dual space */
   /* set x = x + t * z */
-  x = t*z;
+  x = x + t * z;
   /* update the solution value */
   f_value += t * z.dot(np) * (ukfHalf * t + u[iq]);
   /* u = u + t * [-r 1] */
   for (int k = 0; k < iq; k++)
-  {
     u[k] -= t * r[k];
-  }
+
   u[iq] += t;
 #ifdef TRACE_SOLVER
   std::cout << " in both spaces: "
@@ -693,9 +665,8 @@ l2a: /* Step 2a: determine step direction */
       print_vector("iai", iai);
 #endif
       for (int i = 0; i < m; ++i)
-      {
         iai[i] = i;
-      }
+
       for (int i = p; i < iq; ++i)
       {
         A[i] = A_old[i];
@@ -733,9 +704,8 @@ l2a: /* Step 2a: determine step direction */
   /* update s[ip] = CI * x + ci0 */
   ukfPrecisionType sum = ukfZero;
   for (int k = 0; k < n; k++)
-  {
     sum += CI(k, ip) * x[k]; //change
-  }
+
   s[ip] = sum + ci0[ip];
 
 #ifdef TRACE_SOLVER

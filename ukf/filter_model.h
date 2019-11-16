@@ -229,7 +229,7 @@ protected:
   bool _ridgelets_used;
 };
 
-inline mat33_t SetIdentityScaled(double diff_fw)
+inline mat33_t SetIdentityScaled(ukfPrecisionType diff_fw)
 {
   mat33_t tmp;
   tmp.setIdentity();

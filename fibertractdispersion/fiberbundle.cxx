@@ -39,9 +39,8 @@ void fiberbundle ::ReadFibers(std::string inputFibersFileName)
     vtkIdType nPoints;
     vtkIdType *pts;
     if (curLines->GetNextCell(nPoints, pts) == 0)
-    {
       break;
-    }
+    
     // one point array per polydata, and each line == a fiber
     for (vtkIdType curPoint = 0; curPoint < nPoints; ++curPoint)
     {
