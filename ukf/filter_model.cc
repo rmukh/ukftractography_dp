@@ -11,9 +11,9 @@
 
 ukfPrecisionType SignalModel::CheckZero(const ukfPrecisionType &local_d, const std::string &func_name) const
 {
-  if (local_d < 0)
+  if (local_d < ukfZero)
   {
-    if (local_d >= -1.0e-4)
+    if (local_d >= ukfCheckZero)
     {
       return ukfZero;
     }

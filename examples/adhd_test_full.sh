@@ -22,7 +22,7 @@ eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --tracts $output_path \
- --seedsPerVoxel 0.04 \
+ --seedsPerVoxel 0.01 \
  --seedingThreshold 0.18 | tee $logFile
  end=`date +%s`
 

@@ -6,7 +6,7 @@
 
 #include "Eigen/Dense"
 
-//#define UKF_USE_FLOAT 1
+#define UKF_USE_FLOAT 1
 #if UKF_USE_FLOAT
 typedef float ukfPrecisionType;
 #else
@@ -18,7 +18,11 @@ static const ukfPrecisionType GLOBAL_TENSOR_UNPACK_VALUE = 1e-6;
 
 static const ukfPrecisionType ukfZero(static_cast<ukfPrecisionType>(0.0));
 static const ukfPrecisionType ukfOne(static_cast<ukfPrecisionType>(1.0));
+static const ukfPrecisionType ukfZeroOne(static_cast<ukfPrecisionType>(0.1));
+static const ukfPrecisionType ukfThreeThousand(static_cast<ukfPrecisionType>(3000.0));
 static const ukfPrecisionType ukfHalf(static_cast<ukfPrecisionType>(0.5));
+static const ukfPrecisionType ukfDerivativePrecision(static_cast<ukfPrecisionType>(1e-7));
+static const ukfPrecisionType ukfCheckZero(static_cast<ukfPrecisionType>(-1.0e-4));
 
 typedef Eigen::Matrix<ukfPrecisionType, Eigen::Dynamic, 1> ukfVectorType;
 typedef Eigen::Matrix<ukfPrecisionType, Eigen::Dynamic, Eigen::Dynamic> ukfMatrixType;

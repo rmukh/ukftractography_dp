@@ -103,7 +103,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
 
   if (l_seedingThreshold == 0.18)
   {
-    ukf_setAndTell(l_seedingThreshold, FULL_BRAIN_MEAN_SIGNAL_MIN, "seedingThreshold"); 
+    ukf_setAndTell(l_seedingThreshold, FULL_BRAIN_MEAN_SIGNAL_MIN, "seedingThreshold");
   }
   else
   {
@@ -112,7 +112,7 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
 
   if (l_Qm == 0.0)
   {
-    ukf_setAndTell(l_Qm, 0.001, "Qm");
+    ukf_setAndTell(l_Qm, 0.0001, "Qm");
   }
   else
   {
@@ -124,69 +124,68 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     ukf_setAndTell(l_Ql, 150.0, "Ql");
   }
 
-    if (l_Qt == 0.0)
-    {
-      ukf_setAndTell(l_Qt, 50.0, "Qt");
-    }
-    else
-    {
-      ukf_tell(l_Qt, "Qt");
-    }
+  if (l_Qt == 0.0)
+  {
+    ukf_setAndTell(l_Qt, 50.0, "Qt");
+  }
+  else
+  {
+    ukf_tell(l_Qt, "Qt");
+  }
 
-    if (l_minRTOP1stop == 500.0)
-    {
-      ukf_setAndTell(l_minRTOP1stop, 500.0, "minRTOP1stop");
-    }
-    else
-    {
-      ukf_tell(l_minRTOP1stop, "minRTOP1stop");
-    }
+  if (l_minRTOP1stop == 500.0)
+  {
+    ukf_setAndTell(l_minRTOP1stop, 500.0, "minRTOP1stop");
+  }
+  else
+  {
+    ukf_tell(l_minRTOP1stop, "minRTOP1stop");
+  }
 
-    if (l_maxNMSE == 0.15)
-    {
-      ukf_setAndTell(l_maxNMSE, 0.15, "maxNMSE");
-    }
-    else
-    {
-      ukf_tell(l_maxNMSE, "maxNMSE");
-    }
+  if (l_maxNMSE == 0.15)
+  {
+    ukf_setAndTell(l_maxNMSE, 0.15, "maxNMSE");
+  }
+  else
+  {
+    ukf_tell(l_maxNMSE, "maxNMSE");
+  }
 
-    if (l_maxUKFIterations < 0.0)
-    {
-      std::cout << "Error: maxUKFIterations cannot be negative. Exiting" << std::endl;
-      exit(1);
-    }
-    if (l_maxUKFIterations == 5)
-    {
-      ukf_setAndTell(l_maxUKFIterations, 5, "maxUKFIterations");
-    }
-    else
-    {
-      ukf_tell(l_maxUKFIterations, "maxUKFIterations");
-    }
+  if (l_maxUKFIterations < 0.0)
+  {
+    std::cout << "Error: maxUKFIterations cannot be negative. Exiting" << std::endl;
+    exit(1);
+  }
+  if (l_maxUKFIterations == 5)
+  {
+    ukf_setAndTell(l_maxUKFIterations, 5, "maxUKFIterations");
+  }
+  else
+  {
+    ukf_tell(l_maxUKFIterations, "maxUKFIterations");
+  }
 
-    if (l_maxODFthresh == 0.7)
-    {
-      ukf_setAndTell(l_maxODFthresh, 0.7, "maxODFthresh");
-    }
-    else
-    {
-      ukf_tell(l_maxODFthresh, "maxODFthresh");
-    }
+  if (l_maxODFthresh == 0.7)
+  {
+    ukf_setAndTell(l_maxODFthresh, 0.7, "maxODFthresh");
+  }
+  else
+  {
+    ukf_tell(l_maxODFthresh, "maxODFthresh");
+  }
 
-    if (l_FWthresh == 0.65)
-    {
-      ukf_setAndTell(l_FWthresh, 0.65, "FWthresh");
-    }
-    else
-    {
-      ukf_tell(l_FWthresh, "FWthresh");
-    }
-  
+  if (l_FWthresh == 0.65)
+  {
+    ukf_setAndTell(l_FWthresh, 0.65, "FWthresh");
+  }
+  else
+  {
+    ukf_tell(l_FWthresh, "FWthresh");
+  }
 
   if (l_Rs == 0.0)
   {
-      ukf_setAndTell(l_Rs, 0.015, "Rs");
+    ukf_setAndTell(l_Rs, 0.015, "Rs");
   }
   else
   {
@@ -211,17 +210,16 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
     ukf_tell(l_recordLength, "recordLength");
   }
 
-    if (l_Qw == 0.0)
-    {
-        ukf_setAndTell(l_Qw, 0.002, "Qw");
-    }
-    else
-    {
-      ukf_tell(l_Qw, "Qw");
-    }
-  
-    ukf_setAndTell(l_Qwiso, 0.002, "Qwiso");
-  
+  if (l_Qw == 0.0)
+  {
+    ukf_setAndTell(l_Qw, 0.002, "Qw");
+  }
+  else
+  {
+    ukf_tell(l_Qw, "Qw");
+  }
+
+  ukf_setAndTell(l_Qwiso, 0.002, "Qwiso");
 
   if (l_stoppingThreshold == 0.1)
   {

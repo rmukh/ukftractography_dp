@@ -237,7 +237,7 @@ inline mat33_t SetIdentityScaled(ukfPrecisionType diff_fw)
   return tmp;
 }
 
-const double Pi(std::atan(static_cast<double>(1.0)) * 4);
+const double Pi(std::atan(static_cast<ukfPrecisionType>(1.0)) * 4);
 
 inline ukfPrecisionType BhattacharyyaCoeff(ukfPrecisionType x_sr, ukfPrecisionType x_pred, ukfPrecisionType cov)
 {
@@ -263,13 +263,13 @@ inline ukfPrecisionType AngularSimilarity(vec3_t &x_sr, vec3_t &x_pred)
   ukfPrecisionType den_a = x_sr.norm();
   ukfPrecisionType den_b = x_pred.norm();
 
-  if (den_a == 0.0 || den_b == 0.0)
+  if (den_a == ukfZero || den_b == ukfZero)
   {
     std::cout << "cosine similarity is not defined whenever one or both input vectors are zero-vectors." << std::endl;
     throw;
   }
 
-  return 1.0 - (std::acos(std::min(std::max(dot / (den_a * den_b), -1.0), 1.0)) / Pi);
+  return ukfOne - (std::acos(std::min(std::max(dot / (den_a * den_b), -ukfOne), ukfOne)) / Pi);
 }
 
 #endif // FILTER_MODEL_H_

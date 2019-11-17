@@ -469,8 +469,8 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(ARidg, HighBSignalValues, fista_lambda);
       slv.FISTA(C);
     }
-
-    ukfPrecisionType GFA = 0.0;
+    
+    ukfPrecisionType GFA = ukfZero;
     if (_full_brain)
       GFA = s2ga(QRidgSignal * C);
 
@@ -509,7 +509,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       if (n_of_dirs == 1)
       {
         vec3_t orthogonal;
-        orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], 0.0;
+        orthogonal << -dir_vol.row(0)[1], dir_vol.row(0)[0], ukfZero;
         orthogonal = orthogonal / orthogonal.norm();
         dir_init.row(1) = orthogonal;
 
@@ -606,11 +606,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       // Output of the filter
       tmp_info_state = ConvertVector<ukfStateVector, stdVecState>(state);
 
-      ukfPrecisionType rtopModel = 0.0;
-      ukfPrecisionType rtop1 = 0.0;
-      ukfPrecisionType rtop2 = 0.0;
-      ukfPrecisionType rtop3 = 0.0;
-      ukfPrecisionType rtopSignal = 0.0;
+      ukfPrecisionType rtopModel = ukfZero;
+      ukfPrecisionType rtop1 = ukfZero;
+      ukfPrecisionType rtop2 = ukfZero;
+      ukfPrecisionType rtop3 = ukfZero;
+      ukfPrecisionType rtopSignal = ukfZero;
 
       computeRTOPfromState(state, rtopModel, rtop1, rtop2, rtop3);
       computeRTOPfromSignal(rtopSignal, signal_values[i]);
@@ -832,7 +832,7 @@ void Tractography::computeRTOPfromSignal(ukfPrecisionType &rtopSignal, const ukf
 {
   //assert(signal.size() > 0);
 
-  rtopSignal = 0.0;
+  rtopSignal = ukfZero;
 
   // The RTOP is the sum of the signal
   // We use signal.size()/2 because the first half of the signal is identical
@@ -851,63 +851,63 @@ void Tractography::computeRTOPfromSignal(ukfPrecisionType &rtopSignal, const ukf
 
 void Tractography::computeRTOPfromState(ukfStateVector &state, ukfPrecisionType &rtop, ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3)
 {
-  state[3] = std::max(state[3], 1.0);
-  state[4] = std::max(state[4], 1.0);
-  state[5] = std::max(state[5], 0.1);
-  state[6] = std::max(state[6], 0.1);
+  state[3] = std::max(state[3], ukfOne);
+  state[4] = std::max(state[4], ukfOne);
+  state[5] = std::max(state[5], ukfZeroOne);
+  state[6] = std::max(state[6], ukfZeroOne);
 
-  state[3] = std::min(state[3], 3000.0);
-  state[4] = std::min(state[4], 3000.0);
-  state[5] = std::min(state[5], 3000.0);
-  state[6] = std::min(state[6], 3000.0);
+  state[3] = std::min(state[3], ukfThreeThousand);
+  state[4] = std::min(state[4], ukfThreeThousand);
+  state[5] = std::min(state[5], ukfThreeThousand);
+  state[6] = std::min(state[6], ukfThreeThousand);
 
-  state[10] = std::max(state[10], 1.0);
-  state[11] = std::max(state[11], 1.0);
-  state[12] = std::max(state[12], 0.1);
-  state[13] = std::max(state[13], 0.1);
+  state[10] = std::max(state[10], ukfOne);
+  state[11] = std::max(state[11], ukfOne);
+  state[12] = std::max(state[12], ukfZeroOne);
+  state[13] = std::max(state[13], ukfZeroOne);
 
-  state[10] = std::min(state[10], 3000.0);
-  state[11] = std::min(state[11], 3000.0);
-  state[12] = std::min(state[12], 3000.0);
-  state[13] = std::min(state[13], 3000.0);
+  state[10] = std::min(state[10], ukfThreeThousand);
+  state[11] = std::min(state[11], ukfThreeThousand);
+  state[12] = std::min(state[12], ukfThreeThousand);
+  state[13] = std::min(state[13], ukfThreeThousand);
 
-  state[17] = std::max(state[17], 1.0);
-  state[18] = std::max(state[18], 1.0);
-  state[19] = std::max(state[19], 0.1);
-  state[20] = std::max(state[20], 0.1);
+  state[17] = std::max(state[17], ukfOne);
+  state[18] = std::max(state[18], ukfOne);
+  state[19] = std::max(state[19], ukfZeroOne);
+  state[20] = std::max(state[20], ukfZeroOne);
 
-  state[17] = std::min(state[17], 3000.0);
-  state[18] = std::min(state[18], 3000.0);
-  state[19] = std::min(state[19], 3000.0);
-  state[20] = std::min(state[20], 3000.0);
+  state[17] = std::min(state[17], ukfThreeThousand);
+  state[18] = std::min(state[18], ukfThreeThousand);
+  state[19] = std::min(state[19], ukfThreeThousand);
+  state[20] = std::min(state[20], ukfThreeThousand);
 
-  state[21] = std::max(state[21], 0.0);
-  state[22] = std::max(state[22], 0.0);
-  state[23] = std::max(state[23], 0.0);
-  state[24] = std::max(state[24], 0.0);
+  state[21] = std::max(state[21], ukfZero);
+  state[22] = std::max(state[22], ukfZero);
+  state[23] = std::max(state[23], ukfZero);
+  state[24] = std::max(state[24], ukfZero);
 
-  state[21] = std::min(state[21], 1.0);
-  state[22] = std::min(state[22], 1.0);
-  state[23] = std::min(state[23], 1.0);
-  state[24] = std::min(state[24], 1.0);
+  state[21] = std::min(state[21], ukfOne);
+  state[22] = std::min(state[22], ukfOne);
+  state[23] = std::min(state[23], ukfOne);
+  state[24] = std::min(state[24], ukfOne);
 
   // Control input: state should have 25 rows
   //assert(state.size() == 25);
 
-  ukfPrecisionType l11 = state[3] * 1e-6;
-  ukfPrecisionType l12 = state[4] * 1e-6;
-  ukfPrecisionType l13 = state[5] * 1e-6;
-  ukfPrecisionType l14 = state[6] * 1e-6;
+  ukfPrecisionType l11 = state[3] * GLOBAL_TENSOR_UNPACK_VALUE;
+  ukfPrecisionType l12 = state[4] * GLOBAL_TENSOR_UNPACK_VALUE;
+  ukfPrecisionType l13 = state[5] * GLOBAL_TENSOR_UNPACK_VALUE;
+  ukfPrecisionType l14 = state[6] * GLOBAL_TENSOR_UNPACK_VALUE;
 
-  ukfPrecisionType l21 = state[10] * 1e-6;
-  ukfPrecisionType l22 = state[11] * 1e-6;
-  ukfPrecisionType l23 = state[12] * 1e-6;
-  ukfPrecisionType l24 = state[13] * 1e-6;
+  ukfPrecisionType l21 = state[10] * GLOBAL_TENSOR_UNPACK_VALUE;
+  ukfPrecisionType l22 = state[11] * GLOBAL_TENSOR_UNPACK_VALUE;
+  ukfPrecisionType l23 = state[12] * GLOBAL_TENSOR_UNPACK_VALUE;
+  ukfPrecisionType l24 = state[13] * GLOBAL_TENSOR_UNPACK_VALUE;
 
-  ukfPrecisionType l31 = state[17] * 1e-6;
-  ukfPrecisionType l32 = state[18] * 1e-6;
-  ukfPrecisionType l33 = state[19] * 1e-6;
-  ukfPrecisionType l34 = state[20] * 1e-6;
+  ukfPrecisionType l31 = state[17] * GLOBAL_TENSOR_UNPACK_VALUE;
+  ukfPrecisionType l32 = state[18] * GLOBAL_TENSOR_UNPACK_VALUE;
+  ukfPrecisionType l33 = state[19] * GLOBAL_TENSOR_UNPACK_VALUE;
+  ukfPrecisionType l34 = state[20] * GLOBAL_TENSOR_UNPACK_VALUE;
 
   ukfPrecisionType w1 = state[21];
   ukfPrecisionType w2 = state[22];
@@ -1009,37 +1009,37 @@ void Tractography::NonLinearLeastSquareOptimization(ukfStateVector &state, const
   // Lower bound
   ukfVectorType lowerBound(13);
   // First bi-exponential parameters
-  lowerBound[0] = lowerBound[1] = 1.0;
-  lowerBound[2] = lowerBound[3] = 0.1;
+  lowerBound[0] = lowerBound[1] = ukfOne;
+  lowerBound[2] = lowerBound[3] = ukfZeroOne;
 
   // Second bi-exponential
-  lowerBound[4] = lowerBound[5] = 1.0;
-  lowerBound[6] = lowerBound[7] = 0.1;
+  lowerBound[4] = lowerBound[5] = ukfOne;
+  lowerBound[6] = lowerBound[7] = ukfZeroOne;
 
   // Third bi-exponential
-  lowerBound[8] = lowerBound[9] = 1.0;
-  lowerBound[10] = lowerBound[11] = 0.1;
+  lowerBound[8] = lowerBound[9] = ukfOne;
+  lowerBound[10] = lowerBound[11] = ukfZeroOne;
 
   // w1 & w2 & w3 in [0,1]
   //lowerBound[12] = lowerBound[13] = lowerBound[14] = 0.0;
   // free water between 0 and 1
   //lowerBound[15] = 0.0;
-  lowerBound[12] = 0.0;
+  lowerBound[12] = ukfZero;
 
   // Upper bound
   ukfVectorType upperBound(13);
   // First bi-exponential
-  upperBound[0] = upperBound[1] = upperBound[2] = upperBound[3] = 3000.0;
+  upperBound[0] = upperBound[1] = upperBound[2] = upperBound[3] = ukfThreeThousand;
 
   // Second bi-exponential
-  upperBound[4] = upperBound[5] = upperBound[6] = upperBound[7] = 3000.0;
+  upperBound[4] = upperBound[5] = upperBound[6] = upperBound[7] = ukfThreeThousand;
 
   // Third bi-exponential
-  upperBound[8] = upperBound[9] = upperBound[10] = upperBound[11] = 3000.0;
+  upperBound[8] = upperBound[9] = upperBound[10] = upperBound[11] = ukfThreeThousand;
 
   //upperBound[12] = upperBound[13] = upperBound[14] = 1.0;
   //upperBound[15] = 1.0;
-  upperBound[12] = 1.0;
+  upperBound[12] = ukfOne;
 
   // init solver with bounds
   LFBGSB *_lbfgsb = new LFBGSB(_model);
@@ -1127,10 +1127,10 @@ void Tractography::NonLinearLeastSquareOptimization(ukfStateVector &state, const
   ukfVectorType upperBound2(3);
 
   // Lower bound
-  lowerBound2[0] = lowerBound2[1] = lowerBound2[2] = 0.0;
+  lowerBound2[0] = lowerBound2[1] = lowerBound2[2] = ukfZero;
 
   // Upper bound
-  upperBound2[0] = upperBound2[1] = upperBound2[2] = 1.0;
+  upperBound2[0] = upperBound2[1] = upperBound2[2] = ukfOne;
 
   // init solver with bounds
   _lbfgsb->setSignal(signal);

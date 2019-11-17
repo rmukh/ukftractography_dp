@@ -306,7 +306,7 @@ ukfPrecisionType Ridg_BiExp_FW::cosine_similarity(vec3_t &First, vec3_t &Second)
 	ukfPrecisionType den_a = First.norm();
 	ukfPrecisionType den_b = Second.norm();
 
-	if (den_a == 0.0 || den_b == 0.0)
+	if (den_a == ukfZero || den_b == ukfZero)
 	{
 		throw std::logic_error(
 			"cosine similarity is not defined whenever one or both "

@@ -64,9 +64,7 @@ void VtkWriter::PopulateFibersAndTensors(vtkPolyData *polyData,
   size_t num_fibers = fibers.size();
   size_t num_points = 0;
   for (size_t i = 0; i < num_fibers; ++i)
-  {
     num_points += fibers[i].position.size();
-  }
 
   for (size_t i = 0; i < num_fibers; ++i)
   {
@@ -131,9 +129,7 @@ void VtkWriter::PopulateFibersAndTensors(vtkPolyData *polyData,
           for (unsigned ii = 0, v = 0; ii < 3; ++ii)
           {
             for (unsigned jj = 0; jj < 3; ++jj, ++v)
-            {
               tmp[v] = D(ii, jj);
-            }
           }
           curTensor->InsertNextTuple(tmp);
         }
@@ -152,9 +148,7 @@ void VtkWriter::PopulateFibersDirs(vtkPolyData *polyData,
   size_t num_fibers = fibers.size();
   size_t num_points = 0;
   for (size_t i = 0; i < num_fibers; ++i)
-  {
     num_points += fibers[i].position.size();
-  }
 
   for (size_t i = 0; i < num_fibers; ++i)
   {
@@ -212,24 +206,18 @@ void VtkWriter::WritePolyData(vtkSmartPointer<vtkPolyData> pd, const char *filen
 
   if (ext == ".vtp")
   {
-    vtkSmartPointer<vtkXMLPolyDataWriter> writer =
-        vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+    vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+
     if (this->_writeBinary)
-    {
       writer->SetDataModeToBinary();
-    }
     else
-    {
       writer->SetDataModeToAscii();
-    }
+  
     if (this->_writeCompressed)
-    {
       writer->SetCompressorTypeToZLib();
-    }
     else
-    {
       writer->SetCompressorTypeToNone();
-    }
+
 #if (VTK_MAJOR_VERSION < 6)
     writer->SetInput(pd);
 #else
@@ -243,9 +231,8 @@ void VtkWriter::WritePolyData(vtkSmartPointer<vtkPolyData> pd, const char *filen
     vtkSmartPointer<vtkPolyDataWriter> writer =
         vtkSmartPointer<vtkPolyDataWriter>::New();
     if (this->_writeBinary)
-    {
       writer->SetFileTypeToBinary();
-    }
+
 #if (VTK_MAJOR_VERSION < 6)
     writer->SetInput(pd);
 #else
@@ -273,12 +260,9 @@ int VtkWriter::Write(const std::string &file_name,
   if (store_glyphs)
   {
     std::stringstream ss;
-    ss << file_name.substr(0, file_name.find_last_of(".")) << "_glyphs"
-       << ".vtk";
+    ss << file_name.substr(0, file_name.find_last_of(".")) << "_glyphs" << ".vtk";
     if (WriteGlyphs(ss.str(), fibers) == EXIT_FAILURE)
-    {
       return EXIT_FAILURE;
-    }
   }
   // polyData object to fill in
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
@@ -292,9 +276,7 @@ int VtkWriter::Write(const std::string &file_name,
   int num_fibers = fibers.size();
   int num_points = 0;
   for (int i = 0; i < num_fibers; ++i)
-  {
     num_points += fibers[i].position.size();
-  }
 
   // write norm
   {
@@ -306,9 +288,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         norms->InsertNextValue(fibers[i].norm[j]);
-      }
     }
     int idx = pointData->AddArray(norms);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -326,9 +306,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         fa->InsertNextValue(fibers[i].fa[j]);
-      }
     }
     int idx = pointData->AddArray(fa);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -345,9 +323,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         fa2->InsertNextValue(fibers[i].fa2[j]);
-      }
     }
     int idx = pointData->AddArray(fa2);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -364,9 +340,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         fa3->InsertNextValue(fibers[i].fa3[j]);
-      }
     }
     int idx = pointData->AddArray(fa3);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -383,9 +357,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         trace->InsertNextValue(fibers[i].trace[j]);
-      }
     }
     int idx = pointData->AddArray(trace);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -403,9 +375,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         trace2->InsertNextValue(fibers[i].trace2[j]);
-      }
     }
     int idx = pointData->AddArray(trace2);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -421,9 +391,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         free_water->InsertNextValue(fibers[i].free_water[j]);
-      }
     }
     int idx = pointData->AddArray(free_water);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -439,9 +407,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         w1->InsertNextValue(fibers[i].w1[j]);
-      }
     }
     int idx = pointData->AddArray(w1);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -457,9 +423,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         w2->InsertNextValue(fibers[i].w2[j]);
-      }
     }
     int idx = pointData->AddArray(w2);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -475,9 +439,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         w3->InsertNextValue(fibers[i].w3[j]);
-      }
     }
     int idx = pointData->AddArray(w3);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -493,9 +455,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         w1w2angle->InsertNextValue(fibers[i].w1w2angle[j]);
-      }
     }
     int idx = pointData->AddArray(w1w2angle);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -511,9 +471,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         w1w3angle->InsertNextValue(fibers[i].w1w3angle[j]);
-      }
     }
     int idx = pointData->AddArray(w1w3angle);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -529,9 +487,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         Fm1->InsertNextValue(fibers[i].Fm1[j]);
-      }
     }
     int idx = pointData->AddArray(Fm1);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -547,9 +503,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         lmd1->InsertNextValue(fibers[i].lmd1[j]);
-      }
     }
     int idx = pointData->AddArray(lmd1);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -565,9 +519,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         Fm2->InsertNextValue(fibers[i].Fm2[j]);
-      }
     }
     int idx = pointData->AddArray(Fm2);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -583,9 +535,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         lmd2->InsertNextValue(fibers[i].lmd2[j]);
-      }
     }
     int idx = pointData->AddArray(lmd2);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -601,9 +551,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         Fm3->InsertNextValue(fibers[i].Fm3[j]);
-      }
     }
     int idx = pointData->AddArray(Fm3);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -619,9 +567,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         lmd3->InsertNextValue(fibers[i].lmd3[j]);
-      }
     }
     int idx = pointData->AddArray(lmd3);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -637,9 +583,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         varW1->InsertNextValue(fibers[i].varW1[j]);
-      }
     }
     int idx = pointData->AddArray(varW1);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -655,9 +599,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         varW2->InsertNextValue(fibers[i].varW2[j]);
-      }
     }
     int idx = pointData->AddArray(varW2);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -673,9 +615,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         varW3->InsertNextValue(fibers[i].varW3[j]);
-      }
     }
     int idx = pointData->AddArray(varW3);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -691,9 +631,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-      {
         varWiso->InsertNextValue(fibers[i].varWiso[j]);
-      }
     }
     int idx = pointData->AddArray(varWiso);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
@@ -743,9 +681,7 @@ int VtkWriter::Write(const std::string &file_name,
       {
         const ukfStateVector &state = fibers[i].state[j];
         for (int k = 0; k < state_dim; ++k)
-        {
           tmpArray[k] = state[k];
-        }
         stateArray->InsertNextTuple(tmpArray);
       }
     }
@@ -827,9 +763,7 @@ int VtkWriter::WriteGlyphs(const std::string &file_name,
   int num_fibers = fibers.size();
   int num_points = 0;
   for (int i = 0; i < num_fibers; ++i)
-  {
     num_points += fibers[i].position.size();
-  }
 
   const ukfPrecisionType scale = ukfHalf * _scale_glyphs;
 

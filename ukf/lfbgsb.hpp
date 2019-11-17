@@ -101,8 +101,8 @@ public:
     /* Main 'computational' functions */
     void computeError(const ukfMatrixType &signal_estimate, const ukfVectorType &signal, ukfPrecisionType &err)
     {
-        ukfPrecisionType sum = 0.0;
-        ukfPrecisionType norm_sq_signal = 0.0;
+        ukfPrecisionType sum = ukfZero;
+        ukfPrecisionType norm_sq_signal = ukfZero;
         unsigned int N = signal.size() / 2;
 
         for (unsigned int i = 0; i < N; ++i)
@@ -117,7 +117,7 @@ public:
 
     ukfPrecisionType functionValue(const ukfVectorType &x)
     {
-        ukfPrecisionType residual = 0.0;
+        ukfPrecisionType residual = ukfZero;
 
         // Convert the parameter to the ukfMtarixType
         ukfStateVector localState;
@@ -191,7 +191,7 @@ public:
         local_model->H(localState, estimatedSignal);
 
         // Compute the error between the estimated signal and the acquired one
-        ukfPrecisionType err = 0.0;
+        ukfPrecisionType err = ukfZero;
         computeError(estimatedSignal, _signal, err);
         //cout << err << " ";
 
@@ -222,7 +222,7 @@ public:
         for (unsigned it = 0; it < x_size; ++it)
         {
             // Optimal h is sqrt(epsilon machine) * x
-            double h = std::sqrt(2.2204e-16) * std::max(std::abs(x(it)), 1e-7);
+            double h = std::sqrt(2.2204e-16) * std::max(std::abs(x(it)), ukfDerivativePrecision);
 
             // Volatile, otherwise compiler will optimize the value for dx
             volatile double xph = x(it) + h;
@@ -307,7 +307,7 @@ public:
 
             bracket = true;
         }
-        else if (sgnd < 0.0)
+        else if (sgnd < ukfZero)
         {
             info = 2;
             bound = false;
@@ -347,7 +347,7 @@ public:
             theta = 3 * (f_best - f_step) / (step - st_best) + d_best + d_step;
             s = sup_norm(theta, d_best, d_step);
 
-            gamma = s * std::sqrt(std::max(0.0, std::pow(theta / s, 2) - (d_best / s) * (d_step / s)));
+            gamma = s * std::sqrt(std::max(ukfZero, static_cast<ukfPrecisionType>(std::pow(theta / s, 2)) - (d_best / s) * (d_step / s)));
             if (step > st_best)
             {
                 gamma = -gamma;
@@ -357,7 +357,7 @@ public:
             q = (gamma + (d_best - d_step)) + gamma;
             r = p / q;
 
-            if (r < 0.0 && !(std::fabs(gamma) < std::numeric_limits<ukfPrecisionType>::epsilon()))
+            if (r < ukfZero && !(std::fabs(gamma) < std::numeric_limits<ukfPrecisionType>::epsilon()))
             {
                 step_c = step + r * (st_best - step);
             }
@@ -437,7 +437,7 @@ public:
         }
         else
         {
-            if (sgnd < 0.0)
+            if (sgnd < ukfZero)
             {
                 st_other = st_best;
                 f_other = f_best;
@@ -458,11 +458,11 @@ public:
         {
             if (st_other > st_best)
             {
-                step = std::min(st_best + 0.66 * (st_other - st_best), step);
+                step = std::min(st_best + static_cast<ukfPrecisionType>(0.66) * (st_other - st_best), step);
             }
             else
             {
-                step = std::max(st_best + 0.66 * (st_other - st_best), step);
+                step = std::max(st_best + static_cast<ukfPrecisionType>(0.66) * (st_other - st_best), step);
             }
         }
 
@@ -474,10 +474,10 @@ public:
     ukfPrecisionType LineSearch(ukfVectorType &x, ukfVectorType &grad, ukfVectorType &dir)
     {
         // Reimplemented from MINPACK Fortran utility and Matlab's port of MINPACK
-        ukfPrecisionType step = 1.0;
+        ukfPrecisionType step = ukfOne;
         const unsigned iter_max = 100;
 
-        const ukfPrecisionType step_min = 0.0;
+        const ukfPrecisionType step_min = ukfZero;
         const ukfPrecisionType step_max = 10.0;
         const ukfPrecisionType x_tol = 1e-4;
 
@@ -503,8 +503,8 @@ public:
         ukfPrecisionType f_init = f_step, dgrad_test = wolfe1 * dgrad_init;
         ukfPrecisionType width = step_max - step_min, width_old = 2 * width;
 
-        ukfPrecisionType st_best = 0.0, f_best = f_init, dgrad_best = dgrad_init;
-        ukfPrecisionType st_other = 0.0, f_other = f_init, dgrad_other = dgrad_init;
+        ukfPrecisionType st_best = ukfZero, f_best = f_init, dgrad_best = dgrad_init;
+        ukfPrecisionType st_other = ukfZero, f_other = f_init, dgrad_other = dgrad_init;
 
         while (1)
         {
@@ -636,7 +636,7 @@ public:
                 {
                     out(i) = (ub(i) - lb(i)) / 2.0;
                 }
-                else if (in(i) < 0.0)
+                else if (in(i) < ukfZero)
                 {
                     out(i) = lb(i) + EPS;
                 }

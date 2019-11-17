@@ -520,7 +520,7 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
     else if (key.length() > 14 &&
              !key.substr(0, 14).compare("DWMRI_gradient"))
     {
-      ukfPrecisionType gx, gy, gz;
+      double gx, gy, gz;
       if (3 != sscanf(_data_nrrd->kvp[i + 1], "%lf %lf %lf", &gx, &gy, &gz))
       {
         std::cout << "The gradient must have three components!" << std::endl;
@@ -559,8 +559,8 @@ bool NrrdData::LoadSignal(Nrrd *input_nrrd, const bool normalizedDWIData)
   }
   
   // Voxel spacing.
-  ukfPrecisionType space_dir[NRRD_SPACE_DIM_MAX];
-  ukfPrecisionType spacing1, spacing2, spacing3;
+  double space_dir[NRRD_SPACE_DIM_MAX];
+  double spacing1, spacing2, spacing3;
   nrrdSpacingCalculate(this->_data_nrrd, 1, &spacing1, space_dir);
   nrrdSpacingCalculate(this->_data_nrrd, 2, &spacing2, space_dir);
   nrrdSpacingCalculate(this->_data_nrrd, 3, &spacing3, space_dir);

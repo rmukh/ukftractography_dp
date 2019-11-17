@@ -12,6 +12,9 @@
  *
  * \author Christian Baumgartner (baumgach@ee.ethz.ch) adapted from code by Luca Di Gaspero
 */
+/*
+ * \author Rinat Mukhometzianov, redesigned and improved for DP UKF tractography framework
+*/
 
 #include <iostream>
 #include <algorithm>

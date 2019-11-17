@@ -162,7 +162,7 @@
       <longflag>minRTOP1stop</longflag>
       <label>Terminate tracking if RTOP 1 goes below this threshold</label>
       <description>Stopping criteria: RTOP 1 computed from the state vector. Termination of fiber tracking if value goes below this threshold. Default: 500.</description>
-      <default>500.0</default>
+      <default>600.0</default>
     </double>
 
     <double>
@@ -186,7 +186,7 @@
       <longflag>maxODFthresh</longflag>
       <label>Threshold to compute ODF maxima directions</label>
       <description>Maximum ODF threshold which used for spherical ridgelets package maximum ODF computation function.</description>
-      <default>0.7</default>
+      <default>0.3</default>
       <constraints>
         <minimum>0.1</minimum>
         <maximum>0.9</maximum>
@@ -228,7 +228,7 @@
     <double>
       <name>Qw</name>
       <longflag>Qw</longflag>
-      <label>UKF Parameter (Advanced): Rate of change of volume fraction (?)</label>
+      <label>UKF Parameter (Advanced): Rate of change of volume fraction</label>
       <description>UKF data fitting parameter for tensor plus free water model: Process noise for volume fraction weights. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
       <default>0.0</default>
       <constraints>
