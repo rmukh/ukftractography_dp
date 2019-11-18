@@ -6,7 +6,6 @@
 
 #include "Eigen/Dense"
 
-#define UKF_USE_FLOAT 1
 #if UKF_USE_FLOAT
 typedef float ukfPrecisionType;
 #else

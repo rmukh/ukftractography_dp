@@ -19,7 +19,7 @@ ukfPrecisionType SignalModel::CheckZero(const ukfPrecisionType &local_d, const s
     }
     else
     {
-      std::cout << "A value turns zero in " << func_name << std::endl;
+      std::cout << "A value " << local_d << " turns zero in " << func_name << std::endl;
       return ukfZero;
     }
   }

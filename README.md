@@ -39,8 +39,6 @@ is more of a test than anything).
 
 #### a) Standalone Superbuild
 
-**To use previous version of unscented Kalman filter rename unscented_kalman_filter_previous.cc to unscented_kalman_filter.cc **
-
     cd <build-dir>
     cmake <path-to-source>
     make
@@ -97,8 +95,5 @@ install it as a Slicer 4 module.  There will be 3 modules under
 
 Notes
 -----
-
-On a Mac, there are rounding errors that affect the accuracy of 2T FW tracts.
-This explains why the 2T_FW ctest fails.
 
 Several steps in the SuperBuild process download additional git repositories as CMake external projects. By default `UKFTractography_USE_GIT_PROTOCOL:BOOL=OFF` indicates to use `https://` instead of `git://`. This default should work behind most firewalls (the git protocol uses port 9418: if this is blocked by your firewall the build will fail). If download problems are encountered, please [file an issue](https://github.com/pnlbwh/ukftractography/issues/new).
