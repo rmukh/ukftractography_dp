@@ -4,6 +4,7 @@
 #include <math.h>
 #include <algorithm>
 #include <vector>
+#include <limits>
 /*
 %COMPUTE_DISPERSION
 %
@@ -385,7 +386,8 @@ bool computeMeanVector(const MatrixType &xCoordinates,
                       double scale,
                       Eigen::Vector3d &meanVector /* out */)
 {
-  const double eps(2.2204e-16); // that's what matlab thinks eps is.
+  // that's what matlab thinks eps is.
+  const double eps = std::numeric_limits<ukfPrecisionType>::epsilon();
 
 
   std::vector<bool> indexPointsInPlane(xCoordinates.cols(),false);

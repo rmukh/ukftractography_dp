@@ -68,8 +68,9 @@ public:
     ukfVectorType _fixed_params;
     ukfVectorType _signal;
     ukfVectorType lb, ub;
+    ukfPrecisionType EPS = std::numeric_limits<ukfPrecisionType>::epsilon();
 
-    LFBGSB(SignalModel *model) : tol(1e-12), maxIter(2000), m(10), wolfe1(1e-04), wolfe2(0.9), local_model(model), EPS(2.2204e-16) {}
+    LFBGSB(SignalModel *model) : tol(1e-12), maxIter(2000), m(10), wolfe1(1e-04), wolfe2(0.9), local_model(model) {}
 
     /* helper functions */
 
@@ -222,13 +223,13 @@ public:
         for (unsigned it = 0; it < x_size; ++it)
         {
             // Optimal h is sqrt(epsilon machine) * x
-            double h = std::sqrt(2.2204e-16) * std::max(std::abs(x(it)), ukfDerivativePrecision);
+            const ukfPrecisionType h = std::sqrt(EPS) * std::max(std::abs(x(it)), ukfDerivativePrecision);
 
             // Volatile, otherwise compiler will optimize the value for dx
-            volatile double xph = x(it) + h;
+            volatile ukfPrecisionType xph = x(it) + h;
 
             // For taking into account the rounding error
-            double dx = xph - x(it);
+            ukfPrecisionType dx = xph - x(it);
 
             // Compute the slope
             p_h(it) = xph;
@@ -785,7 +786,6 @@ private:
     ukfPrecisionType wolfe1;
     ukfPrecisionType wolfe2;
     const SignalModel *const local_model;
-    ukfPrecisionType EPS;
     unsigned phase;
 };
 
