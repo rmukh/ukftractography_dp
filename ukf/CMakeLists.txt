@@ -36,11 +36,18 @@ set(UKFCLI_CXX "${UKFTractography_SOURCE_DIR}/UKFTractography/UKFTractography.cx
 generateclp(UKFCLI_SOURCE "${UKFTractography_SOURCE_DIR}/UKFTractography/UKFTractography.xml")
 
 #-----------------------------------------------------------------------------
+# Check if float precision type is specified and use it if it is
+if(UKF_USE_FLOAT)
+  add_definitions("-DUKF_USE_FLOAT=1")
+endif()
+
+#-----------------------------------------------------------------------------
 set(MODULE_SRCS
   "${UKF_GITVER_FILE}"
   ../common/BRAINSThreadControl.cxx
   utilities.cc
   cli.cc
+  ../common/ukf_types.h
   tractography.cc
   unscented_kalman_filter.cc
   seed.cc

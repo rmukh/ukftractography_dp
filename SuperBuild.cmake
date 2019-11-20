@@ -198,6 +198,14 @@ if(BUILD_TESTING AND NOT ${PRIMARY_PROJECT_NAME}_BUILD_SLICER_EXTENSION)
     @ONLY)
 endif()
 
+#-----------------------------------------------------------------------------
+# Check if float precision type is specified and use it if it is
+if(UKF_USE_FLOAT)
+  set(UKF_USE_FLOAT 1)
+else()
+  set(UKF_USE_FLOAT 0)
+endif()
+
 #------------------------------------------------------------------------------
 # Configure and build ${PROJECT_NAME}
 #------------------------------------------------------------------------------
@@ -218,6 +226,7 @@ ExternalProject_Add(${proj}
     -DINSTALL_RUNTIME_DESTINATION:PATH=${CMAKE_INSTALL_RUNTIME_DESTINATION}
     -DINSTALL_LIBRARY_DESTINATION:PATH=${CMAKE_INSTALL_LIBRARY_DESTINATION}
     -DINSTALL_ARCHIVE_DESTINATION:PATH=${CMAKE_INSTALL_ARCHIVE_DESTINATION}
+    -DUKF_USE_FLOAT:STRING=${UKF_USE_FLOAT}
   INSTALL_COMMAND ""
   )
 

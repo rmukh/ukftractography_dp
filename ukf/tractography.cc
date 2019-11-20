@@ -160,7 +160,7 @@ void Tractography::UpdateFilterModelType()
   // Compute A basis
   // Spherical Ridgelets helper functions
   UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
-  SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1 / sph_rho);
+  SPH_RIDG<ukfPrecisionType, ukfMatrixType, ukfVectorType> ridg(sph_J, 1.0 / sph_rho);
 
   ridg.RBasis(ARidg, HighBGradDirss);
   ridg.normBasis(ARidg);

@@ -93,10 +93,10 @@ ukfPrecisionType curve_radius(const stdVec_t &fiber)
 }
 
 // legendre polynomial of degree n and order 0
-double Legendre(int n, double t)
+ukfPrecisionType Legendre(int n, ukfPrecisionType t)
 {
   int k;
-  double Pk_1, Pk_2, Pk; // P_{k-1}(x), P_{k-2}(x), P_k(x)
+  ukfPrecisionType Pk_1, Pk_2, Pk; // P_{k-1}(x), P_{k-2}(x), P_k(x)
 
   Pk_2 = 0.0;
   Pk_1 = 1.0;

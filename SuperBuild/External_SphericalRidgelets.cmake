@@ -21,7 +21,7 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
 
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_TAG
-    "cbbacb770779123291b8d58916bbe2bb578af3d9"
+    "b96837082c629b20fa0e2fbad0d58310f00b882d"
     QUIET
   )
   
@@ -52,6 +52,7 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
       -DEigen3_DIR:PATH=${Eigen_DIR}
       -DSPH_DIR:PATH=${EP_SOURCE_DIR}/Ridgelets/SphericalRidgelets
       -DCMAKE_INSTALL_LIBDIR:PATH=${EP_INSTALL_DIR}/lib
+      -DUSE_FLOAT:STRING=${UKF_USE_FLOAT}
     DEPENDS
       ${${proj}_DEPENDENCIES}
     )

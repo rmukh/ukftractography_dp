@@ -140,7 +140,7 @@ else()
     if(BOOST_FOUND)
       message("Boost_INCLUDE_DIRS = " ${Boost_INCLUDE_DIRS})
     else()
-      message("USING the system ${extProjName}, set ${extProjName}_DIR=${${extProjName}_DIR}")
+      message("-- USING the system ${extProjName}, set ${extProjName}_DIR=${${extProjName}_DIR}")
     endif()
   endif()
   # The project is provided using ${extProjName}_DIR, nevertheless since other

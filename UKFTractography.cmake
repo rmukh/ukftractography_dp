@@ -139,3 +139,8 @@ if(${PRIMARY_PROJECT_NAME}_BUILD_SLICER_EXTENSION)
   include(${Slicer_EXTENSION_CPACK})
 endif()
 
+#-----------------------------------------------------------------------------
+# Check if float precision type is specified and use it if it is
+if(UKF_USE_FLOAT)
+  add_definitions("-DUKF_USE_FLOAT=1")
+endif()

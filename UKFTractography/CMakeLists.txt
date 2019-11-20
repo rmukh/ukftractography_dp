@@ -1,6 +1,12 @@
 #-----------------------------------------------------------------------------
 set(MODULE_NAME UKFTractography)
 
+#-----------------------------------------------------------------------------
+# Check if float precision type is specified and use it if it is
+if(UKF_USE_FLOAT)
+  add_definitions("-DUKF_USE_FLOAT=1")
+endif()
+
 set(MODULE_INCLUDE_DIRECTORIES
   ${Teem_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}

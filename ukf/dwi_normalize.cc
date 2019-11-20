@@ -299,6 +299,5 @@ void dwiNormalize(const Nrrd *raw, Nrrd *&normalized)
     normalized->space = nrrdSpaceRightAnteriorSuperior;
   }
 
-  std::cout << "Data normalization finished!" << std::endl
-            << std::endl;
+  std::cout << "Data normalization finished!" << std::endl << std::endl;
 }

@@ -516,7 +516,7 @@ l1:
   print_vector("s", s, m);
 #endif
 
-  if (fabs(psi) <= m * std::numeric_limits<ukfPrecisionType>::epsilon() * c1 * c2 * 100.0)
+  if (fabs(psi) <= m * std::numeric_limits<ukfPrecisionType>::epsilon() * c1 * c2 * static_cast<ukfPrecisionType>(100.0))
     return f_value; /* numerically there are not infeasibilities anymore */
 
   /* save old values for u and A */

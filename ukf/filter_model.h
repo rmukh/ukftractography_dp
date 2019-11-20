@@ -237,7 +237,7 @@ inline mat33_t SetIdentityScaled(ukfPrecisionType diff_fw)
   return tmp;
 }
 
-const double Pi(std::atan(static_cast<ukfPrecisionType>(1.0)) * 4);
+const ukfPrecisionType Pi(std::atan(static_cast<ukfPrecisionType>(1.0)) * 4);
 
 inline ukfPrecisionType BhattacharyyaCoeff(ukfPrecisionType x_sr, ukfPrecisionType x_pred, ukfPrecisionType cov)
 {
