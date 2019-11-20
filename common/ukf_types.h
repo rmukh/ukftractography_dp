@@ -21,7 +21,7 @@ static const ukfPrecisionType ukfZeroOne(static_cast<ukfPrecisionType>(0.1));
 static const ukfPrecisionType ukfThreeThousand(static_cast<ukfPrecisionType>(3000.0));
 static const ukfPrecisionType ukfHalf(static_cast<ukfPrecisionType>(0.5));
 static const ukfPrecisionType ukfDerivativePrecision(static_cast<ukfPrecisionType>(1e-7));
-static const ukfPrecisionType ukfCheckZero(static_cast<ukfPrecisionType>(-1.0e-4));
+static const ukfPrecisionType ukfCheckZero(static_cast<ukfPrecisionType>(-1.0e-3));
 
 typedef Eigen::Matrix<ukfPrecisionType, Eigen::Dynamic, 1> ukfVectorType;
 typedef Eigen::Matrix<ukfPrecisionType, Eigen::Dynamic, Eigen::Dynamic> ukfMatrixType;

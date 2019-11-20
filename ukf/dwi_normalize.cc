@@ -300,4 +300,9 @@ void dwiNormalize(const Nrrd *raw, Nrrd *&normalized)
   }
 
   std::cout << "Data normalization finished!" << std::endl << std::endl;
+  #ifdef UKF_USE_FLOAT
+    std::cout << "Float precision used!" << std::endl;
+  #else
+    std::cout << "Double precision used!" << std::endl;
+  #endif
 }

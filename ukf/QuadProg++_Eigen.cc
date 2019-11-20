@@ -88,7 +88,7 @@ inline double distance(double a, double b)
   return a1 * ::std::sqrt(2.0);
 }
 
-bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukfStateVector &d, int &iq, double &R_norm)
+inline bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukfStateVector &d, int &iq, double &R_norm)
 {
   const int n = static_cast<int>(d.size());
 
@@ -161,7 +161,7 @@ bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukfStateVe
   return true;
 }
 
-void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, QPConstrainedVecInt &A, QPConstrainedVec &u, int n,
+inline void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, QPConstrainedVecInt &A, QPConstrainedVec &u, int n,
                        int p, int &iq, int l)
 {
 #ifdef TRACE_SOLVER
@@ -255,7 +255,7 @@ void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, QPConst
   }
 }
 
-void cholesky_decomposition(ukfStateSquareMatrix &A)
+inline void cholesky_decomposition(ukfStateSquareMatrix &A)
 {
   const int n = 25;
 
@@ -322,7 +322,7 @@ inline void backward_elimination(const ukfStateSquareMatrix &U, ukfStateVector &
   }
 }
 
-void cholesky_solve(const ukfStateSquareMatrix &L, ukfStateVector &x, const ukfStateVector &b)
+inline void cholesky_solve(const ukfStateSquareMatrix &L, ukfStateVector &x, const ukfStateVector &b)
 {
   ukfStateVector y;
 
