@@ -2,6 +2,7 @@
 #define RIDG_BiExp_FW__
 
 #include "filter_model.h"
+#include "math_utilities.h"
 
 #include "SOLVERS.h"
 #include "SPH_RIDG.h"
