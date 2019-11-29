@@ -27,13 +27,7 @@ eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --tracts $output_path \
- --seedsFile $seeds_path \
- --seedsPerVoxel 3 \
- --numThread 1 \
- --minRTOP1stop 500 \
- --Qm 0.0001 \
- --stepLength 0.5 \
- --maxODFthresh 0.3 \
+ --seedsPerVoxel 1 \
  --recordNMSE \
  --recordWeights \
  --recordRTOP | tee -a $logFile

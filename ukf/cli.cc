@@ -97,147 +97,93 @@ int ukf_parse_cli(int argc, char **argv, UKFSettings &s)
   std::cout << "\"-\": default setting\n";
 
   if (labels.size() == 0)
-  {
     labels.push_back(1); //Default to use label 1
-  }
 
   if (l_seedingThreshold == 0.18)
-  {
-    ukf_setAndTell(l_seedingThreshold, FULL_BRAIN_MEAN_SIGNAL_MIN, "seedingThreshold");
-  }
+    ukf_setAndTell(l_seedingThreshold, 0.18, "seedingThreshold");
   else
-  {
     ukf_tell(l_seedingThreshold, "seedingThreshold");
-  }
 
-  if (l_Qm == 0.0)
-  {
+  if (l_Qm == 0.0001)
     ukf_setAndTell(l_Qm, 0.0001, "Qm");
-  }
   else
-  {
     ukf_tell(l_Qm, "Qm");
-  }
 
-  if (l_Ql == 0.0)
-  {
+  if (l_Ql == 150.0)
     ukf_setAndTell(l_Ql, 150.0, "Ql");
-  }
+  else
+    ukf_tell(l_Ql, "Ql");
 
-  if (l_Qt == 0.0)
-  {
+  if (l_Qt == 50.0)
     ukf_setAndTell(l_Qt, 50.0, "Qt");
-  }
   else
-  {
     ukf_tell(l_Qt, "Qt");
-  }
 
-  if (l_minRTOP1stop == 500.0)
-  {
-    ukf_setAndTell(l_minRTOP1stop, 500.0, "minRTOP1stop");
-  }
+  if (l_minRTOP1stop == 600.0)
+    ukf_setAndTell(l_minRTOP1stop, 600.0, "minRTOP1stop");
   else
-  {
     ukf_tell(l_minRTOP1stop, "minRTOP1stop");
-  }
 
   if (l_maxNMSE == 0.15)
-  {
     ukf_setAndTell(l_maxNMSE, 0.15, "maxNMSE");
-  }
   else
-  {
     ukf_tell(l_maxNMSE, "maxNMSE");
-  }
 
   if (l_maxUKFIterations < 0.0)
   {
     std::cout << "Error: maxUKFIterations cannot be negative. Exiting" << std::endl;
     exit(1);
   }
-  if (l_maxUKFIterations == 5)
-  {
-    ukf_setAndTell(l_maxUKFIterations, 5, "maxUKFIterations");
-  }
-  else
-  {
-    ukf_tell(l_maxUKFIterations, "maxUKFIterations");
-  }
 
-  if (l_maxODFthresh == 0.7)
-  {
-    ukf_setAndTell(l_maxODFthresh, 0.7, "maxODFthresh");
-  }
+  if (l_maxUKFIterations == 5)
+    ukf_setAndTell(l_maxUKFIterations, 5, "maxUKFIterations");
   else
-  {
+    ukf_tell(l_maxUKFIterations, "maxUKFIterations");
+
+  if (l_maxODFthresh == 0.3)
+    ukf_setAndTell(l_maxODFthresh, 0.3, "maxODFthresh");
+  else
     ukf_tell(l_maxODFthresh, "maxODFthresh");
-  }
 
   if (l_FWthresh == 0.65)
-  {
     ukf_setAndTell(l_FWthresh, 0.65, "FWthresh");
-  }
   else
-  {
     ukf_tell(l_FWthresh, "FWthresh");
-  }
 
-  if (l_Rs == 0.0)
-  {
+  if (l_Rs == 0.015)
     ukf_setAndTell(l_Rs, 0.015, "Rs");
-  }
   else
-  {
     ukf_tell(l_Rs, "Rs");
-  }
 
   if (l_stepLength == 0.3)
-  {
     ukf_setAndTell(l_stepLength, 0.3, "stepLength");
-  }
   else
-  {
     ukf_tell(l_stepLength, "stepLength");
-  }
 
   if (l_recordLength == 0.9)
-  {
     ukf_setAndTell(l_recordLength, 0.9, "recordLength");
-  }
   else
-  {
     ukf_tell(l_recordLength, "recordLength");
-  }
 
-  if (l_Qw == 0.0)
-  {
+  if (l_Qw == 0.002)
     ukf_setAndTell(l_Qw, 0.002, "Qw");
-  }
   else
-  {
     ukf_tell(l_Qw, "Qw");
-  }
 
-  ukf_setAndTell(l_Qwiso, 0.002, "Qwiso");
+  if (l_Qwiso == 0.002)
+    ukf_setAndTell(l_Qwiso, 0.002, "Qwiso");
+  else
+    ukf_tell(l_Qwiso, "Qwiso");
 
   if (l_stoppingThreshold == 0.1)
-  {
     ukf_setAndTell(l_stoppingThreshold, 0.1, "stoppingThreshold");
-  }
   else
-  {
     ukf_tell(l_stoppingThreshold, "stoppingThreshold");
-  }
 
   if (seedsPerVoxel == 1)
-  {
     std::cout << "- seedsPerVoxel: " << seedsPerVoxel << std::endl;
-  }
   else
-  {
     std::cout << "* seedsPerVoxel: " << seedsPerVoxel << std::endl;
-  }
 
   if (seedsPerVoxel != static_cast<int>(seedsPerVoxel) && seedsPerVoxel > 1.0)
   {

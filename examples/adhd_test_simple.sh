@@ -25,9 +25,7 @@ eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --tracts $output_path \
- --seedsFile $seeds_path \
- --seedsPerVoxel 1 \
- --numTensor 2 | tee $logFile
+ --seedsPerVoxel 0.1 | tee $logFile
  end=`date +%s`
 
 runtime=$((end - start))

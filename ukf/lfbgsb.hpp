@@ -649,7 +649,7 @@ public:
             }
             else
             {
-                ukfPrecisionType in_exp = expapprox_d(in(i));
+                ukfPrecisionType in_exp = std::exp(in(i));
                 out(i) = (lb(i) + EPS + (ub(i) - EPS) * in_exp) / (1.0 + in_exp);
 
                 if (!std::isfinite(out(i)))

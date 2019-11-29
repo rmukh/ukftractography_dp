@@ -384,7 +384,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
           starting_points.push_back(point);
         }
       }
-
       tmp_counter++;
     }
   }
@@ -413,22 +412,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 #else
   std::cout << "Multithreading for seed points initialization is not available!\n "
                "Please, compile the UKF tractography software with OpenMP support enabled if you want this functionality."
-            << std::ednl;
+            << std::endl;
 #endif
   for (unsigned i = 0; i < starting_points.size(); ++i)
   {
     const ukfVectorType &param = starting_params[i];
-
-    // Filter out seeds whose FA is too low.
-    ukfPrecisionType fa = l2fa(param[6], param[7], param[8]);
-    ukfPrecisionType trace = param[6] + param[7] + param[8];
-    ukfPrecisionType fa2 = -1;
-    ukfPrecisionType fa3 = -1;
-    ukfPrecisionType trace2 = -1;
-
-    fa2 = fa;
-    fa3 = fa;
-    trace2 = trace;
 
     // Create seed info for both directions;
     SeedPointInfo info;
@@ -438,18 +426,18 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
     info.point = starting_points[i];
     info.start_dir << param[0], param[1], param[2];
-    info.fa = fa;
-    info.fa2 = fa2;
-    info.fa3 = fa3;
-    info.trace = trace;
-    info.trace2 = trace2;
+    info.fa = -1;
+    info.fa2 = -1;
+    info.fa3 = -1;
+    info.trace = -1;
+    info.trace2 = -1;
     info_inv.point = starting_points[i];
     info_inv.start_dir << -param[0], -param[1], -param[2];
-    info_inv.fa = fa;
-    info_inv.fa2 = fa2;
-    info_inv.fa3 = fa3;
-    info_inv.trace = trace;
-    info_inv.trace2 = trace2;
+    info_inv.fa = -1;
+    info_inv.fa2 = -1;
+    info_inv.fa3 = -1;
+    info_inv.trace = -1;
+    info_inv.trace2 = -1;
 
     tmp_info_state.resize(25);
     tmp_info_inv_state.resize(25);
@@ -474,6 +462,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
     if (_full_brain)
       GFA = s2ga(QRidgSignal * C);
 
+    // Filter out seeds whose GFA is lower than a give treshold
     if (GFA > _seeding_threshold || !_full_brain || _is_seeds)
     {
       // Now we can compute ODF
@@ -490,9 +479,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       unsigned exe_vol_size = std::min(static_cast<unsigned>(exe_vol.size()), static_cast<unsigned>(6));
       ODF_val_at_max.setZero();
       for (unsigned j = 0; j < exe_vol_size; ++j)
-      {
         ODF_val_at_max(j) = ODF(exe_vol(j));
-      }
 
       // STEP 1: Initialise the state based
       mat33_t dir_init;

@@ -136,7 +136,7 @@
       <longflag>Qm</longflag>
       <label>Tracking: Rate of change of tensor direction/orientation</label>
       <description>UKF data fitting parameter for tensor: Process noise for angles/direction. Default: 0.001. Suggested Range: 0.00001 - 0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
-      <default>0.0</default>
+      <default>0.0001</default>
       <constraints>
         <minimum>0.0</minimum>
         <maximum>0.25</maximum>
@@ -217,7 +217,7 @@
       <longflag>Ql</longflag>
       <label>UKF Parameter (Advanced): Rate of change of eigenvalues</label>
       <description>UKF data fitting parameter for tensor model: Process noise for eigenvalues. Defaults: 1 tensor-300 ; 2 tensor-50 ; 3 tensor-100. Suggested Range: 1-1000. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
-      <default>0.0</default>
+      <default>150.0</default>
       <constraints>
         <minimum>0</minimum>
         <maximum>1000</maximum>
@@ -230,7 +230,7 @@
       <longflag>Qw</longflag>
       <label>UKF Parameter (Advanced): Rate of change of volume fraction</label>
       <description>UKF data fitting parameter for tensor plus free water model: Process noise for volume fraction weights. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
-      <default>0.0</default>
+      <default>0.002</default>
       <constraints>
         <minimum>0.0</minimum>
         <maximum>0.25</maximum>
@@ -243,7 +243,7 @@
       <longflag>Qt</longflag>
       <label>UKF Parameter (Advanced): Rate of change of eigenvalues for the slow diffusion</label>
       <description>UKF data fitting parameter for tensor model: Process noise for slow diffusion eigenvalues.</description>
-      <default>0.0</default>
+      <default>50.0</default>
     </double>
 
     <double>
@@ -251,7 +251,7 @@
       <longflag>Qwiso</longflag>
       <label>UKF Parameter (Advanced): Rate of change of freewater weight</label>
       <description>UKF data fitting parameter for tensor plus free water model: Process noise for free water weights, ignored if no free water estimation. Defaults: 1 tensor-0.0025; 2 tensor-0.0015. Suggested Range: 0.00001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
-      <default>0.0</default>
+      <default>0.002</default>
       <constraints>
         <minimum>0.0</minimum>
         <maximum>0.25</maximum>
@@ -359,7 +359,7 @@
       <longflag>Rs</longflag>
       <label>Signal Parameter (Advanced): Expected noise in signal</label>
       <description>UKF Data Term: Measures expected noise in signal. This is used by the UKF method to decide how much to trust the data. This should be increased for very noisy data or reduced for high quality data. Defaults: single tensor/orientation-0.01; other-0.02. Suggested Range: 0.001-0.25. Default of 0.0 indicates the program will assign value based on other model parameters.</description>
-      <default> 0.0 </default>
+      <default>0.015</default>
       <constraints>
         <minimum>0.0</minimum>
         <maximum>0.25</maximum>
