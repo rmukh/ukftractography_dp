@@ -26,6 +26,7 @@ eval $BINARY \
  --maskFile $mask_path \
  --tracts $output_path \
  --stepLength 0.5 \
+ --seedingThreshold 0.135 \
  --seedsFile $seeds_path | tee $logFile
  end=`date +%s`
 

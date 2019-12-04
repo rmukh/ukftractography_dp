@@ -562,7 +562,7 @@ int VtkWriter::Write(const std::string &file_name,
     vtkSmartPointer<vtkFloatArray> lmd3 = vtkSmartPointer<vtkFloatArray>::New();
     lmd3->SetNumberOfComponents(1);
     lmd3->Allocate(num_points);
-    lmd3->SetName("Frob lambda 2");
+    lmd3->SetName("Frob lambda 3");
     for (int i = 0; i < num_fibers; ++i)
     {
       int fiber_size = fibers[i].position.size();
