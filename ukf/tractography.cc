@@ -1638,7 +1638,7 @@ void Tractography::LoopUKF(const int thread_id,
     er_org = er;
     er = dNormMSE;
 
-    if (er_org - er < 0.001) // if error is fine then stop
+    if (std::fabs(er_org - er) < 0.001) // if error is fine then stop
       break;
 
     state_prev = state;
