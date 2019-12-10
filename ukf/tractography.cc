@@ -457,7 +457,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(ARidg, HighBSignalValues, fista_lambda);
       slv.FISTA(C);
     }
-    
+
     ukfPrecisionType GFA = ukfZero;
     if (_full_brain)
       GFA = s2ga(QRidgSignal * C);
@@ -587,7 +587,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       ukfStateSquareMatrix p(info.covariance);
 
       // Estimate the initial state
-      // InitLoopUKF(state, p, signal_values[i], dNormMSE);
       NonLinearLeastSquareOptimization(state, signal_values[i]);
 
       // Output of the filter
@@ -1353,7 +1352,6 @@ void Tractography::Follow(const int thread_id,
   Record(x, rtop1, rtop2, rtop3, state, p, fiber, dNormMSE, rtopModel, rtopSignal);
 
   vec3_t m1 = fiberStartSeed.start_dir;
-  vec3_t m2, m3;
 
   // Tract the fiber.
   ukfMatrixType signal_tmp(_model->signal_dim(), 1);
@@ -1362,26 +1360,25 @@ void Tractography::Follow(const int thread_id,
   while (true)
   {
     ++stepnr;
-
-    // That's one small step for a propagator, one giant leap for tractography...
-    Step(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
+    is_discarded = 0; // by default we assume that this fiber is fine, we are going to keep using it
+    bool in_csf = false;
+    const bool is_brain = _signal_data->ScalarMaskValue(x) > 0; //_signal_data->Interp3ScalarMask(x) > 0.1;
+    if (!is_brain)
+      break;
 
     // Check if we should abort following this fiber. We abort if we reach the
     // CSF, if FA or GA get too small, if the curvature get's too high or if
     // the fiber gets too long.
-    const bool is_brain = _signal_data->ScalarMaskValue(x) > 0; //_signal_data->Interp3ScalarMask(x) > 0.1;
 
-    _model->H(state, signal_tmp);
+    // That's one small step for a propagator, one giant leap for tractography...
+    Step(thread_id, x, m1, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
 
     //const ukfPrecisionType mean_signal = s2adc(signal_tmp);
-    bool in_csf = false;
+
     if (_csf_provided)
       in_csf = _signal_data->ScalarCSFValue(x) > 0.5; // consider CSF as a true only if pve value > 0.5
     //else
     //in_csf = mean_signal < _mean_signal_min; // estimate 'CSF' which is basically GAF from a signal
-
-    // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
-
     //The trick is to discard fibers only when we have CSF mask?
     //Wonder why? Because we can't say if estimated from voxel 'CSF' is CSF.
     if (_csf_provided && in_csf)
@@ -1389,10 +1386,12 @@ void Tractography::Follow(const int thread_id,
       is_discarded = 1; // mark fiber to remove it later
       break;
     }
-    else
-    {
-      is_discarded = 0; // that's fiber is fine, we are going to keep it on
-    }
+    else if (in_csf)
+      break;
+
+    _model->H(state, signal_tmp);
+
+    // ukfPrecisionType rtopSignal = trace2; // rtopSignal is stored in trace2
 
     bool dNormMSE_too_high = dNormMSE > _max_nmse;
     bool is_curving = curve_radius(fiber.position) < _min_radius;
@@ -1408,7 +1407,7 @@ void Tractography::Follow(const int thread_id,
     //else
     //{
 
-    if (!is_brain || in_rtop1 || is_high_fw || in_csf || is_curving || dNormMSE_too_high || stepnr > _max_length)
+    if (in_rtop1 || is_high_fw || is_curving || dNormMSE_too_high || stepnr > _max_length)
       break;
 
     //}
@@ -1551,8 +1550,6 @@ void Tractography::Follow3T(const int thread_id,
 void Tractography::Step(const int thread_id,
                         vec3_t &x,
                         vec3_t &m1,
-                        vec3_t &m2,
-                        vec3_t &m3,
                         ukfStateVector &state,
                         ukfStateSquareMatrix &covariance,
                         ukfPrecisionType &dNormMSE,
@@ -1583,11 +1580,9 @@ void Tractography::Step(const int thread_id,
   LoopUKF(thread_id, state, covariance, signal, state_new, covariance_new, dNormMSE);
 
   vec3_t old_dir = m1;
-
-  _model->State2Tensor3T(state, old_dir, m1, m2, m3);
+  _model->State2Tensor3T(state, old_dir, m1);
 
   ukfPrecisionType _rtop1, _rtop2, _rtop3, _rtopModel, _rtopSignal;
-
   computeRTOPfromState(state, _rtopModel, _rtop1, _rtop2, _rtop3);
   computeRTOPfromSignal(_rtopSignal, signal);
 
@@ -1625,26 +1620,29 @@ void Tractography::LoopUKF(const int thread_id,
   state = state_new;
   covariance = covariance_new;
 
-  ukfPrecisionType er_org = dNormMSE;
-  ukfPrecisionType er = er_org;
-
-  ukfStateVector state_prev = state;
-
-  for (int jj = 0; jj < _maxUKFIterations; ++jj)
+  if (_maxUKFIterations > 1)
   {
-    _ukf[thread_id]->Filter(state, covariance, signal, state_new, covariance_new, dNormMSE);
-    state = state_new;
+    ukfPrecisionType er_org = dNormMSE;
+    ukfPrecisionType er = er_org;
 
-    er_org = er;
-    er = dNormMSE;
+    ukfStateVector state_prev = state;
 
-    if (std::fabs(er_org - er) < 0.001) // if error is fine then stop
-      break;
+    for (int jj = 0; jj < _maxUKFIterations; ++jj)
+    {
+      _ukf[thread_id]->Filter(state, covariance, signal, state_new, covariance_new, dNormMSE);
+      state = state_new;
 
-    state_prev = state;
+      er_org = er;
+      er = dNormMSE;
+
+      if (std::fabs(er_org - er) < 0.001) // if error is fine then stop
+        break;
+
+      state_prev = state;
+    }
+
+    state = state_prev;
   }
-
-  state = state_prev;
 }
 
 void Tractography::SwapState(stdVecState &state,

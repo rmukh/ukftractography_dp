@@ -174,7 +174,7 @@ private:
   void UnpackTensor(const ukfVectorType &b, const stdVec_t &u, stdEigVec_t &s, stdEigVec_t &ret);
 
   /** One step for ridgelets bi-exp case */
-  void Step(const int thread_id, vec3_t &x, vec3_t &m1, vec3_t &m2, vec3_t &m3, ukfStateVector &state, ukfStateSquareMatrix &covariance, ukfPrecisionType &dNormMSE,
+  void Step(const int thread_id, vec3_t &x, vec3_t &m1, ukfStateVector &state, ukfStateSquareMatrix &covariance, ukfPrecisionType &dNormMSE,
               ukfPrecisionType &rtop1, ukfPrecisionType &rtop2, ukfPrecisionType &rtop3, ukfPrecisionType &rtopModel, ukfPrecisionType &rtopSignal);
 
   /**

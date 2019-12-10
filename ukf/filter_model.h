@@ -101,7 +101,7 @@ public:
     assert(!"Not implemented");
   }
 
-  virtual void State2Tensor3T(const ukfStateVector &, const vec3_t &, vec3_t &, vec3_t &, vec3_t &)
+  virtual void State2Tensor3T(const ukfStateVector &, const vec3_t &, vec3_t &)
   {
     assert(!"Not implemented");
   }

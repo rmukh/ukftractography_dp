@@ -647,18 +647,12 @@ void Ridg_BiExp_FW::State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m,
 		m3 = -m3;
 }
 
-void Ridg_BiExp_FW::State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1, vec3_t &m2, vec3_t &m3)
+void Ridg_BiExp_FW::State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1)
 {
 	// Orientations;
 	initNormalized(m1, x[0], x[1], x[2]);
-	initNormalized(m2, x[7], x[8], x[9]);
-	initNormalized(m3, x[14], x[15], x[16]);
 
 	// Flip orientations if necessary.
 	if (m1.dot(old_m) < 0)
 		m1 = -m1;
-	if (m2.dot(old_m) < 0)
-		m2 = -m2;
-	if (m3.dot(old_m) < 0)
-		m3 = -m3;
 }
