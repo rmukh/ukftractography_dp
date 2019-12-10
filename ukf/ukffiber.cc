@@ -59,9 +59,7 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
   for (int i = 0; i < num_primary_fibers; i++)
   {
     if (num_points_on_primary_fiber[i] >= MINIMUM_NUM_POINTS_ON_FIBER && discarded_fibers[2 * i] != 1 && discarded_fibers[2 * i + 1] != 1)
-    {
       num_valid_primary_fibers++;
-    }
   }
 
   fibers.resize(num_valid_primary_fibers);
@@ -70,7 +68,7 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
   int counter = 0;
   for (int i = 0; i < num_primary_fibers; i++)
   {
-    if (num_points_on_primary_fiber[i] < MINIMUM_NUM_POINTS_ON_FIBER || discarded_fibers[2 * i] == 1 || discarded_fibers[2 * i + 1] == 1)
+    if (num_points_on_primary_fiber[i] < MINIMUM_NUM_POINTS_ON_FIBER || (discarded_fibers[2 * i] == 1 && discarded_fibers[2 * i + 1] == 1))
       continue;
 
     const UKFFiber &first_half = raw_primary[2 * i];
@@ -78,102 +76,54 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
 
     fibers[counter].position.resize(num_points_on_primary_fiber[i]);
     if (record_fa)
-    {
       fibers[counter].fa.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_fa2)
-    {
       fibers[counter].fa2.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_fa3)
-    {
       fibers[counter].fa3.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_trace)
-    {
       fibers[counter].trace.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_trace2)
-    {
       fibers[counter].trace2.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_free_water)
-    {
       fibers[counter].free_water.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_w1)
-    {
       fibers[counter].w1.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_w2)
-    {
       fibers[counter].w2.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_w3)
-    {
       fibers[counter].w3.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_w1w2angle)
-    {
       fibers[counter].w1w2angle.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_w1w3angle)
-    {
       fibers[counter].w1w3angle.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_Fm1)
-    {
       fibers[counter].Fm1.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_lmd1)
-    {
       fibers[counter].lmd1.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_Fm2)
-    {
       fibers[counter].Fm2.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_lmd2)
-    {
       fibers[counter].lmd2.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_Fm3)
-    {
       fibers[counter].Fm3.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_lmd3)
-    {
       fibers[counter].lmd3.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_varW1)
-    {
       fibers[counter].varW1.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_varW2)
-    {
       fibers[counter].varW2.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_varW3)
-    {
       fibers[counter].varW3.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_varWiso)
-    {
       fibers[counter].varWiso.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_normMSE)
-    {
       fibers[counter].normMSE.resize(num_points_on_primary_fiber[i]);
-    }
     fibers[counter].norm.resize(num_points_on_primary_fiber[i]);
     if (record_state)
-    {
       fibers[counter].state.resize(num_points_on_primary_fiber[i]);
-    }
     if (record_cov)
-    {
       fibers[counter].covariance.resize(num_points_on_primary_fiber[i]);
-    }
 
     int k = 0;
     // The first point in the first_half, namely the seed point in the first half, is excluded
