@@ -19,18 +19,19 @@ output_path="/home/rinat/Desktop/ukftests/HCP/HCP_demo_output.vtk"
 
 #csf_path="/data/pnl/home/rz892/HCP/spm/csf_mask.nrrd"
 #wm_path="/data/pnl/home/rz892/HCP/spm/wm_mask.nrrd"
-seeds_path="/home/rinat/Desktop/HCP_subj/seeds_stem.nrrd"
+seeds_path="/home/rinat/Desktop/HCP_subj/stem_seeds.nrrd"
 echo "Start time $(date)" | tee $logFile
 
 # --seedsFile $seeds_path \
 eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
+ --seedsFile $seeds_path \
  --tracts $output_path \
- --seedsPerVoxel 0.01 \
- --recordNMSE \
- --recordWeights \
- --recordRTOP | tee -a $logFile
+ --seedsPerVoxel 1 \
+ --stepLength 1.25 \
+ --recordLength 1.25 \
+ --maxUKFIterations 1 | tee -a $logFile
  end=`date +%s`
 
 runtime=$((end - start))

@@ -92,7 +92,7 @@ Tractography::Tractography(UKFSettings s) : // begin initializer list
                                             debug(false),
                                             sph_rho(3.125),
                                             sph_J(2),
-                                            fista_lambda(0.01),
+                                            fista_lambda(0.001),
                                             lvl(4),
                                             max_odf_thresh(s.max_odf_threshold)
 // end initializer list
@@ -307,6 +307,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   if (seeds.size() == 1 && static_cast<unsigned>(_seeds_per_voxel) == 1) // if there is only one seed don't use offset so fibers can be compared
   {
     rand_dirs.push_back(vec3_t(0, 0, 0) /* make_vec(0, 0, 0) */); // in the test cases.
+    std::cout << "Only for test case!" << std::endl;
   }
   else
   {
@@ -387,7 +388,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       tmp_counter++;
     }
   }
-
   stdEigVec_t starting_params(starting_points.size());
 
   UnpackTensor(_signal_data->GetBValues(), _signal_data->gradients(),
@@ -1490,7 +1490,7 @@ void Tractography::Follow3T(const int thread_id,
     // std::cout << "step " << stepnr << std::endl;
     ++stepnr;
 
-    Step(thread_id, x, m1, m2, m3, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
+    Step(thread_id, x, m1, state, p, dNormMSE, rtop1, rtop2, rtop3, rtopModel, rtopSignal);
 
     // cout << "w's " << state(21) << " " << state(22) << " " << state(23) << endl;
     // Check if we should abort following this fiber. We abort if we reach the

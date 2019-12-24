@@ -25,9 +25,9 @@ eval $BINARY \
  --dwiFile $dwi_path \
  --maskFile $mask_path \
  --tracts $output_path \
- --stepLength 0.5 \
- --seedingThreshold 0.135 \
- --seedsFile $seeds_path | tee $logFile
+ --stepLength 1.25 \
+ --recordLength 1.25 \
+ --maxUKFIterations 1 | tee $logFile
  end=`date +%s`
 
 runtime=$((end - start))
