@@ -29,16 +29,16 @@ public:
   vec3_t point;
   /** The starting direction for the simple model */
   vec3_t start_dir;
-  /** Fractional Anisotropy of the first tensor */
-  ukfPrecisionType fa;
-  /** Fractional Anisotropy of the second tensor */
-  ukfPrecisionType fa2;
-  /** Fractional Anisotropy of the third tensor */
-  ukfPrecisionType fa3;
-  /** Trace of the first tensor */
-  ukfPrecisionType trace;
-  /** Trace of the second tensor */
-  ukfPrecisionType trace2;
+  /** RTOP of the first compartment */
+  ukfPrecisionType rtop1;
+  /** RTOP of the second compartment */
+  ukfPrecisionType rtop2;
+  /** RTOP of the third compartment */
+  ukfPrecisionType rtop3;
+  /** RTOP from state */
+  ukfPrecisionType rtop_model;
+  /** RTOP from dMRI image */
+  ukfPrecisionType rtop_signal;
 };
 
 /** Writes debug information about seeds to stdout. */

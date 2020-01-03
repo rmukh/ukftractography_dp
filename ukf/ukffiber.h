@@ -24,12 +24,12 @@ struct UKFFiber
 {
   /** vector of 3D points defining the fiber path */
   stdVec_t position;
-  /** FA of tensor 1 */
-  std::vector<ukfPrecisionType> fa;
-  /** FA of tensor 2 */
-  std::vector<ukfPrecisionType> fa2;
-  /** FA of tensor 3 */
-  std::vector<ukfPrecisionType> fa3;
+  /** RTOP of compartment 1 */
+  std::vector<ukfPrecisionType> rtop1;
+  /** RTOP of compartment 2 */
+  std::vector<ukfPrecisionType> rtop2;
+  /** RTOP of compartment 3 */
+  std::vector<ukfPrecisionType> rtop3;
   /** Array 2 norm of the covariance matrix */
   std::vector<ukfPrecisionType> norm;
   /** ukfStateVector of the current model at the current position*/
@@ -40,10 +40,10 @@ struct UKFFiber
   std::vector<ukfPrecisionType> free_water;
   /** Normalized mean squared error of the signal reconstruction to the signal */
   std::vector<ukfPrecisionType> normMSE;
-  /** Trace of tensor 1 */
-  std::vector<ukfPrecisionType> trace;
-  /** Trace of tensor 2 */
-  std::vector<ukfPrecisionType> trace2;
+  /** RTOP from state */
+  std::vector<ukfPrecisionType> rtop_model;
+  /** RTOP from dMRI image */
+  std::vector<ukfPrecisionType> rtop_signal;
   /** Weights (diffussion propagator, bi-exponential) */
   std::vector<ukfPrecisionType> w1;
   std::vector<ukfPrecisionType> w2;

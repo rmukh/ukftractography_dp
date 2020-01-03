@@ -193,7 +193,7 @@ private:
   // BiExp version only
   void Record(const vec3_t &x, const ukfPrecisionType rtop1, const ukfPrecisionType rtop2, const ukfPrecisionType rtop3, 
               const ukfStateVector &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
-              const ukfPrecisionType trace, const ukfPrecisionType trace2);
+              const ukfPrecisionType rtop_model, const ukfPrecisionType rtop_signal);
 
   void RecordWeightTrack(const vec3_t &x, UKFFiber &fiber, ukfPrecisionType d1, ukfPrecisionType d2, ukfPrecisionType d3);
 

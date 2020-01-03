@@ -22,6 +22,6 @@ void PrintSeedInfo(const std::vector<SeedPointInfo>& seed_infos)
     std::cout << std::endl;
     std::cout << "  Dir: (" << inf.start_dir[0] << ", " << inf.start_dir[1]
               << ", " << inf.start_dir[2] << ")" << std::endl;
-    std::cout << "  FA:" << inf.fa << std::endl;
+    std::cout << "  RTOP1:" << inf.rtop1 << std::endl;
     }
 }

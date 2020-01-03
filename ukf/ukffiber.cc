@@ -16,11 +16,11 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
 
   assert((num_half_fibers > 0) && (num_half_fibers % 2 == 0));
   // if Noddi model is used Kappa is stored in trace, Vic in fa and Viso in freewater
-  const bool record_fa = !raw_primary[0].fa.empty();
-  const bool record_fa2 = !raw_primary[0].fa2.empty();
-  const bool record_fa3 = !raw_primary[0].fa3.empty();
-  const bool record_trace = !raw_primary[0].trace.empty();
-  const bool record_trace2 = !raw_primary[0].trace2.empty();
+  const bool record_rtop1 = !raw_primary[0].rtop1.empty();
+  const bool record_rtop2 = !raw_primary[0].rtop2.empty();
+  const bool record_rtop3 = !raw_primary[0].rtop3.empty();
+  const bool record_rtop_model = !raw_primary[0].rtop_model.empty();
+  const bool record_rtop_signal = !raw_primary[0].rtop_signal.empty();
   const bool record_free_water = !raw_primary[0].free_water.empty();
   const bool record_normMSE = !raw_primary[0].normMSE.empty();
   const bool record_cov = !raw_primary[0].covariance.empty();
@@ -75,16 +75,16 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
     const UKFFiber &second_half = raw_primary[2 * i + 1];
 
     fibers[counter].position.resize(num_points_on_primary_fiber[i]);
-    if (record_fa)
-      fibers[counter].fa.resize(num_points_on_primary_fiber[i]);
-    if (record_fa2)
-      fibers[counter].fa2.resize(num_points_on_primary_fiber[i]);
-    if (record_fa3)
-      fibers[counter].fa3.resize(num_points_on_primary_fiber[i]);
-    if (record_trace)
-      fibers[counter].trace.resize(num_points_on_primary_fiber[i]);
-    if (record_trace2)
-      fibers[counter].trace2.resize(num_points_on_primary_fiber[i]);
+    if (record_rtop1)
+      fibers[counter].rtop1.resize(num_points_on_primary_fiber[i]);
+    if (record_rtop2)
+      fibers[counter].rtop2.resize(num_points_on_primary_fiber[i]);
+    if (record_rtop3)
+      fibers[counter].rtop3.resize(num_points_on_primary_fiber[i]);
+    if (record_rtop_model)
+      fibers[counter].rtop_model.resize(num_points_on_primary_fiber[i]);
+    if (record_rtop_signal)
+      fibers[counter].rtop_signal.resize(num_points_on_primary_fiber[i]);
     if (record_free_water)
       fibers[counter].free_water.resize(num_points_on_primary_fiber[i]);
     if (record_w1)
@@ -130,25 +130,25 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
     for (int j = static_cast<int>(first_half.position.size()) - 1; j > 0; j--)
     {
       fibers[counter].position[k] = first_half.position[j];
-      if (record_fa)
+      if (record_rtop1)
       {
-        fibers[counter].fa[k] = first_half.fa[j];
+        fibers[counter].rtop1[k] = first_half.rtop1[j];
       }
-      if (record_fa2)
+      if (record_rtop2)
       {
-        fibers[counter].fa2[k] = first_half.fa2[j];
+        fibers[counter].rtop2[k] = first_half.rtop2[j];
       }
-      if (record_fa3)
+      if (record_rtop3)
       {
-        fibers[counter].fa3[k] = first_half.fa3[j];
+        fibers[counter].rtop3[k] = first_half.rtop3[j];
       }
-      if (record_trace)
+      if (record_rtop_model)
       {
-        fibers[counter].trace[k] = first_half.trace[j];
+        fibers[counter].rtop_model[k] = first_half.rtop_model[j];
       }
-      if (record_trace2)
+      if (record_rtop_signal)
       {
-        fibers[counter].trace2[k] = first_half.trace2[j];
+        fibers[counter].rtop_signal[k] = first_half.rtop_signal[j];
       }
       if (record_free_water)
       {
@@ -232,25 +232,25 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
     for (int j = 0; j < static_cast<int>(second_half.position.size()); j++)
     {
       fibers[counter].position[k] = second_half.position[j];
-      if (record_fa)
+      if (record_rtop1)
       {
-        fibers[counter].fa[k] = second_half.fa[j];
+        fibers[counter].rtop1[k] = second_half.rtop1[j];
       }
-      if (record_fa2)
+      if (record_rtop2)
       {
-        fibers[counter].fa2[k] = second_half.fa2[j];
+        fibers[counter].rtop2[k] = second_half.rtop2[j];
       }
-      if (record_fa3)
+      if (record_rtop3)
       {
-        fibers[counter].fa3[k] = second_half.fa3[j];
+        fibers[counter].rtop3[k] = second_half.rtop3[j];
       }
-      if (record_trace)
+      if (record_rtop_model)
       {
-        fibers[counter].trace[k] = second_half.trace[j];
+        fibers[counter].rtop_model[k] = second_half.rtop_model[j];
       }
-      if (record_trace2)
+      if (record_rtop_signal)
       {
-        fibers[counter].trace2[k] = second_half.trace2[j];
+        fibers[counter].rtop_signal[k] = second_half.rtop_signal[j];
       }
       if (record_free_water)
       {

@@ -295,7 +295,7 @@ int VtkWriter::Write(const std::string &file_name,
   }
 
   // write rtop1
-  if (fibers[0].fa.size() > 0)
+  if (fibers[0].rtop1.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> fa = vtkSmartPointer<vtkFloatArray>::New();
     fa->SetNumberOfComponents(1);
@@ -306,14 +306,14 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-        fa->InsertNextValue(fibers[i].fa[j]);
+        fa->InsertNextValue(fibers[i].rtop1[j]);
     }
     int idx = pointData->AddArray(fa);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
   // rtop2
-  if (fibers[0].fa2.size() > 0)
+  if (fibers[0].rtop2.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> fa2 = vtkSmartPointer<vtkFloatArray>::New();
     fa2->SetName("RTOP2");
@@ -323,14 +323,14 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-        fa2->InsertNextValue(fibers[i].fa2[j]);
+        fa2->InsertNextValue(fibers[i].rtop2[j]);
     }
     int idx = pointData->AddArray(fa2);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
   // rtop3
-  if (fibers[0].fa3.size() > 0)
+  if (fibers[0].rtop3.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> fa3 = vtkSmartPointer<vtkFloatArray>::New();
     fa3->SetName("RTOP3");
@@ -340,14 +340,14 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-        fa3->InsertNextValue(fibers[i].fa3[j]);
+        fa3->InsertNextValue(fibers[i].rtop3[j]);
     }
     int idx = pointData->AddArray(fa3);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
   // trace
-  if (fibers[0].trace.size() > 0)
+  if (fibers[0].rtop_model.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> trace = vtkSmartPointer<vtkFloatArray>::New();
     trace->SetNumberOfComponents(1);
@@ -357,14 +357,14 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-        trace->InsertNextValue(fibers[i].trace[j]);
+        trace->InsertNextValue(fibers[i].rtop_model[j]);
     }
     int idx = pointData->AddArray(trace);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
   // trace2
-  if (fibers[0].trace2.size() > 0)
+  if (fibers[0].rtop_signal.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> trace2 = vtkSmartPointer<vtkFloatArray>::New();
     trace2->SetNumberOfComponents(1);
@@ -375,7 +375,7 @@ int VtkWriter::Write(const std::string &file_name,
     {
       int fiber_size = fibers[i].position.size();
       for (int j = 0; j < fiber_size; ++j)
-        trace2->InsertNextValue(fibers[i].trace2[j]);
+        trace2->InsertNextValue(fibers[i].rtop_signal[j]);
     }
     int idx = pointData->AddArray(trace2);
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);

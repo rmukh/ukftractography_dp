@@ -393,13 +393,6 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
   UnpackTensor(_signal_data->GetBValues(), _signal_data->gradients(),
                signal_values, starting_params);
 
-  // If we work with the simple model we have to change the second and third
-  // eigenvalues: l2 = l3 = (l2 + l3) / 2.
-  for (size_t i = 0; i < starting_params.size(); ++i)
-  {
-    starting_params[i][7] = starting_params[i][8] = (starting_params[i][7] + starting_params[i][8]) / 2.0;
-    // two minor eigenvalues are treated equal in simplemodel
-  }
   seed_infos.reserve(static_cast<unsigned>(starting_points.size()) * 3);
 
 #if defined(_OPENMP)
@@ -426,18 +419,9 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
     info.point = starting_points[i];
     info.start_dir << param[0], param[1], param[2];
-    info.fa = -1;
-    info.fa2 = -1;
-    info.fa3 = -1;
-    info.trace = -1;
-    info.trace2 = -1;
+
     info_inv.point = starting_points[i];
     info_inv.start_dir << -param[0], -param[1], -param[2];
-    info_inv.fa = -1;
-    info_inv.fa2 = -1;
-    info_inv.fa3 = -1;
-    info_inv.trace = -1;
-    info_inv.trace2 = -1;
 
     tmp_info_state.resize(25);
     tmp_info_inv_state.resize(25);
@@ -602,17 +586,17 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       computeRTOPfromSignal(rtopSignal, signal_values[i]);
 
       // These values are stored so that: rtop1 -> fa; rtop2 -> fa2; rtop3 -> fa3; rtop -> trace; rtopSignal -> trace2
-      info.fa = rtop1;
-      info.fa2 = rtop2;
-      info.fa3 = rtop3;
-      info.trace = rtopModel;
-      info.trace2 = rtopSignal;
+      info.rtop1 = rtop1;
+      info.rtop2 = rtop2;
+      info.rtop3 = rtop3;
+      info.rtop_model = rtopModel;
+      info.rtop_signal = rtopSignal;
 
-      info_inv.fa = rtop1;
-      info_inv.fa2 = rtop2;
-      info_inv.fa3 = rtop3;
-      info_inv.trace = rtopModel;
-      info_inv.trace2 = rtopSignal;
+      info_inv.rtop1 = rtop1;
+      info_inv.rtop2 = rtop2;
+      info_inv.rtop3 = rtop3;
+      info_inv.rtop_model = rtopModel;
+      info_inv.rtop_signal = rtopSignal;
 
       // Create the opposite seed
       InverseStateDiffusionPropagator(tmp_info_state, tmp_info_inv_state);
@@ -1336,11 +1320,11 @@ void Tractography::Follow(const int thread_id,
   To simplify code 'readability' and understanding I make a local rtop variables
   in Follow3T and Step3T functions.
   */
-  ukfPrecisionType rtop1 = fiberStartSeed.fa;
-  ukfPrecisionType rtop2 = fiberStartSeed.fa2;
-  ukfPrecisionType rtop3 = fiberStartSeed.fa3;
-  ukfPrecisionType rtopModel = fiberStartSeed.trace;
-  ukfPrecisionType rtopSignal = fiberStartSeed.trace2;
+  ukfPrecisionType rtop1 = fiberStartSeed.rtop1;
+  ukfPrecisionType rtop2 = fiberStartSeed.rtop2;
+  ukfPrecisionType rtop3 = fiberStartSeed.rtop3;
+  ukfPrecisionType rtopModel = fiberStartSeed.rtop_model;
+  ukfPrecisionType rtopSignal = fiberStartSeed.rtop_signal;
   ukfPrecisionType dNormMSE = 0; // no error at the fiberStartSeed
 
   //std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
@@ -1457,11 +1441,11 @@ void Tractography::Follow3T(const int thread_id,
   To simplify code 'reading' and understanding I make a local rtop variables
   in Follow3T and Step3T functions.
   */
-  ukfPrecisionType rtop1 = fiberStartSeed.fa;
-  ukfPrecisionType rtop2 = fiberStartSeed.fa2;
-  ukfPrecisionType rtop3 = fiberStartSeed.fa3;
-  ukfPrecisionType rtopModel = fiberStartSeed.trace;
-  ukfPrecisionType rtopSignal = fiberStartSeed.trace2;
+  ukfPrecisionType rtop1 = fiberStartSeed.rtop1;
+  ukfPrecisionType rtop2 = fiberStartSeed.rtop2;
+  ukfPrecisionType rtop3 = fiberStartSeed.rtop3;
+  ukfPrecisionType rtopModel = fiberStartSeed.rtop_model;
+  ukfPrecisionType rtopSignal = fiberStartSeed.rtop_signal;
   ukfPrecisionType dNormMSE = 0; // no error at the fiberStartSeed
 
   //std::cout << "For seed point \n " << fiberStartSeed.state << std::endl;
@@ -1582,15 +1566,8 @@ void Tractography::Step(const int thread_id,
   vec3_t old_dir = m1;
   _model->State2Tensor3T(state, old_dir, m1);
 
-  ukfPrecisionType _rtop1, _rtop2, _rtop3, _rtopModel, _rtopSignal;
-  computeRTOPfromState(state, _rtopModel, _rtop1, _rtop2, _rtop3);
-  computeRTOPfromSignal(_rtopSignal, signal);
-
-  rtop1 = _rtop1;
-  rtop2 = _rtop2;
-  rtop3 = _rtop3;
-  rtopModel = _rtopModel;
-  rtopSignal = _rtopSignal;
+  computeRTOPfromState(state, rtopModel, rtop1, rtop2, rtop3);
+  computeRTOPfromSignal(rtopSignal, signal);
 
   vec3_t dx;
   {
@@ -1753,14 +1730,13 @@ void Tractography::SwapState(ukfStateVector &state,
 
 void Tractography::Record(const vec3_t &x, const ukfPrecisionType rtop1, const ukfPrecisionType rtop2, const ukfPrecisionType rtop3,
                           const ukfStateVector &state, const ukfMatrixType p, UKFFiber &fiber, const ukfPrecisionType dNormMSE,
-                          const ukfPrecisionType trace, const ukfPrecisionType trace2)
+                          const ukfPrecisionType rtop_model, const ukfPrecisionType rtop_signal)
 {
-  /*
   // if Noddi model is used Kappa is stored in trace, Vic in fa and Viso in freewater
   assert(_model->state_dim() == static_cast<int>(state.size()));
   assert(p.rows() == static_cast<unsigned int>(state.size()) &&
          p.cols() == static_cast<unsigned int>(state.size()));
-*/
+
   // std::cout << "x: " << x[0] << " " << x[1] << " " << x[2] << std::endl;
   fiber.position.push_back(x);
   fiber.norm.push_back(p.norm());
@@ -1772,15 +1748,15 @@ void Tractography::Record(const vec3_t &x, const ukfPrecisionType rtop1, const u
 
   if (_record_trace)
   {
-    fiber.trace.push_back(trace);
-    fiber.trace2.push_back(trace2);
+    fiber.rtop_model.push_back(rtop_model);
+    fiber.rtop_signal.push_back(rtop_signal);
   }
 
   if (_record_rtop)
   {
-    fiber.fa.push_back(rtop1);
-    fiber.fa2.push_back(rtop2);
-    fiber.fa3.push_back(rtop3);
+    fiber.rtop1.push_back(rtop1);
+    fiber.rtop2.push_back(rtop2);
+    fiber.rtop3.push_back(rtop3);
   }
 
   if (_record_weights)
@@ -1910,12 +1886,11 @@ void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
   {
     fiber.normMSE.reserve(fiber_size);
   }
-
   if (_record_rtop)
   {
-    fiber.fa.reserve(fiber_size);
-    fiber.fa2.reserve(fiber_size);
-    fiber.fa3.reserve(fiber_size);
+    fiber.rtop1.reserve(fiber_size);
+    fiberrtop2.reserve(fiber_size);
+    fiber.rtop3.reserve(fiber_size);
   }
   if (_record_free_water)
   {
