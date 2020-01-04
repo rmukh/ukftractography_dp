@@ -68,7 +68,7 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
   int counter = 0;
   for (int i = 0; i < num_primary_fibers; i++)
   {
-    if (num_points_on_primary_fiber[i] < MINIMUM_NUM_POINTS_ON_FIBER || (discarded_fibers[2 * i] == 1 && discarded_fibers[2 * i + 1] == 1))
+    if (num_points_on_primary_fiber[i] < MINIMUM_NUM_POINTS_ON_FIBER || discarded_fibers[2 * i] == 1 || discarded_fibers[2 * i + 1] == 1)
       continue;
 
     const UKFFiber &first_half = raw_primary[2 * i];

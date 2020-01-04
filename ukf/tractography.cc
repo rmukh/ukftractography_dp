@@ -1368,6 +1368,7 @@ void Tractography::Follow(const int thread_id,
     if (_csf_provided && in_csf)
     {
       is_discarded = 1; // mark fiber to remove it later
+      std::cout << "Discarded. This is error now!" << std::endl;
       break;
     }
     else if (in_csf)
@@ -1889,7 +1890,7 @@ void Tractography::FiberReserve(UKFFiber &fiber, int fiber_size)
   if (_record_rtop)
   {
     fiber.rtop1.reserve(fiber_size);
-    fiberrtop2.reserve(fiber_size);
+    fiber.rtop2.reserve(fiber_size);
     fiber.rtop3.reserve(fiber_size);
   }
   if (_record_free_water)

@@ -659,10 +659,6 @@ int VtkWriter::Write(const std::string &file_name,
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
     std::cout << "nmse_avg=" << nmse_sum / counter << std::endl;
   }
-  else
-  {
-    std::cout << "nmse_avg=0" << std::endl;
-  }
 
   if (write_state)
   {
