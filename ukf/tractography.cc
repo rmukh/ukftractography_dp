@@ -669,9 +669,7 @@ bool Tractography::Run()
 
   _ukf.reserve(num_of_threads); //Allocate, but do not assign
   for (int i = 0; i < num_of_threads; i++)
-  {
     _ukf.push_back(new UnscentedKalmanFilter(_model)); // Create one Kalman filter for each thread
-  }
 
   std::vector<UKFFiber> raw_primary;
   std::vector<unsigned char> discarded_fibers;
@@ -1368,11 +1366,8 @@ void Tractography::Follow(const int thread_id,
     if (_csf_provided && in_csf)
     {
       is_discarded = 1; // mark fiber to remove it later
-      std::cout << "Discarded. This is error now!" << std::endl;
       break;
     }
-    else if (in_csf)
-      break;
 
     _model->H(state, signal_tmp);
 

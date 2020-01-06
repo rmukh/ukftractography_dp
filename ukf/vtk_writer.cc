@@ -63,6 +63,7 @@ void VtkWriter::PopulateFibersAndTensors(vtkPolyData *polyData,
 
   size_t num_fibers = fibers.size();
   size_t num_points = 0;
+
   for (size_t i = 0; i < num_fibers; ++i)
     num_points += fibers[i].position.size();
 
@@ -346,7 +347,7 @@ int VtkWriter::Write(const std::string &file_name,
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
-  // trace
+  // rtop model
   if (fibers[0].rtop_model.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> trace = vtkSmartPointer<vtkFloatArray>::New();
@@ -363,7 +364,7 @@ int VtkWriter::Write(const std::string &file_name,
     pointData->SetActiveAttribute(idx, vtkDataSetAttributes::SCALARS);
   }
 
-  // trace2
+  // rtop signal
   if (fibers[0].rtop_signal.size() > 0)
   {
     vtkSmartPointer<vtkFloatArray> trace2 = vtkSmartPointer<vtkFloatArray>::New();

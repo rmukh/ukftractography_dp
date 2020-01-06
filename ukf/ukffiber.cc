@@ -131,204 +131,109 @@ void PostProcessFibers(const std::vector<UKFFiber> &raw_primary,
     {
       fibers[counter].position[k] = first_half.position[j];
       if (record_rtop1)
-      {
         fibers[counter].rtop1[k] = first_half.rtop1[j];
-      }
       if (record_rtop2)
-      {
         fibers[counter].rtop2[k] = first_half.rtop2[j];
-      }
       if (record_rtop3)
-      {
         fibers[counter].rtop3[k] = first_half.rtop3[j];
-      }
       if (record_rtop_model)
-      {
         fibers[counter].rtop_model[k] = first_half.rtop_model[j];
-      }
       if (record_rtop_signal)
-      {
         fibers[counter].rtop_signal[k] = first_half.rtop_signal[j];
-      }
       if (record_free_water)
-      {
         fibers[counter].free_water[k] = first_half.free_water[j];
-      }
       if (record_w1)
-      {
         fibers[counter].w1[k] = first_half.w1[j];
-      }
       if (record_w2)
-      {
         fibers[counter].w2[k] = first_half.w2[j];
-      }
       if (record_w3)
-      {
         fibers[counter].w3[k] = first_half.w3[j];
-      }
       if (record_w1w2angle)
-      {
         fibers[counter].w1w2angle[k] = first_half.w1w2angle[j];
-      }
       if (record_w1w3angle)
-      {
         fibers[counter].w1w3angle[k] = first_half.w1w3angle[j];
-      }
       if (record_Fm1)
-      {
         fibers[counter].Fm1[k] = first_half.Fm1[j];
-      }
       if (record_lmd1)
-      {
         fibers[counter].lmd1[k] = first_half.lmd1[j];
-      }
       if (record_Fm2)
-      {
         fibers[counter].Fm2[k] = first_half.Fm2[j];
-      }
       if (record_lmd2)
-      {
         fibers[counter].lmd2[k] = first_half.lmd2[j];
-      }
       if (record_Fm3)
-      {
         fibers[counter].Fm3[k] = first_half.Fm3[j];
-      }
       if (record_lmd3)
-      {
         fibers[counter].lmd3[k] = first_half.lmd3[j];
-      }
       if (record_varW1)
-      {
         fibers[counter].varW1[k] = first_half.varW1[j];
-      }
       if (record_varW2)
-      {
         fibers[counter].varW2[k] = first_half.varW2[j];
-      }
       if (record_varW3)
-      {
         fibers[counter].varW3[k] = first_half.varW3[j];
-      }
       if (record_varWiso)
-      {
         fibers[counter].varWiso[k] = first_half.varWiso[j];
-      }
       if (record_normMSE)
-      {
         fibers[counter].normMSE[k] = first_half.normMSE[j];
-      }
       fibers[counter].norm[k] = first_half.norm[j];
       if (record_state)
-      {
         fibers[counter].state[k] = first_half.state[j];
-      }
       if (record_cov)
-      {
         fibers[counter].covariance[k] = first_half.covariance[j];
-      }
       k++;
     }
+
     for (int j = 0; j < static_cast<int>(second_half.position.size()); j++)
     {
       fibers[counter].position[k] = second_half.position[j];
       if (record_rtop1)
-      {
         fibers[counter].rtop1[k] = second_half.rtop1[j];
-      }
       if (record_rtop2)
-      {
         fibers[counter].rtop2[k] = second_half.rtop2[j];
-      }
       if (record_rtop3)
-      {
         fibers[counter].rtop3[k] = second_half.rtop3[j];
-      }
       if (record_rtop_model)
-      {
         fibers[counter].rtop_model[k] = second_half.rtop_model[j];
-      }
       if (record_rtop_signal)
-      {
         fibers[counter].rtop_signal[k] = second_half.rtop_signal[j];
-      }
       if (record_free_water)
-      {
         fibers[counter].free_water[k] = second_half.free_water[j];
-      }
       if (record_w1)
-      {
         fibers[counter].w1[k] = second_half.w1[j];
-      }
       if (record_w2)
-      {
         fibers[counter].w2[k] = second_half.w2[j];
-      }
       if (record_w3)
-      {
         fibers[counter].w3[k] = second_half.w3[j];
-      }
       if (record_w1w2angle)
-      {
         fibers[counter].w1w2angle[k] = second_half.w1w2angle[j];
-      }
       if (record_w1w3angle)
-      {
         fibers[counter].w1w3angle[k] = second_half.w1w3angle[j];
-      }
       if (record_Fm1)
-      {
         fibers[counter].Fm1[k] = second_half.Fm1[j];
-      }
       if (record_lmd1)
-      {
         fibers[counter].lmd1[k] = second_half.lmd1[j];
-      }
       if (record_Fm2)
-      {
         fibers[counter].Fm2[k] = second_half.Fm2[j];
-      }
       if (record_lmd2)
-      {
         fibers[counter].lmd2[k] = second_half.lmd2[j];
-      }
       if (record_Fm3)
-      {
         fibers[counter].Fm3[k] = second_half.Fm3[j];
-      }
       if (record_lmd3)
-      {
         fibers[counter].lmd3[k] = second_half.lmd3[j];
-      }
       if (record_varW1)
-      {
         fibers[counter].varW1[k] = second_half.varW1[j];
-      }
       if (record_varW2)
-      {
         fibers[counter].varW2[k] = second_half.varW2[j];
-      }
       if (record_varW3)
-      {
         fibers[counter].varW3[k] = second_half.varW3[j];
-      }
       if (record_varWiso)
-      {
         fibers[counter].varWiso[k] = second_half.varWiso[j];
-      }
       if (record_normMSE)
-      {
         fibers[counter].normMSE[k] = second_half.normMSE[j];
-      }
       fibers[counter].norm[k] = second_half.norm[j];
       if (record_state)
-      {
         fibers[counter].state[k] = second_half.state[j];
-      }
       if (record_cov)
-      {
         fibers[counter].covariance[k] = second_half.covariance[j];
-      }
       k++;
     }
 
