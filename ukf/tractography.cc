@@ -609,8 +609,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
       info.state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_state);
       info_inv.state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_inv_state);
 
-      seed_infos.push_back(info);
-      seed_infos.push_back(info_inv);
+#pragma omp critical
+      {
+        seed_infos.push_back(info);
+        seed_infos.push_back(info_inv);
+      }
 
       if (n_of_dirs > 1)
       {
@@ -623,9 +626,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
         info_inv.state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_inv_state);
         info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
-
-        seed_infos.push_back(info);
-        seed_infos.push_back(info_inv);
+#pragma omp critical
+        {
+          seed_infos.push_back(info);
+          seed_infos.push_back(info_inv);
+        }
 
         if (n_of_dirs > 2)
         {
@@ -638,9 +643,11 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
 
           info_inv.state = ConvertVector<stdVecState, ukfStateVector>(tmp_info_inv_state);
           info_inv.start_dir << tmp_info_inv_state[0], tmp_info_inv_state[1], tmp_info_inv_state[2];
-
-          seed_infos.push_back(info);
-          seed_infos.push_back(info_inv);
+#pragma omp critical
+          {
+            seed_infos.push_back(info);
+            seed_infos.push_back(info_inv);
+          }
         }
       }
     }
