@@ -407,7 +407,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
                "Please, compile the UKF tractography software with OpenMP support enabled if you want this functionality."
             << std::endl;
 #endif
-  for (unsigned i = 0; i < starting_points.size(); ++i)
+  for (int i = 0; i < starting_points.size(); ++i)
   {
     const ukfVectorType &param = starting_params[i];
 
@@ -439,7 +439,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
     ukfVectorType C;
     {
       SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(ARidg, HighBSignalValues, fista_lambda);
-      slv.FISTA(C);
+      slv.FISTA(C, 2000, 0.001);
     }
 
     ukfPrecisionType GFA = ukfZero;

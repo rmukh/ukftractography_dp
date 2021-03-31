@@ -20,7 +20,7 @@ void Ridg_BiExp_FW::F(ukfStateCovMatrix &X, ukfVectorType s, const ukfMatrixType
 	ukfVectorType C;
 	{
 		SOLVERS<ukfPrecisionType, ukfMatrixType, ukfVectorType> slv(A, HighBSignalValues, fista_lambda);
-		slv.FISTA(C);
+		slv.FISTA(C, 2000, 0.001);
 	}
 
 	ukfVectorType ODF = QRidg * C;
