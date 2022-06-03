@@ -1,7 +1,6 @@
 UKF TRACTOGRAPHY
 ================
 
-
 About
 -----
 
@@ -25,7 +24,6 @@ For references and further documentation, please see the [Slicer module homepage
 Installation
 ------------
 
-
 ### 1. From Source
 
 Checkout from github:
@@ -36,13 +34,17 @@ There are 3 ways to build this project from source, as a stand alone
 superbuild, against a Slicer 4 build, and as a Slicer 4 extension build (which
 is more of a test than anything).
 
-
 #### a) Standalone Superbuild
 
     cd <build-dir>
     cmake <path-to-source>
     make
     make test
+##### On Windows,
+    cd <build-dir>
+    cmake <path-to-source>
+    cmake --build . --config Release|Debug|RelWithDebInfo
+    cmake --build build -t test
 
 #### b) Build with Slicer4
 
@@ -51,6 +53,7 @@ is more of a test than anything).
     make
     make test
 
+Note that some of the tests are broken!
 #### c) Build via Slicer ExtensionIndex build
 
 Create local extension index following [these instructions](https://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Developers/Build_ExtensionsIndex), containing at least `UKFTractography.s4ext` and `SlicerDMRI.s4ext` (required runtime dependency).
