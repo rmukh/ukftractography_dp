@@ -47,6 +47,7 @@ void dwiNormalize(const Nrrd *raw, Nrrd *&normalized)
   // Process the key/value pairs. Identify the non-zero gradients, namely the non-zero B values
   std::vector<std::pair<std::string, std::string>> keyValuePairsOfRaw;
   std::vector<bool> nonZeroGradientFlag;
+
   int bmax;
 
   for (unsigned int i = 0; i < nrrdKeyValueSize(raw); i++)
@@ -57,11 +58,11 @@ void dwiNormalize(const Nrrd *raw, Nrrd *&normalized)
     std::string keyStr(key);
 
     // Obtain DWMRI_b-value
-    
     if( keyStr.length() == 13 && !keyStr.compare("DWMRI_b-value") )
     {
         sscanf(value, "%d", &bmax);
         std::cout << "DWMRI_b-value " << bmax << std::endl;
+        
     }
 
     if (keyStr.length() > 14 && !keyStr.substr(0, 14).compare("DWMRI_gradient"))
