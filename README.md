@@ -99,4 +99,4 @@ install it as a Slicer 4 module.  There will be 3 modules under
 Notes
 -----
 
-Several steps in the SuperBuild process download additional git repositories as CMake external projects. By default `UKFTractography_USE_GIT_PROTOCOL:BOOL=OFF` indicates to use `https://` instead of `git://`. This default should work behind most firewalls (the git protocol uses port 9418: if this is blocked by your firewall the build will fail). If download problems are encountered, please [file an issue](https://github.com/pnlbwh/ukftractography/issues/new).
+Several steps in the SuperBuild process download additional git repositories as CMake external projects via `https://` protocol.
