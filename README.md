@@ -37,12 +37,12 @@ is more of a test than anything).
 #### a) Standalone Superbuild
 
     cd <build-dir>
-    cmake <path-to-source>
+    cmake <path-to-source> -DCMAKE_BUILD_TYPE=Release|Debug|RelWithDebInfo
     make
     make test
 ##### On Windows,
     cd <build-dir>
-    cmake <path-to-source>
+    cmake <path-to-source> -DCMAKE_BUILD_TYPE=Release|Debug|RelWithDebInfo
     cmake --build . --config Release|Debug|RelWithDebInfo
     cmake --build build -t test
 
