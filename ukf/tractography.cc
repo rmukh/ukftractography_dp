@@ -34,10 +34,7 @@
 #include "math_utilities.h"
 
 // filters
-#include "filter_ridg.h"
-
-// TODO implement this switch
-//#include "config.h"
+#include "filter_model.h"
 
 Tractography::Tractography(UKFSettings s) : // begin initializer list
                                             _ukf(0, NULL),
@@ -173,7 +170,7 @@ void Tractography::UpdateFilterModelType()
   // Compute connectivity
   m.FindConnectivity(conn, fcs, nu.rows());
 
-  _model = new Ridg_BiExp_FW(Qm, Ql, Qt, Qw, Qwiso, Rs, true, D_ISO, ARidg, QRidg, fcs, nu, conn, signal_mask, fista_lambda, max_odf_thresh);
+  _model = new SignalModel(Qm, Ql, Qt, Qw, Qwiso, Rs, true, D_ISO, ARidg, QRidg, fcs, nu, conn, signal_mask, fista_lambda, max_odf_thresh);
 
   _model->set_signal_data(_signal_data);
   _model->set_signal_dim(_signal_data->GetSignalDimension() * 2);

@@ -27,6 +27,10 @@ else()
   set(OPENMP "")
 endif()
 
+if(CMAKE_CL_64 OR MSVC)
+  add_definitions(/bigobj)
+endif()
+
 #-----------------------------------------------------------------------------
 find_package(SlicerExecutionModel REQUIRED)
 include(${SlicerExecutionModel_USE_FILE})
@@ -72,6 +76,7 @@ else()
       BINARY_DIR        ${Eigen_BUILD_DIR}
       GIT_REPOSITORY    ${Eigen_GIT_REPOSITORY}
       GIT_TAG           ${Eigen_GIT_TAG}
+      ${cmakeversion_external_update} "${cmakeversion_external_update_value}"
       CONFIGURE_COMMAND ""
       BUILD_COMMAND     ""
       INSTALL_COMMAND   ""

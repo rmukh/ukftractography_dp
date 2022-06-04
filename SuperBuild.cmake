@@ -248,6 +248,7 @@ ExternalProject_Add_Step(${proj} forcebuild
   COMMAND ${CMAKE_COMMAND} -E remove
     ${CMAKE_CURRENT_BINARY_DIR}/${proj}-prefix/src/${proj}-stamp/${proj}-build
   COMMENT "Forcing build step for '${proj}'"
+  DEPENDEES configure
   DEPENDEES build
   ALWAYS 1
   )

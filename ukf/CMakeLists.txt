@@ -58,7 +58,6 @@ set(MODULE_SRCS
   thread.cc
   QuadProg++_Eigen.cc
   filter_model.cc
-  filter_ridg.cc
   UKFTractographyCLP.h
   )
 

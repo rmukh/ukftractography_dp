@@ -1,4 +1,3 @@
-
 set(proj ITK)
 # Set dependency list
 set(${proj}_DEPENDENCIES "zlib")
