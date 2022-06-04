@@ -18,7 +18,7 @@ mask_path="$SRC/UKFTractography/Data/Input/dwi-mask.nhdr"
 seeds_path="$SRC/UKFTractography/Data/Input/seeds_tc.nhdr"
 
 # OUTPUT FIBER
-output_path='./seeds_tc.vtk'
+output_path='./fibers_tc.vtk'
 
 # --seedsFile $seeds_path \
 eval $BINARY \
@@ -26,9 +26,8 @@ eval $BINARY \
  --maskFile $mask_path \
  --seedsFile $seeds_path \
  --tracts $output_path \
- --stepLength 0.1 \
- --recordNMSE \
- --recordWeights \
+ --stepLength 0.2 \
+ --seedsPerVoxel 5 \
  --recordRTOP \
  --recordUncertainties | tee $logFile
  end=`date +%s`
