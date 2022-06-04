@@ -49,7 +49,6 @@ if(NOT DEFINED SlicerExecutionModel_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM
     GIT_TAG "${${CMAKE_PROJECT_NAME}_${proj}_GIT_TAG}"
     SOURCE_DIR ${CMAKE_BINARY_DIR}/${proj}
     BINARY_DIR ${proj}-build
-    ${cmakeversion_external_update} "${cmakeversion_external_update_value}"
     CMAKE_ARGS -Wno-dev --no-warn-unused-cli
     CMAKE_CACHE_ARGS
       ${COMMON_EXTERNAL_PROJECT_ARGS}
