@@ -1,4 +1,3 @@
-
 set(proj zlib)
 
 # Set dependency list
@@ -32,13 +31,13 @@ if(NOT DEFINED zlib_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
 
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_REPOSITORY
-    "https://github.com/commontk/zlib.git"
+    "https://github.com/madler/zlib.git"
     QUIET
     )
 
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_TAG
-    "66a753054b356da85e1838a081aa94287226823e"
+    "21767c654d31d2dccdde4330529775c6c5fd5389"
     QUIET
     )
 
@@ -49,6 +48,7 @@ if(NOT DEFINED zlib_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
     SOURCE_DIR ${EP_SOURCE_DIR}
     BINARY_DIR ${EP_BINARY_DIR}
     INSTALL_DIR ${EP_INSTALL_DIR}
+    ${cmakeversion_external_update} "${cmakeversion_external_update_value}"
     CMAKE_CACHE_ARGS
       ## CXX should not be needed, but it a cmake default test
       -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
@@ -56,23 +56,21 @@ if(NOT DEFINED zlib_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
       -DCMAKE_C_FLAGS:STRING=${ep_common_c_flags}
 #      -DZLIB_MANGLE_PREFIX:STRING=slicer_zlib_
       -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-    DEPENDS
-      ${${proj}_DEPENDENCIES}
     )
 
   ExternalProject_GenerateProjectDescription_Step(${proj})
 
-  set(zlib_DIR ${EP_INSTALL_DIR})
-  set(ZLIB_ROOT ${zlib_DIR})
-  set(ZLIB_INCLUDE_DIR ${zlib_DIR}/include)
+  set(zlib_DIR ${EP_INSTALL_DIR} CACHE PATH "zlib dir" FORCE)
+  set(ZLIB_ROOT ${zlib_DIR} CACHE PATH "zlib root" FORCE)
+  set(ZLIB_INCLUDE_DIR ${zlib_DIR}/include CACHE PATH "zlib include dir" FORCE)
   if(WIN32)
-	if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") #to make compatible with msys2 gcc build
-		set(ZLIB_LIBRARY ${zlib_DIR}/lib/libzlib.a)
-	else()
-		set(ZLIB_LIBRARY ${zlib_DIR}/lib/zlib.lib)
-	endif()
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") #to make compatible with msys2 gcc build
+      set(ZLIB_LIBRARY ${zlib_DIR}/lib/libzlib.a CACHE FILEPATH "zlib library" FORCE)
+    else()
+      set(ZLIB_LIBRARY ${zlib_DIR}/lib/zlib.lib CACHE FILEPATH "zlib library" FORCE)
+    endif()
   else()
-    set(ZLIB_LIBRARY ${zlib_DIR}/lib/libzlib.a)
+    set(ZLIB_LIBRARY ${zlib_DIR}/lib/libzlib.a CACHE FILEPATH "zlib library" FORCE)
   endif()
 else()
   # The project is provided using zlib_DIR, nevertheless since other project may depend on zlib,

@@ -27,7 +27,7 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
   
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_REPOSITORY 
-    "${git_protocol}://github.com/rmukh/spherical_ridgelets.git"
+    "https://github.com/rmukh/spherical_ridgelets.git"
     QUIET
   )
 
@@ -42,6 +42,7 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
     SOURCE_DIR ${EP_SOURCE_DIR}
     BINARY_DIR ${EP_BINARY_DIR}
     INSTALL_DIR ${EP_INSTALL_DIR}
+    ${cmakeversion_external_update} "${cmakeversion_external_update_value}"
     CMAKE_CACHE_ARGS
       -DCMAKE_CXX_COMPILER:FILEPATH=${CMAKE_CXX_COMPILER}
       -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}

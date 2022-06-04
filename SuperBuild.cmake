@@ -28,6 +28,18 @@ set(EXTERNAL_PROJECT_BUILD_TYPE "Release" CACHE STRING "Default build type for s
 set_property(CACHE EXTERNAL_PROJECT_BUILD_TYPE PROPERTY
   STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 
+# With CMake 2.8.9 or later, the UPDATE_COMMAND is required for updates to occur.
+# For earlier versions, we nullify the update state to prevent updates and
+# undesirable rebuild.
+option(FORCE_EXTERNAL_BUILDS "Force rebuilding of external project (if they are updated)" OFF)
+if(CMAKE_VERSION VERSION_LESS 2.8.9 OR NOT FORCE_EXTERNAL_BUILDS)
+  set(cmakeversion_external_update UPDATE_COMMAND)
+  set(cmakeversion_external_update_value "" )
+else()
+  set(cmakeversion_external_update LOG_UPDATE )
+  set(cmakeversion_external_update_value 1)
+endif()
+
 option(USE_SYSTEM_ITK "Build using an externally defined version of ITK" OFF)
 option(USE_SYSTEM_SlicerExecutionModel "Build using an externally defined version of SlicerExecutionModel"  OFF)
 option(USE_SYSTEM_VTK "Build using an externally defined version of VTK" OFF)
@@ -55,12 +67,12 @@ mark_as_superbuild(
 
 ## for i in SuperBuild/*; do  echo $i |sed 's/.*External_\([a-zA-Z]*\).*/\1/g'|fgrep -v cmake|fgrep -v Template; done|sort -u
 set(${PRIMARY_PROJECT_NAME}_DEPENDENCIES
+  teem
   Boost
-  SlicerExecutionModel
-  ITK
   Eigen
   VTK
-  teem
+  ITK
+  SlicerExecutionModel
   SphericalRidgelets
   )
 
@@ -132,7 +144,6 @@ mark_as_superbuild(
     SlicerExecutionModel_DEFAULT_CLI_INSTALL_RUNTIME_DESTINATION:PATH
     SlicerExecutionModel_DEFAULT_CLI_INSTALL_LIBRARY_DESTINATION:PATH
     SlicerExecutionModel_DEFAULT_CLI_INSTALL_ARCHIVE_DESTINATION:PATH
-    UKFTractography_USE_GIT_PROTOCOL:BOOL
   ALL_PROJECTS
   )
 
@@ -220,6 +231,7 @@ ExternalProject_Add(${proj}
   CMAKE_ARGS
     --no-warn-unused-cli    # HACK Only expected variables should be passed down.
     -D${PRIMARY_PROJECT_NAME}_SUPERBUILD:BOOL=OFF    #NOTE: VERY IMPORTANT reprocess top level CMakeList.txt
+    -DCMAKE_GENERATOR_PLATFORM:STRING=${CMAKE_GENERATOR_PLATFORM}
     -DRUNTIME_OUTPUT_DIRECTORY:PATH=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     -DLIBRARY_OUTPUT_DIRECTORY:PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     -DARCHIVE_OUTPUT_DIRECTORY:PATH=${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}

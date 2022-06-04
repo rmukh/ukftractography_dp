@@ -32,22 +32,13 @@ include(CMakeDependentOption)
 include(ExternalProjectDependency)
 include(ExternalProjectGenerateProjectDescription)
 
-#-----------------------------------------------------------------------------
-# Git protocol option
-#-----------------------------------------------------------------------------
-option(${CMAKE_PROJECT_NAME}_USE_GIT_PROTOCOL "Turn this ON to use git:// instead of https:// (not recommended behind firewall)" OFF)
-set(git_protocol "https")
-if(${CMAKE_PROJECT_NAME}_USE_GIT_PROTOCOL)
-  set(git_protocol "git")
-endif()
-
 find_package(Git REQUIRED)
 
 #-----------------------------------------------------------------------------
 # Eigen version settings
 #-----------------------------------------------------------------------------
 
-set(Eigen_GIT_REPOSITORY "$https://github.com/eigenteam/eigen-git-mirror")
+set(Eigen_GIT_REPOSITORY "https://github.com/eigenteam/eigen-git-mirror")
 set(Eigen_GIT_TAG "3.3.7")
 
 #-----------------------------------------------------------------------------
@@ -80,6 +71,12 @@ set(CMAKE_MODULE_PATH
 #------------------------------------------------------------------------------
 include(PreventInSourceBuilds)
 include(PreventInBuildInstalls)
+
+if(CMAKE_VERSION VERSION_LESS 2.8.9)
+  set(cmakeversion_external_update UPDATE_COMMAND "")
+else()
+  set(cmakeversion_external_update LOG_UPDATE 1)
+endif()
 
 #-----------------------------------------------------------------------------
 # Platform check
@@ -131,4 +128,3 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ITK_REQUIRED_CXX_FLAGS}" CACHE STRING 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ITK_REQUIRED_LINK_FLAGS}" CACHE STRING "CMake Linker Flags" FORCE)
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${ITK_REQUIRED_LINK_FLAGS}" CACHE STRING "CMake shared linker Flags" FORCE)
 set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${ITK_REQUIRED_LINK_FLAGS}" CACHE STRING "CMake module linker Flags" FORCE)
-

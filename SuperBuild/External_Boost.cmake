@@ -43,16 +43,15 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
   if(CMAKE_COMPILER_IS_CLANGXX)
     set(CLANG_ARG -DCMAKE_COMPILER_IS_CLANGXX:BOOL=ON)
   endif()
-  set(BOOST_SOURCE_DIR ${SOURCE_DOWNLOAD_CACHE}/${proj})
 
   if(UNIX)
-    set(Boost_url "http://sourceforge.net/projects/boost/files/boost/1.70.0/boost_1_70_0.tar.gz")
+    set(Boost_url "https://sourceforge.net/projects/boost/files/boost/1.70.0/boost_1_70_0.tar.gz")
     set(Boost_md5 fea771fe8176828fabf9c09242ee8c26)
     set(Boost_Bootstrap_Command ./bootstrap.sh)
     set(Boost_b2_Command ./b2)
   else()
     if(WIN32)
-      set(Boost_url "http://sourceforge.net/projects/boost/files/boost/1.70.0/boost_1_70_0.zip")
+      set(Boost_url "https://sourceforge.net/projects/boost/files/boost/1.70.0/boost_1_70_0.zip")
       set(Boost_md5 a110ebd91a3d2c34c72ace09c92ae50b)
       set(Boost_Bootstrap_Command ./bootstrap.bat)
       set(Boost_b2_Command b2)
@@ -74,9 +73,11 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
 	  set(boost_toolset toolset=msvc-14.0)
     elseif(MSVC_VERSION GREATER_EQUAL 1910 AND MSVC_VERSION LESS 1920)
 	  set(boost_toolset toolset=msvc-14.1)
-    else()
-    set(boost_toolset toolset=msvc)
-	endif()
+    elseif(MSVC_VERSION GREATER_EQUAL 1920 AND MSVC_VERSION LESS 1930)
+	  set(boost_toolset toolset=msvc-14.2)
+    else()	
+	    message(FATAL_ERROR "Unsupported MSVC compiler version [${MSVC_VERSION}]. Run with Visual Studio 16 2019 or earlier.")
+	  endif()
   endif()
 
   if(XCODE_VERSION OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
@@ -116,7 +117,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
 	BUILD_IN_SOURCE 1
 	URL ${Boost_url}
 	URL_MD5 ${Boost_md5}
-	UPDATE_COMMAND ""
+	${cmakeversion_external_update} "${cmakeversion_external_update_value}"
 	CONFIGURE_COMMAND ${Boost_Bootstrap_Command} --prefix=${Boost_Install_Dir}/lib
 	BUILD_COMMAND ${Boost_b2_Command} install -j8 --prefix=${Boost_Install_Dir} --with-thread --with-filesystem --with-system --with-date_time --with-program_options --with-atomic ${boost_toolset} link=static address-model=${Boost_address_model} variant=${Boost_VARIANT} optimization=speed
 	INSTALL_COMMAND ""

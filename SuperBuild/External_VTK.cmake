@@ -34,8 +34,7 @@ if (CMAKE_SIZEOF_VOID_P EQUAL 8)
 endif()
 
 if((NOT DEFINED VTK_DIR OR NOT DEFINED VTK_SOURCE_DIR) AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
-
-  set(${proj}_GIT_REPOSITORY "${git_protocol}://github.com/Kitware/VTK.git" CACHE STRING "Repository from which to get VTK" FORCE)
+  set(${proj}_GIT_REPOSITORY "https://github.com/Kitware/VTK.git" CACHE STRING "Repository from which to get VTK" FORCE)
   set(${proj}_GIT_TAG "v7.1.1") #"b86da7eef93f75c4a7f524b3644523ae6b651bc4")  # VTK v7.1.1
 
 ## Use ../VTK/Utilities/Maintenance/WhatModulesVTK.py ../VTK ./
@@ -47,6 +46,7 @@ if((NOT DEFINED VTK_DIR OR NOT DEFINED VTK_SOURCE_DIR) AND NOT ${CMAKE_PROJECT_N
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${proj}-build
     GIT_REPOSITORY "${${proj}_GIT_REPOSITORY}"
     GIT_TAG ${${proj}_GIT_TAG}
+    ${cmakeversion_external_update} "${cmakeversion_external_update_value}"
     CMAKE_ARGS -Wno-dev --no-warn-unused-cli
     CMAKE_CACHE_ARGS
       ${COMMON_EXTERNAL_PROJECT_ARGS}
