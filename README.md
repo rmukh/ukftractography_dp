@@ -79,6 +79,8 @@ The executable is called 'UKFTractography'. It can be found in:
     
     <build-dir>/UKFTractography-build/UKFTractography/bin/
 
+The path may containt a subfolder after bin/ if you are using a superbuild with the choosen build type (Release, Debug, etc.).
+
 In order to see all options run.
 
     ./UKFTractography --help 
@@ -100,3 +102,4 @@ Notes
 -----
 
 Several steps in the SuperBuild process download additional git repositories as CMake external projects via `https://` protocol.
+You can find some running examples in the examples folder.
