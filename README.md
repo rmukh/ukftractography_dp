@@ -69,7 +69,6 @@ Notes:
 Navigate to the Slicer Extension Manager and download `UKF Tractography` to
 install it as a Slicer 4 module.
 
-
 Basic Usage
 -----------
 
@@ -97,9 +96,8 @@ Navigate to the Slicer Extension Manager and download `UKF Tractography` to
 install it as a Slicer 4 module.  There will be 3 modules under
 `Diffusion-->Tractography`: `UKF Tractography`, `vtk2mask`, and `vtkFilter`.
 
-
 Notes
------
+-----------
 
 Several steps in the SuperBuild process download additional git repositories as CMake external projects via `https://` protocol.
 You can find some running examples in the examples folder.
