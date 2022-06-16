@@ -199,26 +199,26 @@ public:
   }
 
   /** Destructor */
-  virtual ~SignalModel()
+  ~SignalModel()
   {
   }
 
   /** state transition function */
-  virtual void F(ukfStateCovMatrix & /* X */, ukfVectorType /* s */, const ukfMatrixType & /* &covMatrix */) const;
-  virtual void F(ukfStateCovMatrix & /* X */) const;
+  void F(ukfStateCovMatrix & /* X */, ukfVectorType /* s */, const ukfMatrixType & /* &covMatrix */) const;
+  void F(ukfStateCovMatrix & /* X */) const;
 
   /** observation, i.e. signal reconstruction */
 
-  virtual void H(const ukfStateCovMatrix & /* X */, ukfMatrixType & /* Y */) const;
-  virtual void H(const ukfStateVector &, ukfMatrixType &) const;
+  void H(const ukfStateCovMatrix & /* X */, ukfMatrixType & /* Y */) const;
+  void H(const ukfStateVector &, ukfMatrixType &) const;
 
   // Functions that convert the state into a tensor representation that can be
   // used for tractography (meaning the main direction and all the eigenvalues/
   // lambdas).
 
   /** Extracts principal diffusion direction and eigen values from the state */
-  virtual void State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3);
-  virtual void State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1);
+  void State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3);
+  void State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1);
 
   ukfPrecisionType cosine_similarity(vec3_t &First, vec3_t &Second) const;
   /** The minimum/maximum value of the eigenvalues. Clamped in each step */
