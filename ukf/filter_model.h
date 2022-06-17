@@ -67,8 +67,8 @@ inline ukfPrecisionType AngularSimilarity(vec3_t &x_sr, vec3_t &x_pred)
 
 /**
  * \struct SignalModel
- * \brief Interface for implementation of a signal model
- * A generic class that defines the transition function and the observation
+ * \brief Implementation of a signal model
+ * A class that defines the transition function and the observation
  * model to be used in the Kalman filter.
  */
 class SignalModel
@@ -208,13 +208,13 @@ public:
   void F(ukfStateCovMatrix & /* X */) const;
 
   /** observation, i.e. signal reconstruction */
-
   void H(const ukfStateCovMatrix & /* X */, ukfMatrixType & /* Y */) const;
   void H(const ukfStateVector &, ukfMatrixType &) const;
 
-  // Functions that convert the state into a tensor representation that can be
-  // used for tractography (meaning the main direction and all the eigenvalues/
-  // lambdas).
+  /* 
+  Functions that convert the state into a tensor representation that can be
+  used for tractography (meaning the main direction and all the eigenvalues/lambdas).
+  */
 
   /** Extracts principal diffusion direction and eigen values from the state */
   void State2Tensor3T(const ukfStateVector &x, const vec3_t &old_m, vec3_t &m1, vec3_t &l1, vec3_t &m2, vec3_t &l2, vec3_t &m3, vec3_t &l3);

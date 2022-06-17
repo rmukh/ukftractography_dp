@@ -4,8 +4,6 @@
  */
 
 #include "filter_model.h"
-#include <iostream>
-#include <chrono>
 #include "utilities.h"
 
 ukfPrecisionType SignalModel::CheckZero(const ukfPrecisionType &local_d, const std::string &func_name) const
