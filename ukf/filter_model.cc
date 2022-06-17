@@ -25,16 +25,18 @@ ukfPrecisionType SignalModel::CheckZero(const ukfPrecisionType &local_d, const s
   return local_d;
 }
 
-// 3T Bi-Exponential model with spherical ridgelets //
-// Functions for 3-tensor bi-exponential simple model.
 void SignalModel::F(ukfStateCovMatrix &X, ukfVectorType s, const ukfMatrixType &covMatrix) const
 {
-  /*
+  /* 
+  3T Bi-Exponential model with spherical ridgelets
+  Functions for 3-tensor bi-exponential simple model.
+  */
+
   assert(_signal_dim > 0);
   assert(X.rows() == static_cast<unsigned int>(_state_dim) &&
-       (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
-      X.cols() == 1));
-*/
+         (X.cols() == static_cast<unsigned int>(2 * _state_dim + 1) ||
+          X.cols() == 1));
+
   UtilMath<ukfPrecisionType, ukfMatrixType, ukfVectorType> m;
 
   ukfVectorType HighBSignalValues(signal_mask.size());
@@ -330,7 +332,7 @@ ukfPrecisionType SignalModel::cosine_similarity(vec3_t &First, vec3_t &Second) c
   ukfPrecisionType den_a = First.norm();
   ukfPrecisionType den_b = Second.norm();
 
-  if (den_a == ukfZero || den_b == ukfZero)
+  if (cmpf(den_a, ukfZero) || cmpf(den_b, ukfZero))
   {
     throw std::logic_error(
         "cosine similarity is not defined whenever one or both "

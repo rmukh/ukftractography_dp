@@ -73,4 +73,10 @@ inline double expapprox_d(double val)
                                                                                                                                                                                                          2.17150255054231565039e-4))))));
 }
 
+
+inline bool cmpf(ukfPrecisionType a, ukfPrecisionType b, ukfPrecisionType epsilon = 1e-9)
+{
+    return (fabs(a - b) < epsilon);
+}
+
 #endif // MATH_UTILITIES_H_

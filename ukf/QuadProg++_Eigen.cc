@@ -53,25 +53,25 @@ inline ukfPrecisionType distance(ukfPrecisionType a, ukfPrecisionType b)
   if (a1 > b1)
   {
     ukfPrecisionType t = (b1 / a1);
-    return a1 * ::std::sqrt(1.0 + t * t);
+    return a1 * ::std::sqrt(ukfOne + t * t);
   }
   else if (b1 > a1)
   {
     ukfPrecisionType t = (a1 / b1);
-    return b1 * ::std::sqrt(1.0 + t * t);
+    return b1 * ::std::sqrt(ukfOne + t * t);
   }
-  return a1 * ::std::sqrt(2.0);
+  return a1 * ::std::sqrt(2 * ukfOne);
 }
 
-inline bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukfStateVector &d, int &iq, double &R_norm)
+inline bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukfStateVector &d, int &iq, ukfPrecisionType &R_norm)
 {
   using std::abs;
-  int n = J.rows();
+  int n = static_cast<int>(J.rows());
 #ifdef TRACE_SOLVER
   std::cerr << "Add constraint " << iq << '/';
 #endif
   int j, k;
-  double cc, ss, h, t1, t2, xny;
+  ukfPrecisionType cc, ss, h, t1, t2, xny;
 
   /* we have to find the Givens rotation which will reduce the element
 		d(j) to zero.
@@ -90,12 +90,12 @@ inline bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukf
     cc = d(j - 1);
     ss = d(j);
     h = distance(cc, ss);
-    if (h == 0.0)
+    if (cmpf(h, ukfZero))
       continue;
-    d(j) = 0.0;
+    d(j) = ukfZero;
     ss = ss / h;
     cc = cc / h;
-    if (cc < 0.0)
+    if (cc < ukfZero)
     {
       cc = -cc;
       ss = -ss;
@@ -103,7 +103,7 @@ inline bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukf
     }
     else
       d(j - 1) = h;
-    xny = ss / (1.0 + cc);
+    xny = ss / (ukfOne + cc);
     for (k = 0; k < n; k++)
     {
       t1 = J(k, j - 1);
@@ -122,21 +122,21 @@ inline bool add_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, ukf
   std::cerr << iq << std::endl;
 #endif
 
-  if (abs(d(iq - 1)) <= std::numeric_limits<double>::epsilon() * R_norm)
+  if (abs(d(iq - 1)) <= std::numeric_limits<ukfPrecisionType>::epsilon() * R_norm)
     // problem degenerate
     return false;
-  R_norm = std::max<double>(R_norm, abs(d(iq - 1)));
+  R_norm = std::max<ukfPrecisionType>(R_norm, abs(d(iq - 1)));
   return true;
 }
 
 inline void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, QPConstrainedVecInt &A, QPConstrainedVec &u, int p, int &iq, int l)
 {
-  int n = R.rows();
+  int n = static_cast<int>(R.rows());
 #ifdef TRACE_SOLVER
   std::cerr << "Delete constraint " << l << ' ' << iq;
 #endif
   int i, j, k, qq;
-  double cc, ss, h, xny, t1, t2;
+  ukfPrecisionType cc, ss, h, xny, t1, t2;
 
   /* Find the index qq for active constraint l to be removed */
   for (i = p; i < iq; i++)
@@ -157,9 +157,9 @@ inline void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, 
   A(iq - 1) = A(iq);
   u(iq - 1) = u(iq);
   A(iq) = 0;
-  u(iq) = 0.0;
+  u(iq) = ukfZero;
   for (j = 0; j < iq; j++)
-    R(j, iq - 1) = 0.0;
+    R(j, iq - 1) = ukfZero;
   /* constraint has been fully removed */
   iq--;
 #ifdef TRACE_SOLVER
@@ -174,12 +174,12 @@ inline void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, 
     cc = R(j, j);
     ss = R(j + 1, j);
     h = distance(cc, ss);
-    if (h == 0.0)
+    if (cmpf(h, ukfZero))
       continue;
     cc = cc / h;
     ss = ss / h;
-    R(j + 1, j) = 0.0;
-    if (cc < 0.0)
+    R(j + 1, j) = ukfZero;
+    if (cc < ukfZero)
     {
       R(j, j) = -h;
       cc = -cc;
@@ -188,7 +188,7 @@ inline void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, 
     else
       R(j, j) = h;
 
-    xny = ss / (1.0 + cc);
+    xny = ss / (ukfOne + cc);
     for (k = j + 1; k < iq; k++)
     {
       t1 = R(j, k);
@@ -227,10 +227,10 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
   ukfStateVector z, d, np, x_old;
   QPConstrainedVec s, r, u, u_old;
 
-  double f_value, psi, c1, c2, sum, ss, R_norm;
-  const double inf = std::numeric_limits<double>::infinity();
+  ukfPrecisionType f_value, psi, c1, c2, sum, ss, R_norm;
+  const ukfPrecisionType inf = std::numeric_limits<ukfPrecisionType>::infinity();
   /* t is the step length, which is the minimum of the partial step length t1 and the full step length t2 */
-  double t, t1, t2;
+  ukfPrecisionType t, t1, t2;
   int q;
   int iq, iter = 0;
   bool iaexcl[33];
@@ -253,7 +253,7 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
   /* initialize the matrix R */
   d.setZero();
   R.setZero();
-  R_norm = 1.0; /* this variable will hold the norm of the matrix R */
+  R_norm = ukfOne; /* this variable will hold the norm of the matrix R */
 
   /* compute the inverse of the factorized matrix G^-1, this is the initial value for H */
   // J = L^-T
@@ -274,7 +274,7 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
   x = chol.solve(g0);
   x = -x;
   /* and compute the current solution value */
-  f_value = 0.5 * g0.dot(x);
+  f_value = (ukfOne / 2) * g0.dot(x);
 #ifdef TRACE_SOLVER
   std::cerr << "Unconstrained solution: " << f_value << std::endl;
   std::cout << "x" << x << std::endl;
@@ -297,8 +297,8 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
 
     /* compute full step length t2: i.e., the minimum step in primal space s.t. the contraint 
       becomes feasible */
-    t2 = 0.0;
-    if (abs(z.dot(z)) > std::numeric_limits<double>::epsilon()) // i.e. z != 0
+    t2 = ukfZero;
+    if (abs(z.dot(z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
       t2 = (-np.dot(x) - ce0) / z.dot(np);
 
     x += t2 * z;
@@ -308,7 +308,7 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
     u.head(iq) -= t2 * r.head(iq);
 
     /* compute the new solution value */
-    f_value += 0.5 * (t2 * t2) * z.dot(np);
+    f_value += (ukfOne / 2) * (t2 * t2) * z.dot(np);
     A(i) = -i - 1;
 
     if (!add_constraint(R, J, d, iq, R_norm))
@@ -336,21 +336,21 @@ l1:
   }
 
   /* compute s(x) = ci^T * x + ci0 for all elements of K \ A */
-  ss = 0.0;
-  psi = 0.0; /* this value will contain the sum of all infeasibilities */
+  ss = ukfZero;
+  psi = ukfZero; /* this value will contain the sum of all infeasibilities */
   ip = 0;    /* ip will be the index of the chosen violated constraint */
   for (i = 0; i < mi; i++)
   {
     iaexcl[i] = true;
     sum = CI.col(i).dot(x) + ci0(i);
     s(i) = sum;
-    psi += std::min(0.0, sum);
+    psi += std::min(ukfZero, sum);
   }
 #ifdef TRACE_SOLVER
   std::cout << "s" << s << std::endl;
 #endif
 
-  if (abs(psi) <= mi * std::numeric_limits<double>::epsilon() * c1 * c2 * 100.0)
+  if (abs(psi) <= mi * std::numeric_limits<ukfPrecisionType>::epsilon() * c1 * c2 * 100*ukfOne)
   {
     /* numerically there are not infeasibilities anymore */
     q = iq;
@@ -371,7 +371,7 @@ l2: /* Step 2: check for feasibility and determine a new S-pair */
       ip = i;
     }
   }
-  if (ss >= 0.0)
+  if (ss >= ukfZero)
   {
     q = iq;
     return f_value;
@@ -380,7 +380,7 @@ l2: /* Step 2: check for feasibility and determine a new S-pair */
   /* set np = n(ip) */
   np = CI.col(ip);
   /* set u = (u 0)^T */
-  u(iq) = 0.0;
+  u(iq) = ukfZero;
   /* add ip to the active set A */
   A(iq) = ip;
 
@@ -410,15 +410,15 @@ l2a: /* Step 2a: determine step direction */
   /* find the index l s.t. it reaches the minimum of u+(x) / r */
   for (k = me; k < iq; k++)
   {
-    double tmp;
-    if (r(k) > 0.0 && ((tmp = u(k) / r(k)) < t1))
+    ukfPrecisionType tmp;
+    if (r(k) > ukfZero && ((tmp = u(k) / r(k)) < t1))
     {
       t1 = tmp;
       l = A(k);
     }
   }
   /* Compute t2: full step length (minimum step in primal space such that the constraint ip becomes feasible */
-  if (abs(z.dot(z)) > std::numeric_limits<double>::epsilon()) // i.e. z != 0
+  if (abs(z.dot(z)) > std::numeric_limits<ukfPrecisionType>::epsilon()) // i.e. z != 0
     t2 = -s(ip) / z.dot(np);
   else
     t2 = inf; /* +inf */
@@ -461,7 +461,7 @@ l2a: /* Step 2a: determine step direction */
 
   x += t * z;
   /* update the solution value */
-  f_value += t * z.dot(np) * (0.5 * t + u(iq));
+  f_value += t * z.dot(np) * ((ukfOne / 2) * t + u(iq));
 
   u.head(iq) -= t * r.head(iq);
   u(iq) += t;

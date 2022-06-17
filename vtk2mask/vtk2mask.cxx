@@ -66,11 +66,10 @@ int main(int argc, char* argv[]) {
     if (Verbose)
       std::cout << "-No Scalar given. Will calculate label map." << std::endl;
   } else {
-    Fiber::FieldMapType::iterator it;
-    in_fibers[0].Fields.find(ScalarName);
+    Fiber::FieldMapType::iterator it = in_fibers[0].Fields.find(ScalarName);
     if (it == in_fibers[0].Fields.end()) {
-      std::cout << "Error: The fiber file doesnt contain a label called " << ScalarName << std::endl;
-      return 1;
+      std::cout << "Error: The fiber file doesn't contain a label called " << ScalarName << std::endl;
+      return EXIT_FAILURE;
     }
   }
 

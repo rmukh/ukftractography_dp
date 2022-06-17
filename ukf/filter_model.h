@@ -56,7 +56,7 @@ inline ukfPrecisionType AngularSimilarity(vec3_t &x_sr, vec3_t &x_pred)
   ukfPrecisionType den_a = x_sr.norm();
   ukfPrecisionType den_b = x_pred.norm();
 
-  if (den_a == ukfZero || den_b == ukfZero)
+  if (cmpf(den_a, ukfZero) || cmpf(den_b, ukfZero))
   {
     std::cout << "cosine similarity is not defined whenever one or both input vectors are zero-vectors." << std::endl;
     throw;

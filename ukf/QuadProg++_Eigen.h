@@ -20,6 +20,7 @@
 #define _QUADPROGPP
 
 #include "ukf_types.h"
+#include "math_utilities.h"
 /**
  * \namespace QuadProgPP
  * \brief Contains the Quadratic Programming functionality.
