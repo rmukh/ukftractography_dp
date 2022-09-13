@@ -28,7 +28,7 @@ Installation
 
 Checkout from github:
 
-    git clone https://github.com/pnlbwh/ukftractography_dp.git
+    git clone https://github.com/rmukh/ukftractography_dp.git
 
 There are 3 ways to build this project from source, as a stand alone
 superbuild, against a Slicer 4 build, and as a Slicer 4 extension build (which
@@ -40,6 +40,7 @@ is more of a test than anything).
     cmake <path-to-source> -DCMAKE_BUILD_TYPE=Release|Debug|RelWithDebInfo
     make
     make test
+
 ##### On Windows,
     cd <build-dir>
     cmake <path-to-source> -DCMAKE_BUILD_TYPE=Release|Debug|RelWithDebInfo
@@ -52,6 +53,8 @@ is more of a test than anything).
     cmake -DSlicer_DIR=<path-to-Slicer4-Superbuild>/Slicer-build <path-to-source>
     make
     make test
+    
+The compilation might not work with the latest version of compilers. The recommended versions are GCC of versions 5,6,7,8,9. You can install them in addition to your default system compilers if needed and specify in the cmake arguments as *-DCMAKE_C_COMPILER=gcc-V -DCMAKE_CXX_COMPILER=g++-V*, where *V* is the version number from the list of recommended ones.
 
 Note that some of the tests are broken!
 #### c) Build via Slicer ExtensionIndex build
