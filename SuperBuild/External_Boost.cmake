@@ -121,6 +121,7 @@ if(NOT ( DEFINED "USE_SYSTEM_${extProjName}" AND "${USE_SYSTEM_${extProjName}}" 
 	CONFIGURE_COMMAND ${Boost_Bootstrap_Command} --prefix=${Boost_Install_Dir}/lib
 	BUILD_COMMAND ${Boost_b2_Command} install -j8 --prefix=${Boost_Install_Dir} --with-thread --with-filesystem --with-system --with-date_time --with-program_options --with-atomic ${boost_toolset} link=static address-model=${Boost_address_model} variant=${Boost_VARIANT} optimization=speed
 	INSTALL_COMMAND ""
+	DOWNLOAD_EXTRACT_TIMESTAMP 1 # cmake > 3.24
 	)
 
   if(NOT WIN32)
