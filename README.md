@@ -54,7 +54,7 @@ is more of a test than anything).
     make
     make test
 
-The compilation might not work with the latest version of compilers. The recommended versions are GCC of versions 5,6,7,8. You can install them in addition to your default system compilers if needed and specify in the cmake arguments as `-DCMAKE_C_COMPILER=gcc-V -DCMAKE_CXX_COMPILER=g++-V`, where **V** is the version number from the list of recommended ones.
+The compilation might not work with the latest version of compilers. The recommended are GCC of versions 5,6,7,8. You can install them in addition to your default system compilers if needed and specify in the cmake arguments as `-DCMAKE_C_COMPILER=gcc-V -DCMAKE_CXX_COMPILER=g++-V`, where **V** is the version number from the list of recommended ones.
 
 **Note** that some of the tests are broken!
 #### c) Build via Slicer ExtensionIndex build
