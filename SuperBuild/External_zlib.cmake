@@ -70,7 +70,7 @@ if(NOT DEFINED zlib_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_${proj})
       set(ZLIB_LIBRARY ${zlib_DIR}/lib/zlib.lib CACHE FILEPATH "zlib library" FORCE)
     endif()
   else()
-    set(ZLIB_LIBRARY ${zlib_DIR}/lib/libzlib.a CACHE FILEPATH "zlib library" FORCE)
+    set(ZLIB_LIBRARY ${zlib_DIR}/lib/libz.a CACHE FILEPATH "zlib library" FORCE)
   endif()
 else()
   # The project is provided using zlib_DIR, nevertheless since other project may depend on zlib,

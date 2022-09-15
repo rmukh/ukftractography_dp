@@ -53,10 +53,10 @@ is more of a test than anything).
     cmake -DSlicer_DIR=<path-to-Slicer4-Superbuild>/Slicer-build <path-to-source>
     make
     make test
-    
-The compilation might not work with the latest version of compilers. The recommended versions are GCC of versions 5,6,7,8,9. You can install them in addition to your default system compilers if needed and specify in the cmake arguments as *-DCMAKE_C_COMPILER=gcc-V -DCMAKE_CXX_COMPILER=g++-V*, where *V* is the version number from the list of recommended ones.
 
-Note that some of the tests are broken!
+The compilation might not work with the latest version of compilers. The recommended versions are GCC of versions 5,6,7,8. You can install them in addition to your default system compilers if needed and specify in the cmake arguments as `-DCMAKE_C_COMPILER=gcc-V -DCMAKE_CXX_COMPILER=g++-V`, where **V** is the version number from the list of recommended ones.
+
+**Note** that some of the tests are broken!
 #### c) Build via Slicer ExtensionIndex build
 
 Create local extension index following [these instructions](https://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Developers/Build_ExtensionsIndex), containing at least `UKFTractography.s4ext` and `SlicerDMRI.s4ext` (required runtime dependency).
