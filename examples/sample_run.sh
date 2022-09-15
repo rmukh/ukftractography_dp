@@ -9,13 +9,13 @@ logFile="log.txt"
 BINARY='../build/UKFTractography-build/UKFTractography/bin/UKFTractography'
 
 # VOLUME
-dwi_path="$SRC/UKFTractography/Data/Input/dwi.nhdr"
+dwi_path="$SRC/Data/Input/dwi.nhdr"
 
 # MASK
-mask_path="$SRC/UKFTractography/Data/Input/dwi-mask.nhdr"
+mask_path="$SRC/Data/Input/dwi-mask.nhdr"
 
 # SEEDS
-seeds_path="$SRC/UKFTractography/Data/Input/seeds_tc.nhdr"
+seeds_path="$SRC/Data/Input/seeds_tc.nhdr"
 
 # OUTPUT FIBER
 output_path='./fibers_tc.vtk'
