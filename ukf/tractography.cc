@@ -404,7 +404,7 @@ void Tractography::Init(std::vector<SeedPointInfo> &seed_infos)
                "Please, compile the UKF tractography software with OpenMP support enabled if you want this functionality."
             << std::endl;
 #endif
-  for (int i = 0; i < starting_points.size(); ++i)
+  for (long unsigned int i = 0; i < starting_points.size(); ++i)
   {
     const ukfVectorType &param = starting_params[i];
 

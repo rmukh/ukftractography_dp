@@ -81,10 +81,10 @@ public:
               ukfPrecisionType rs, bool constrained, const ukfPrecisionType diff_fw,
               ukfMatrixType &Aridg, ukfMatrixType &Qridg, ukfMatrixType &fcsridg, ukfMatrixType &nuridg,
               vector<vector<unsigned>> &connridg, signalMaskType &sm, ukfPrecisionType fl, ukfPrecisionType mot)
-      : _state_dim(25), _rs(rs), _signal_dim(0), _signal_data(NULL), _constrained(constrained), _ridgelets_used(false),
-        _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000.0),
-        _w_fast_diffusion(0.7), m_D_iso(SetIdentityScaled(diff_fw)), A(Aridg), QRidg(Qridg), fcs(fcsridg), nu(nuridg),
-        conn(connridg), signal_mask(sm), fista_lambda(fl), max_odf_thresh(mot)
+      : _lambda_min_fast_diffusion(1.0), _lambda_min_slow_diffusion(0.1), _lambda_max_diffusion(3000.0), _w_fast_diffusion(0.7), 
+      m_D_iso(SetIdentityScaled(diff_fw)), A(Aridg), QRidg(Qridg), fcs(fcsridg), nu(nuridg), conn(connridg), signal_mask(sm),
+      fista_lambda(fl), max_odf_thresh(mot), _state_dim(25), _rs(rs), _signal_dim(0), _signal_data(NULL), 
+      _constrained(constrained), _ridgelets_used(false)
   {
     // size(X, 'column') == 25
     // X = [x10, x11, x12, l11, l12, l13, l14, x20, x21, x22, l21, l22, l23, l24, x30, x31, x32, l31, l32, l33, l34, w1, w2, w3, wiso]'
