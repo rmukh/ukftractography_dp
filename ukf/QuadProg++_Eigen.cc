@@ -135,7 +135,7 @@ inline void delete_constraint(ukfStateSquareMatrix &R, ukfStateSquareMatrix &J, 
 #ifdef TRACE_SOLVER
   std::cerr << "Delete constraint " << l << ' ' << iq;
 #endif
-  int i, j, k, qq;
+  int i, j, k, qq{iq - 1};
   ukfPrecisionType cc, ss, h, xny, t1, t2;
 
   /* Find the index qq for active constraint l to be removed */
@@ -231,14 +231,13 @@ ukfPrecisionType solve_quadprog(ukfStateSquareMatrix &G, ukfStateVector &g0,
   const ukfPrecisionType inf = std::numeric_limits<ukfPrecisionType>::infinity();
   /* t is the step length, which is the minimum of the partial step length t1 and the full step length t2 */
   ukfPrecisionType t, t1, t2;
-  int q;
   int iq, iter = 0;
   bool iaexcl[33];
   QPConstrainedVecInt A, A_old, iai;
 
   me = p; /* number of equality constraints */
   mi = m; /* number of inequality constraints */
-  q = 0;  /* size of the active set A (containing the indices of the active constraints) */
+  int q = 0;  /* size of the active set A (containing the indices of the active constraints) */
 
   /*
    * Preprocessing phase

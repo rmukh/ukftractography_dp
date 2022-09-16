@@ -21,7 +21,7 @@ if(NOT DEFINED SphericalRidgelets_DIR AND NOT ${CMAKE_PROJECT_NAME}_USE_SYSTEM_$
 
   ExternalProject_SetIfNotDefined(
     ${CMAKE_PROJECT_NAME}_${proj}_GIT_TAG
-    "2c5a6c5cba1561a39d72ecbd39c837925fa5d218"
+    "d741e4f400c4803a6f377e0216de5ad677785917"
     QUIET
   )
   

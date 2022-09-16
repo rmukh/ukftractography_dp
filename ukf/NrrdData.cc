@@ -30,9 +30,9 @@ NrrdData::~NrrdData()
 void NrrdData::Interp3Signal(const vec3_t &pos,
                              ukfVectorType &signal) const
 {
-  const int nx = static_cast<const int>(_dim[0]);
-  const int ny = static_cast<const int>(_dim[1]);
-  const int nz = static_cast<const int>(_dim[2]);
+  const int nx = static_cast<int>(_dim[0]);
+  const int ny = static_cast<int>(_dim[1]);
+  const int nz = static_cast<int>(_dim[2]);
 
   // If sigmaSignal is not set minimum of voxel size is used for interpolation
   ukfPrecisionType sigma = _sigma_signal;
@@ -56,7 +56,7 @@ void NrrdData::Interp3Signal(const vec3_t &pos,
   // for each location
   for (int xx = -1; xx <= 1; ++xx)
   {
-    const int x = static_cast<const int>(round(pos[0]) + xx);
+    const int x = static_cast<int>(round(pos[0]) + xx);
     if (x < 0 || nx <= x)
     {
       continue;
@@ -65,7 +65,7 @@ void NrrdData::Interp3Signal(const vec3_t &pos,
     const ukfPrecisionType dxx = dx * dx;
     for (int yy = -1; yy <= 1; ++yy)
     {
-      const int y = static_cast<const int>(round(pos[1]) + yy);
+      const int y = static_cast<int>(round(pos[1]) + yy);
       if (y < 0 || ny <= y)
       {
         continue;
@@ -75,7 +75,7 @@ void NrrdData::Interp3Signal(const vec3_t &pos,
       const ukfPrecisionType dyy = dy * dy;
       for (int zz = -1; zz <= 1; ++zz)
       {
-        const int z = static_cast<const int>(round(pos[2]) + zz);
+        const int z = static_cast<int>(round(pos[2]) + zz);
         if (z < 0 || nz <= z)
         {
           continue;
@@ -113,9 +113,9 @@ void NrrdData::Interp3Signal(const vec3_t &pos,
 
 ukfPrecisionType NrrdData::Interp3ScalarMask(const vec3_t &pos) const
 {
-  const int nx = static_cast<const int>(_dim[0]);
-  const int ny = static_cast<const int>(_dim[1]);
-  const int nz = static_cast<const int>(_dim[2]);
+  const int nx = static_cast<int>(_dim[0]);
+  const int ny = static_cast<int>(_dim[1]);
+  const int nz = static_cast<int>(_dim[2]);
 
   unsigned int index;
   ukfPrecisionType value;
@@ -125,7 +125,7 @@ ukfPrecisionType NrrdData::Interp3ScalarMask(const vec3_t &pos) const
 
   for (int xx = -1; xx <= 1; xx++)
   {
-    const int x = static_cast<const int>(round(pos[0]) + xx);
+    const int x = static_cast<int>(round(pos[0]) + xx);
     if (x < 0 || nx <= x)
     {
       continue;
@@ -134,7 +134,7 @@ ukfPrecisionType NrrdData::Interp3ScalarMask(const vec3_t &pos) const
     ukfPrecisionType dxx = dx * dx;
     for (int yy = -1; yy <= 1; yy++)
     {
-      const int y = static_cast<const int>(round(pos[1]) + yy);
+      const int y = static_cast<int>(round(pos[1]) + yy);
       if (y < 0 || ny <= y)
       {
         continue;
@@ -143,7 +143,7 @@ ukfPrecisionType NrrdData::Interp3ScalarMask(const vec3_t &pos) const
       ukfPrecisionType dyy = dy * dy;
       for (int zz = -1; zz <= 1; zz++)
       {
-        const int z = static_cast<const int>(round(pos[2]) + zz);
+        const int z = static_cast<int>(round(pos[2]) + zz);
         if (z < 0 || nz <= z)
         {
           continue;
@@ -187,16 +187,16 @@ ukfPrecisionType NrrdData::Interp3ScalarMask(const vec3_t &pos) const
 
 ukfPrecisionType NrrdData::ScalarMaskValue(const vec3_t &pos) const
 {
-  const int nx = static_cast<const int>(_dim[0]);
-  const int ny = static_cast<const int>(_dim[1]);
-  const int nz = static_cast<const int>(_dim[2]);
+  const int nx = static_cast<int>(_dim[0]);
+  const int ny = static_cast<int>(_dim[1]);
+  const int nz = static_cast<int>(_dim[2]);
 
   unsigned int index;
   ukfPrecisionType value;
 
-  const int x = static_cast<const int>(round(pos[0]));
-  const int y = static_cast<const int>(round(pos[1]));
-  const int z = static_cast<const int>(round(pos[2]));
+  const int x = static_cast<int>(round(pos[0]));
+  const int y = static_cast<int>(round(pos[1]));
+  const int z = static_cast<int>(round(pos[2]));
 
   if ((x < 0 || nx <= x) ||
       (y < 0 || ny <= y) ||
@@ -230,15 +230,15 @@ ukfPrecisionType NrrdData::ScalarMaskValue(const vec3_t &pos) const
 
 ukfPrecisionType NrrdData::ScalarWMValue(const vec3_t &pos) const
 {
-  const int nx = static_cast<const int>(_dim[0]);
-  const int ny = static_cast<const int>(_dim[1]);
-  const int nz = static_cast<const int>(_dim[2]);
+  const int nx = static_cast<int>(_dim[0]);
+  const int ny = static_cast<int>(_dim[1]);
+  const int nz = static_cast<int>(_dim[2]);
 
   unsigned int index;
 
-  const int x = static_cast<const int>(round(pos[0]));
-  const int y = static_cast<const int>(round(pos[1]));
-  const int z = static_cast<const int>(round(pos[2]));
+  const int x = static_cast<int>(round(pos[0]));
+  const int y = static_cast<int>(round(pos[1]));
+  const int z = static_cast<int>(round(pos[2]));
 
   if ((x < 0 || nx <= x) ||
       (y < 0 || ny <= y) ||
@@ -254,15 +254,15 @@ ukfPrecisionType NrrdData::ScalarWMValue(const vec3_t &pos) const
 
 ukfPrecisionType NrrdData::ScalarCSFValue(const vec3_t &pos) const
 {
-  const int nx = static_cast<const int>(_dim[0]);
-  const int ny = static_cast<const int>(_dim[1]);
-  const int nz = static_cast<const int>(_dim[2]);
+  const int nx = static_cast<int>(_dim[0]);
+  const int ny = static_cast<int>(_dim[1]);
+  const int nz = static_cast<int>(_dim[2]);
 
   unsigned int index;
 
-  const int x = static_cast<const int>(round(pos[0]));
-  const int y = static_cast<const int>(round(pos[1]));
-  const int z = static_cast<const int>(round(pos[2]));
+  const int x = static_cast<int>(round(pos[0]));
+  const int y = static_cast<int>(round(pos[1]));
+  const int z = static_cast<int>(round(pos[2]));
 
   if ((x < 0 || nx <= x) ||
       (y < 0 || ny <= y) ||
